@@ -9,12 +9,11 @@
 #include "uart2.h"
 #include "id_code.h"
 #include "data_logger.h"
+#include "lcd.h"
 _FOSCSEL(FNOSC_FRC & IESO_ON);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
 _FWDT(FWDTEN_OFF); 
-char sendBuffer[] = "This is test string 1";
-char send2[] = "2";
-char receiveBuffer[50];
+
 
 #define FILESIZE 10000
 
@@ -53,7 +52,6 @@ int main (void)
 
    FSFILE * pointer=NULL;
    DWORD first_sector;
-   BYTE test_array[512];
    SearchRec rec;
    pointer=NULL;
    unsigned char attributes;
@@ -72,21 +70,27 @@ int main (void)
 	id=Get_ID_Code();
 	printf("ID: %u\r\n",id);
 	OFB_init(id);
-	Increment_ID_Code();
+	//Increment_ID_Code();
 	#ifdef __DEBUG
 		printf("Clock Switch Complete, Waiting For Media\r\n");
 	#endif
-	//waits for a card to be inserted
-   while (!MDD_MediaDetect());
+	
+   char filename[9];
+   sprintf(filename,"%05d.bin",id);
+   // Create a file
+   
+   printf("filename will be: %s\r\n",filename);
+   Init_LCD();
+   home_clr();
+   home_it();
+   puts_lcd((unsigned char*) &filename[0],9);
+   //waits for a card to be inserted
+   	while (!MDD_MediaDetect());
 	#ifdef __DEBUG
 		printf("Media Found, Waiting for FSinit\r\n");
 	#endif
    // Initialize the library
    while (!FSInit());
-   char filename[9];
-   sprintf(filename,"%05d.bin",id);
-   // Create a file
-   printf("filename will be: %s\r\n",filename);
    while(pointer==NULL)
    {
    		pointer = FSfopen (filename, "w");
