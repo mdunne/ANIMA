@@ -29,30 +29,33 @@ int main (void)
         __builtin_write_OSCCONL(0b01);
 	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
 	while(OSCCONbits.LOCK != 1) {};
-	init_gps(BAUD_38400);
 	UART2Init();
+	init_gps(BAUD_38400);
 	//UART1Init(BAUD_38400);
 	printf("starting Mediatek GPS Test\r\n");
-	printf("U1BRG: %d",BAUD_38400);
 	char msg[]="$PGCMD,16,1,1,1,1,1*6B\r\n";
 	char msg2[]="$PGCMD,16,0,0,0,0,0*6A\r\n";
 	char r1hz[]="$PMTK220,1000*1F";
 	char r4hz[]="$PMTK220,250*29";
 	char r10hz[]="$PMTK220,100*2F";
-	
+	//gpsControlData.newDatatoParse=1;
 	//UART1PutMsg(MEDIATEK_NMEA);
    while(1)
    {
-	   if (!UART1IsEmpty())
+	   //gpsControlData.newDatatoParse=1;
+	   /*if(tGpsData.newDatatoParse==1)
+	   {
+		   printf("There is new data\r\n");
+		   tGpsData.newDatatoParse=0;
+	   }*/
+	}  
+	   /*if (!UART1IsEmpty())
 	   {
 		   while(!UART1IsEmpty())
 		   {
 			   printf("%c",UART1GetChar());
 		   }
-		}  
-   }
-
-
+		} */ 
 }
 
 

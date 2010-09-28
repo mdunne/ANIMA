@@ -4,6 +4,7 @@
 //#include "MultiCircBuffer.h"
 #include "UART1.h"
 #include "stdio.h"
+#include "anima_GPS.h"
 #include "loggerDefinitions.h"
 #ifdef __DEBUG
 	#include "uart2.h"
@@ -123,25 +124,70 @@ char UART1GetChar()
 }
 	
 
+typedef enum
+{
+	WAIT_DOLLAR=0,
+	WAIT_LINEFEED,
+	GPS_PARSE,
+	GPS_WAIT
+}GPS_STATES;	
 
 
 
 void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 {
+	static char Cur_State=WAIT_DOLLAR;
+	static char msg_count=0;
+	unsigned char cur_char=0;
 	//UART1PutChar('q');
 	//char temp;
 	//temp=U2RXREG;
 	//UART2PutChar('e');
-	while(U1STAbits.URXDA == 1){
-		writeBack(UART1_receiveBuffer, (unsigned char)U1RXREG);
+	//UART1PutMsg(NMEA_SWITCH);
+	switch (Cur_State)
+	{
+		case WAIT_DOLLAR:
+			cur_char=U1RXREG;
+			if (cur_char=='$')
+			{
+				
+				Cur_State=WAIT_LINEFEED;
+				if(msg_count>=2)
+				{
+					Cur_State=GPS_PARSE;
+					UART1PutMsg(NMEA_SWITCH);
+					writeBack(UART1_receiveBuffer, cur_char);
+				}
+			}
+			break;
+		case WAIT_LINEFEED:
+			cur_char=U1RXREG;
+			if(cur_char=='\n')
+			{
+				Cur_State=WAIT_DOLLAR;
+				msg_count++;
+			}
+			break;
+		case GPS_PARSE:
+			//UART2PutChar('q');
+			while(U1STAbits.URXDA == 1)
+			{
+				//if (prev_char==''&&)
+				writeBack(UART1_receiveBuffer, (unsigned char)U1RXREG);
+			}
+			break;	
 	}
+	/*while(U1STAbits.URXDA == 1){
+		//if (prev_char==''&&)
+		writeBack(UART1_receiveBuffer, (unsigned char)U1RXREG);
+	}*/
 	
 	// If there was an overun error clear it and continue
 	if (U1STAbits.OERR == 1){
 		U1STAbits.OERR = 0;
 	}
 	
-	// clear the interrupt
+	/*// clear the interrupt*/
 	IFS0bits.U1RXIF = 0;
 }
 
@@ -161,4 +207,10 @@ char UART1PutMsg(char *message)
 	        UART2PutChar(*message);
 	        UART1PutChar(*message++);
         }
+}
+
+
+int UART1GetLength()
+{
+	return getLength(UART1_transmitBuffer);
 }	
