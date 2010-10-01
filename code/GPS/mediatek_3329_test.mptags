@@ -35,7 +35,7 @@ CBRef	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	43;"	t	line:
 CHEW_FAT_SIZE::45056	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	51;"	d	line:51
 CHEW_FAT_SIZE_IN_SECTORS::88	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	52;"	d	line:52
 CMD55::(0x40+55)	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	32;"	d	line:32
-CSIZE::26	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	82;"	d	line:82
+CSIZE::26	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	84;"	d	line:84
 CircBuffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	23;"	s	line:23
 CircBuffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	29;"	t	line:29
 CircBuffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	32;"	s	line:32
@@ -46,7 +46,7 @@ DMABUFFERSIZE::SECTORSIZE-2-2-1-2	C:\Users\mdunne\Documents\SLUGS-Logger\code\co
 FOOTER_ONE::'^'	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	46;"	d	line:46
 FOOTER_TWO::'&'	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	47;"	d	line:47
 FWDTEN_OFF	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	13;"	v	line:13
-GPS_GetChar	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	92;"	p	line:92	file:
+GPS_GetChar	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	94;"	p	line:94	file:
 GPS_GetChar::UART1GetChar	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	23;"	d	line:23
 GPS_Get_Uart_Len::UART1GetLength	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	24;"	d	line:24
 GPS_PARSE	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	131;"	e	line:131	file:
@@ -60,11 +60,11 @@ HEADER_TWO::'&'	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinit
 IESO_ON	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	11;"	v	line:11
 INIT::(0x40+1)	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	26;"	d	line:26
 INITIAL_BAUD::MEDIATEK_INITIAL_BAUD	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	11;"	d	line:11
-KTS2MPS::0.514444444	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	77;"	d	line:77
+KTS2MPS::0.514444444	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	79;"	d	line:79
 MEDIATEK_NMEA::"$PGCMD,16,1,0,0,0,1*6A	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	15;"	d	line:15
 MEDIA_SECTOR_SIZE::512	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	37;"	d	line:37
 MEM_LOCATION_ID::0	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	49;"	d	line:49
-MSIZE::150	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	81;"	d	line:81
+MSIZE::150	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	83;"	d	line:83
 NINETY_PER_CHEW_FAT_SIZE_IN_SECTORS::79	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	53;"	d	line:53
 NMEA_SWITCH::MEDIATEK_NMEA	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	10;"	d	line:10
 OFB_getSize	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.c	50;"	f	line:50	signature:(void)
@@ -92,18 +92,18 @@ SECTORSIZE::512	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinit
 SEND_IF_COND::(0x40+8)	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\loggerDefinitions.h	28;"	d	line:28
 UART1GetChar	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	116;"	f	line:116
 UART1GetChar	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	24;"	p	line:24	signature:()
-UART1GetLength	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	213;"	f	line:213
+UART1GetLength	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	234;"	f	line:234
 UART1GetLength	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	28;"	p	line:28	signature:()
 UART1Init	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	42;"	f	line:42	signature:(int baud_rate)
 UART1Init	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	25;"	p	line:25	signature:(int baud_rate)
-UART1IsEmpty	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	195;"	f	line:195
+UART1IsEmpty	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	215;"	f	line:215
 UART1IsEmpty	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	27;"	p	line:27	signature:()
 UART1PrintString	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	29;"	p	line:29	signature:( char *str )
 UART1PutChar	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	86;"	f	line:86	signature:( char ch )
 UART1PutChar	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	30;"	p	line:30	signature:( char ch )
 UART1PutDec	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	31;"	p	line:31	signature:( unsigned char dec )
 UART1PutHex	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	32;"	p	line:32	signature:( int toPrint )
-UART1PutMsg	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	202;"	f	line:202	signature:(char *message)
+UART1PutMsg	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	222;"	f	line:222	signature:(char *message)
 UART1PutMsg	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	34;"	p	line:34	signature:(char *message)
 UART1_H	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	7;"	d	line:7
 UART1_receiveBuffer	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	17;"	v	line:17
@@ -140,8 +140,8 @@ bufferflag	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	35;"	v	line:35	file
 bufferflag	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.c	32;"	v	line:32	file:
 bufferreturn	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	33;"	p	line:33	signature:(unsigned int *buffer)
 bufferreturn	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.h	23;"	p	line:23	signature:(unsigned int *buffer)
-buildAndCheckSentence	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	32;"	f	line:32	signature:(unsigned char characterIn)
-buildAndCheckSentence	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	99;"	p	line:99	signature:(unsigned char characterIn)
+buildAndCheckSentence	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	33;"	f	line:33	signature:(unsigned char characterIn)
+buildAndCheckSentence	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	101;"	p	line:101	signature:(unsigned char characterIn)
 cB	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	62;"	l	line:62
 calc_checksum	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.c	119;"	f	line:119	signature:(unsigned char inBuffer[])
 calc_checksum	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.h	30;"	p	line:30	signature:(unsigned char inBuffer[])
@@ -150,39 +150,42 @@ chData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	37;"	m	line:37
 chData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	42;"	m	line:42
 chData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	47;"	m	line:47
 chData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	52;"	m	line:52
-chTmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	184;"	l	line:184
-chTmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	295;"	l	line:295
-checkSum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	102;"	l	line:102
+chTmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	189;"	l	line:189
+chTmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	300;"	l	line:300
+checkSum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	107;"	l	line:107
 checkSum	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.c	122;"	l	line:122
 checkSum	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.c	205;"	l	line:205
-checksum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	14;"	v	line:14
+checksum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	15;"	v	line:15
 checksum	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.c	98;"	l	line:98
 cog	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	67;"	m	line:67	struct:tGpsData
 cur_char	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	141;"	l	line:141
 day	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	60;"	m	line:60	struct:tGpsData
-degMinToDeg	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	28;"	f	line:28	signature:(unsigned char degrees, float minutes)
-degMinToDeg	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	92;"	p	line:92	signature:(unsigned char degrees, float minutes)
+degMinToDeg	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	29;"	f	line:29	signature:(unsigned char degrees, float minutes)
+degMinToDeg	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	94;"	p	line:94	signature:(unsigned char degrees, float minutes)
 fix	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	70;"	m	line:70	struct:tGpsData
 flData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	53;"	m	line:53
 freeCircBuffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	49;"	f	line:49	signature:(CBRef* cB)
 freeCircBuffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	84;"	f	line:84	signature:(CBRef* cB)
 freeCircBuffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	56;"	p	line:56	signature:(CBRef* cB)
-getChecksum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	99;"	f	line:99	signature:(char* sentence, unsigned char size)
-getChecksum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	110;"	p	line:110	signature:(char* sentence, unsigned char size)
-getGpsMainData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	117;"	p	line:117	signature:(float* data)
+getChecksum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	104;"	f	line:104	signature:(char* sentence, unsigned char size)
+getChecksum	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	112;"	p	line:112	signature:(char* sentence, unsigned char size)
+getGpsMainData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	119;"	p	line:119	signature:(float* data)
 getLength	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	104;"	f	line:104	signature:(CBRef cB)
 getLength	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	63;"	p	line:63	signature:(CBRef cB)
 getOverflow	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	215;"	f	line:215	signature:(CBRef cB)
 getOverflow	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	89;"	p	line:89	signature:(CBRef cB)
-gpsControlData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	11;"	v	line:11
+get_overflowcount	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	243;"	f	line:243
+get_overflowcount	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	36;"	p	line:36	signature:()
+gpsControlData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	12;"	v	line:12
 hdop	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	69;"	m	line:69	struct:tGpsData
 head	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	25;"	m	line:25	struct:CircBuffer
 head	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	34;"	m	line:34	struct:CircBuffer
 height	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	66;"	m	line:66	struct:tGpsData
-hex2char	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	21;"	f	line:21	signature:(char halfhex)
-hex2char	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	87;"	p	line:87	signature:(char halfhex)
+hex2char	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	22;"	f	line:22	signature:(char halfhex)
+hex2char	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	89;"	p	line:89	signature:(char halfhex)
+hmm	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	44;"	l	line:44
 hour	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	61;"	m	line:61	struct:tGpsData
-i	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	103;"	l	line:103
+i	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	108;"	l	line:108
 i	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	24;"	l	line:24
 i	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\write.c	20;"	l	line:20
 i	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	203;"	l	line:203
@@ -194,12 +197,13 @@ i	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.c	208;"	l	line:208
 inData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	48;"	m	line:48
 incomingUart	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.c	13;"	v	line:13
 incomingUart1	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	16;"	v	line:16
-init_gps	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	4;"	f	line:4
+init_gps	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	5;"	f	line:5
 init_gps	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	26;"	p	line:26	signature:()
 j	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.c	20;"	l	line:20
 j	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.c	59;"	l	line:59
-lastByte	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	153;"	l	line:153	file:
+lastByte	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	158;"	l	line:158	file:
 lat	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	64;"	m	line:64	struct:tGpsData
+length	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	236;"	l	line:236
 lon	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	65;"	m	line:65	struct:tGpsData
 main	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	21;"	f	line:21	signature:(void)
 makeEmpty	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	201;"	f	line:201	signature:(CBRef cB)
@@ -209,8 +213,8 @@ month	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	59;"	m	line:59	struct
 msg	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	36;"	l	line:36
 msg2	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	37;"	l	line:37
 msg_count	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	140;"	l	line:140	file:
-myTokenizer	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	150;"	f	line:150	signature:(char* stringToTokenize, char token, char * returnToken)
-myTokenizer	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	123;"	p	line:123	signature:(char* stringToTokenize, char token, char * returnToken)
+myTokenizer	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	155;"	f	line:155	signature:(char* stringToTokenize, char token, char * returnToken)
+myTokenizer	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	125;"	p	line:125	signature:(char* stringToTokenize, char token, char * returnToken)
 need_buffer	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	36;"	v	line:36	file:
 need_buffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.c	33;"	v	line:33	file:
 newCircBuffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	32;"	f	line:32	signature:(CBRef cB)
@@ -230,18 +234,20 @@ outgoingUart1	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	13;"	v	line:13
 overflowCount	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	28;"	m	line:28	struct:CircBuffer
 overflowCount	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	37;"	m	line:37	struct:CircBuffer
 overflowed	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\overflowBuffer.c	95;"	l	line:95	file:
-parseGGA	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	291;"	f	line:291	signature:(char* stream)
-parseGGA	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	135;"	p	line:135	signature:(char* stream)
-parseRMC	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	180;"	f	line:180	signature:(char* stream)
-parseRMC	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	129;"	p	line:129	signature:(char* stream)
-pch	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	151;"	l	line:151	file:
+parseGGA	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	296;"	f	line:296	signature:(char* stream)
+parseGGA	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	137;"	p	line:137	signature:(char* stream)
+parseRMC	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	185;"	f	line:185	signature:(char* stream)
+parseRMC	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	131;"	p	line:131	signature:(char* stream)
+pch	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	156;"	l	line:156	file:
 peak	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	147;"	f	line:147	signature:(CBRef cB)
 peak	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	74;"	p	line:74	signature:(CBRef cB)
-prevPch	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	152;"	l	line:152	file:
+prevPch	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	157;"	l	line:157	file:
 printCircBuf	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	226;"	f	line:226	signature:(CBRef cB)
 printCircBuf	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	96;"	p	line:96	signature:(CBRef cB)
-processNewGpsData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	90;"	f	line:90	signature:(unsigned char* message)
-processNewGpsData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	105;"	p	line:105	signature:(unsigned char* message)
+print_circ_buf	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.c	249;"	f	line:249
+print_circ_buf	C:\Users\mdunne\Documents\ANIMA\code\uart\uart1.h	38;"	p	line:38	signature:()
+processNewGpsData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	91;"	f	line:91
+processNewGpsData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	107;"	p	line:107	signature:()
 r10hz	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	40;"	l	line:40
 r1hz	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	38;"	l	line:38
 r4hz	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	39;"	l	line:39
@@ -254,9 +260,9 @@ readTail	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	69;"	p	li
 retVal	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.c	167;"	l	line:167
 sats	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	71;"	m	line:71	struct:tGpsData
 sec	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	63;"	m	line:63	struct:tGpsData
-sentence	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	12;"	v	line:12
-sentenceIndex	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	13;"	v	line:13
-sentenceState	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	15;"	v	line:15
+sentence	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	13;"	v	line:13
+sentenceIndex	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	14;"	v	line:14
+sentenceState	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	16;"	v	line:16
 shData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	38;"	m	line:38
 shData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	54;"	m	line:54
 size	C:\Users\mdunne\Documents\ANIMA\code\GPS\mediatek_test.c	24;"	l	line:24
@@ -273,12 +279,12 @@ tUnsignedShortToChar	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	34;"	t
 tail	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	26;"	m	line:26	struct:CircBuffer
 tail	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	35;"	m	line:35	struct:CircBuffer
 temp	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\write.c	21;"	l	line:21
-tmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	183;"	l	line:183
-tmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	294;"	l	line:294
-tmp3	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	183;"	l	line:183
-tmp3	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	294;"	l	line:294
-token	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	182;"	l	line:182
-token	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	293;"	l	line:293
+tmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	188;"	l	line:188
+tmp	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	299;"	l	line:299
+tmp3	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	188;"	l	line:188
+tmp3	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	299;"	l	line:299
+token	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	187;"	l	line:187
+token	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.c	298;"	l	line:298
 txreg	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\write.c	24;"	l	line:24
 uiData	C:\Users\mdunne\Documents\ANIMA\code\GPS\anima_gps.h	43;"	m	line:43
 umode	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\write.c	22;"	l	line:22

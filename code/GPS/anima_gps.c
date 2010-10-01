@@ -1,5 +1,6 @@
 #include "anima_gps.h"
-
+#include "stdio.h"
+#include "string.h"
 
 int init_gps()
 {
@@ -33,18 +34,18 @@ void buildAndCheckSentence(unsigned char characterIn) {
 	// Full specification for NMEA0138 specifies a maximum sentence length
 	// of 255 characters. We're going to ignore this for half the length as
 	// we shouldn't get anything that big.
-
 	// This contains the function's state of whether
 	// it is currently building a sentence.
 	// 0 - Awaiting start character ($)
 	// 1 - Building sentence
 	// 2 - Building first checksum character
 	// 3 - Building second checksum character
-	
+	//printf("char: %c\r\n",characterIn);
 	// We start recording a new sentence if we see a dollarsign.
 	// The sentenceIndex is hard-set to 1 so that multiple dollar-signs
 	// keep you at the beginning.
 	if (characterIn == '$') {
+		//printf("start character at least");
 		sentence[0] = characterIn;
 		sentenceIndex = 1;
 		sentenceState = 1;
@@ -87,10 +88,14 @@ void buildAndCheckSentence(unsigned char characterIn) {
 	}
 }
 
-void processNewGpsData(unsigned char* message) {
-	while (GPS_Get_Uart_Len > 0) {
+void processNewGpsData() {
+	while (GPS_Get_Uart_Len() > 0) {
+
 		buildAndCheckSentence(GPS_GetChar());
+		//printf("size: %d\r\n%c\r\n",GPS_Get_Uart_Len(),GPS_GetChar());
+		//printf("size: %d\r\n%c\r\n",GPS_Get_Uart_Len(),GPS_GetChar());
 	}
+	gpsControlData.newDatatoParse=0;
 }
 
 // GPS checksum code based on 

@@ -33,6 +33,10 @@ void UART1PutHex( int toPrint );
 char bufferreturn(unsigned int *buffer);
 char UART1PutMsg(char *message);
 
+unsigned char get_overflowcount();
+
+void print_circ_buf();
+
 #endif
 
 

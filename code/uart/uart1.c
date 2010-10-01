@@ -154,9 +154,10 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 				Cur_State=WAIT_LINEFEED;
 				if(msg_count>=2)
 				{
-					Cur_State=GPS_PARSE;
+					Cur_State=GPS_WAIT;
 					UART1PutMsg(NMEA_SWITCH);
 					writeBack(UART1_receiveBuffer, cur_char);
+					gpsControlData.newDatatoParse=1;
 				}
 			}
 			break;
@@ -170,12 +171,31 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 			break;
 		case GPS_PARSE:
 			//UART2PutChar('q');
-			while(U1STAbits.URXDA == 1)
-			{
+			cur_char=U1RXREG;
+			//UART2PutChar(cur_char);
+			writeBack(UART1_receiveBuffer, cur_char);
+			//while(U1STAbits.URXDA == 1)
+			//{
 				//if (prev_char==''&&)
-				writeBack(UART1_receiveBuffer, (unsigned char)U1RXREG);
+				
+			//}
+			if(cur_char=='$')
+			{
+				Cur_State=GPS_WAIT;
+				gpsControlData.newDatatoParse=1;
+				//printf("new data: %d",gpsControlData.newDatatoParse);
 			}
-			break;	
+			break;
+		case GPS_WAIT:
+			cur_char=U1RXREG;
+			//UART2PutChar(cur_char);
+			writeBack(UART1_receiveBuffer, cur_char);
+			if(cur_char=='\n')
+			{
+				//printf("leaving GPS Wait\r\n");
+				Cur_State=GPS_PARSE;	
+			}
+			break;
 	}
 	/*while(U1STAbits.URXDA == 1){
 		//if (prev_char==''&&)
@@ -207,10 +227,26 @@ char UART1PutMsg(char *message)
 	        UART2PutChar(*message);
 	        UART1PutChar(*message++);
         }
+        return 0;
 }
 
 
 int UART1GetLength()
 {
-	return getLength(UART1_transmitBuffer);
+	int length=getLength(UART1_receiveBuffer);
+	//printf("size in uart stack: %d\r\n",length);
+	return length;
+}	
+
+
+
+unsigned char get_overflowcount()
+{
+	return getOverflow( UART1_receiveBuffer);
+}	
+
+
+void print_circ_buf()
+{
+	printCircBuf(UART1_receiveBuffer);
 }	

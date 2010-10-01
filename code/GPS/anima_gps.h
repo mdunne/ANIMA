@@ -74,6 +74,8 @@ typedef struct tGpsData{
 }tGpsData;
 
 
+extern tGpsData gpsControlData;
+
 #define KTS2MPS 		0.514444444
 
 // GPS Circular Buffers
@@ -102,7 +104,7 @@ void buildAndCheckSentence(unsigned char characterIn);
  * Pull new bytes from the UART2 receive buffer and
  * calls buildAndCheckSentence on each of them.
  */
-void processNewGpsData(unsigned char* message);
+void processNewGpsData();
 
 /**
  * Computes the checksum for a given GPS sentence.
