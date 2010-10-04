@@ -38,12 +38,43 @@
  ********************************************************************/
 
 #include "delay.h"
+#include "p33FJ256GP710.h"
 
 unsigned int temp_count;
 
 void Delay( unsigned int delay_count ) 
 {
-	temp_count = delay_count +1;
+	TMR1=0;
+	switch(delay_count)
+	{
+		case Delay_1mS_Cnt:
+			T1CONbits.TCKPS=0b00;
+			T1CONbits.TON=1;
+			while(TMR1<=40000);
+			T1CONbits.TON=0;
+		break;
+		case Delay_2mS_Cnt:
+			T1CONbits.TCKPS=0b01;
+			T1CONbits.TON=1;
+			while(TMR1<=10000);
+			T1CONbits.TON=0;
+		break;
+		case Delay_5mS_Cnt:
+			T1CONbits.TCKPS=0b01;
+			T1CONbits.TON=1;
+			while(TMR1<=25000);
+			T1CONbits.TON=0;
+		break;
+		case Delay_15mS_Cnt:
+			T1CONbits.TCKPS=0b10;
+			T1CONbits.TON=1;
+			while(TMR1<=9375);
+			T1CONbits.TON=0;
+		break;		
+
+
+	}	
+	/*temp_count = delay_count +1;
 	asm volatile("outer: dec _temp_count");	
 	asm volatile("cp0 _temp_count");
 	asm volatile("bra z, done");
@@ -51,13 +82,19 @@ void Delay( unsigned int delay_count )
 	asm volatile("nop");
 	asm volatile("inner: nop");
 	asm volatile("bra outer");
-	asm volatile("done:");
+	asm volatile("done:");*/
 }
 	
 
+
 void Delay_Us( unsigned int delayUs_count )
 {
-	temp_count = delayUs_count +1;
+	TMR1=0;
+	T1CONbits.TON=1;
+	T1CONbits.TCKPS=0b00;
+	while(TMR1<=7975);
+	T1CONbits.TON=0;
+	/*temp_count = delayUs_count +1;
 	asm volatile("outer1: dec _temp_count");	
 	asm volatile("cp0 _temp_count");
 	asm volatile("bra z, done1");
@@ -65,6 +102,6 @@ void Delay_Us( unsigned int delayUs_count )
 	asm volatile("nop");
 	asm volatile("inner1: nop");
 	asm volatile("bra outer1");
-	asm volatile("done1:");
+	asm volatile("done1:");*/
 }		
 

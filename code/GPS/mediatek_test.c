@@ -57,7 +57,11 @@ int main (void)
 		   	processNewGpsData();
 		   	if(gpsControlData.newData==1)
 		   	{
-			printf("time: %02d:%02d:%02d\r\n",gpsControlData.hour,gpsControlData.min,gpsControlData.sec);
+			printf("time: %02d:%02d:%02d",gpsControlData.hour,gpsControlData.min,gpsControlData.sec);
+			printf(" Lat: %.4f: Lon: %.4f", gpsControlData.lat , gpsControlData.lon);
+			printf(" Height: %.4f hdop: %d fix: %d sats: %d", gpsControlData.height, gpsControlData.hdop , gpsControlData.fix , gpsControlData.sats);
+			
+			printf("\r\n");
 			gpsControlData.newData=0;
 			}
 		   		//while (UART1GetLength() > 0) //{

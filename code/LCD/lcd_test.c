@@ -10,6 +10,7 @@
 #include "id_code.h"
 #include "data_logger.h"
 #include "lcd.h"
+#include "delay.h"
 _FOSCSEL(FNOSC_FRC & IESO_ON);
 _FOSC(FCKSM_CSECMD & OSCIOFNC_OFF & POSCMD_XT);
 _FWDT(FWDTEN_OFF); 
@@ -67,9 +68,9 @@ int main (void)
 	printf("starting Integration test\r\n");
 	//DataEEInit();
 	int id=0;
-	id=Get_ID_Code();
+	//id=Get_ID_Code();
 	printf("ID: %u\r\n",id);
-	OFB_init(id);
+	//OFB_init(id);
 	//Increment_ID_Code();
 	#ifdef __DEBUG
 		printf("Clock Switch Complete, Waiting For Media\r\n");
@@ -78,8 +79,31 @@ int main (void)
    char filename[9];
    sprintf(filename,"%05d.bin",id);
    // Create a file
+   TRISAbits.TRISA5=0;
+   _RA5=0;
+   Delay( Delay_5mS_Cnt);
+   _RA5=1;
+   Delay( Delay_1mS_Cnt);
+   _RA5=0;
+   Delay(Delay_1mS_Cnt);
+   _RA5=1;
+   Delay( Delay_1mS_Cnt);
+   _RA5=0;
+   Delay(Delay_2mS_Cnt);
+   _RA5=1;
+   
+    Delay( Delay_1mS_Cnt);
+   _RA5=0;
+   Delay(Delay_15mS_Cnt);
+   _RA5=1;
+   
+       Delay( Delay_1mS_Cnt);
+   _RA5=0;
+   Delay_Us(Delay_15mS_Cnt);
+   _RA5=1;
    
    printf("filename will be: %s\r\n",filename);
+   //while(1);
    Init_LCD();
    home_clr();
    home_it();
