@@ -2,9 +2,9 @@
 #include "stdio.h"
 #include "string.h"
 
-int init_gps()
+int init_gps(int baud_rate)
 {
-	GPS_UART_Init(INITIAL_BAUD);
+	GPS_UART_Init(baud_rate);
 	
 }
 

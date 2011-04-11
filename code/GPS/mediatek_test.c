@@ -30,7 +30,7 @@ int main (void)
 	while (OSCCONbits.COSC != 0b011);	// Wait for Clock switch to occur	
 	while(OSCCONbits.LOCK != 1) {};
 	UART2Init();
-	init_gps(BAUD_38400);
+	init_gps(BAUD_115200);
 	//UART1Init(BAUD_38400);
 	printf("starting Mediatek GPS Test\r\n");
 	char msg[]="$PGCMD,16,1,1,1,1,1*6B\r\n";
@@ -40,13 +40,27 @@ int main (void)
 	char r10hz[]="$PMTK220,100*2F";
 	//gpsControlData.newDatatoParse=1;
 	printf("new data to parse: %d",gpsControlData.newDatatoParse);
-	//UART1PutMsg(MEDIATEK_NMEA);
+	//UART1PutMsg("$PUBX,41,2,0002,0002,9600,0*14\r\n");
 	char hmm;
+	char first_time=0;
+	while(1)
+	{
+		//while(!UART2IsEmpty())
+			//UART1PutChar(UART2GetChar());
+	}	
    while(1)
    {
 	   //gpsControlData.newDatatoParse=1;
 	   if(gpsControlData.newDatatoParse==1)
 	   {
+		   /*if(first_time==0)
+		   {
+			   GPS_PutMsg(REFRESH_RATE);
+			   GPS_PutMsg(CHANGE_BAUD);
+			   while(UART1GetSendLength()!=0);
+			   GPS_Change_Baud(FINAL_BAUD);
+			   first_time++;
+			}*/ 
 		   /*print_circ_buf();
 		   printf("size in main: %d\r\n", (int)UART1GetLength());
 		   for(i=0;i<50;i++)
@@ -55,7 +69,7 @@ int main (void)
 			}*/ 
 		   	//printf("what is going on\r\n");
 		   	processNewGpsData();
-		   	if(gpsControlData.newData==1)
+		   	/*if(gpsControlData.newData==1)
 		   	{
 			printf("time: %02d:%02d:%02d",gpsControlData.hour,gpsControlData.min,gpsControlData.sec);
 			printf(" Lat: %.4f: Lon: %.4f", gpsControlData.lat , gpsControlData.lon);
@@ -63,7 +77,7 @@ int main (void)
 			
 			printf("\r\n");
 			gpsControlData.newData=0;
-			}
+			}*/
 		   		//while (UART1GetLength() > 0) //{
 
 		//buildAndCheckSentence(GPS_GetChar());

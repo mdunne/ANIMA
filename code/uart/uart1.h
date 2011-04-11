@@ -23,9 +23,11 @@
 
 char UART1GetChar();
 void UART1Init(int baud_rate);
+void UART1ChangeBaud(int baud_rate);
 //#endif
 char UART1IsEmpty();
 int UART1GetLength();
+int UART1GetSendLength();
 void UART1PrintString( char *str );
 void UART1PutChar( char ch );
 void UART1PutDec( unsigned char dec );

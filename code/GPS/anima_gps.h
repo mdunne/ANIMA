@@ -7,13 +7,28 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define NMEA_SWITCH MEDIATEK_NMEA
-#define INITIAL_BAUD MEDIATEK_INITIAL_BAUD 
+#define MEDIATEK
+
+#ifdef MEDIATEK
+	#define NMEA_SWITCH MEDIATEK_NMEA
+	#define INITIAL_BAUD MEDIATEK_INITIAL_BAUD 
+	#define FINAL_BAUD MEDIATEK_MAX_BAUD
+	#define CHANGE_BAUD MEDIATEK_CHANGE_BAUD
+	#define REFRESH_RATE MEDIATEK_REFRESH_RATE
+#endif
+
 
 //settings for mediatek 3329
 #define MEDIATEK_NMEA "$PGCMD,16,1,0,0,0,1*6A\r\n"
 #define MEDIATEK_INITIAL_BAUD BAUD_38400
+#define MEDIATEK_MAX_BAUD BAUD_115200
+#define MEDIATEK_CHANGE_BAUD "$PMTK251,115200*1F\r\n"
+#define MEDIATEK_REFRESH_RATE "$PMTK220,1000*1F\r\n"
 
+//setting for locosys
+
+#define LOCOSYS_CHANGE_BAUD MEDIATEK_CHANGE_BAUD
+#define LOCOSYS_SELECT_MESSAGE "$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0*28\r\n"
 
 
 //wrapper for functions, eventually will be able to select uart
@@ -22,6 +37,9 @@
 #define GPS_UART_Init UART1Init
 #define GPS_GetChar UART1GetChar
 #define GPS_Get_Uart_Len UART1GetLength
+#define GPS_Get_Uart_Send_Len UART1GetSendLength
+#define GPS_Change_Baud UART1ChangeBaud
+
 
 int init_gps();
 

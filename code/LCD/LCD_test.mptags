@@ -662,7 +662,7 @@ brg	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\SD-SPI.c	134;"	l
 brg	C:\Users\mdunne\Documents\SLUGS-Logger\code\common\write.c	25;"	l	line:25
 buf	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	8635;"	l	line:8635
 buf	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	8641;"	l	line:8641
-buffer	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	258;"	l	line:258
+buffer	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	268;"	l	line:268
 buffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	24;"	m	line:24	struct:CircBuffer
 buffer	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\circBuffer.h	33;"	m	line:33	struct:CircBuffer
 bufferEnd	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	6312;"	l	line:6312
@@ -670,7 +670,7 @@ bufferOverflow	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.
 bufferflag	C:\Users\mdunne\Documents\SLUGS-Logger\code\integration\data_logger.c	20;"	v	line:20	file:
 bufferflag	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.c	32;"	v	line:32	file:
 bufferreturn	C:\Users\mdunne\Documents\SLUGS-Logger\code\uart\uart2.h	23;"	p	line:23	signature:(unsigned int *buffer)
-buffersign	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	259;"	l	line:259
+buffersign	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	269;"	l	line:269
 c	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	1795;"	l	line:1795
 c	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	2405;"	l	line:2405
 c	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	2591;"	l	line:2591
@@ -823,7 +823,7 @@ entryptr	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	7260
 eraseDir	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	261;"	p	line:261	file:	signature:(char * path)
 eraseDir	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	7805;"	f	line:7805	signature:(char * path)
 erasePage	C:\Users\mdunne\Documents\SLUGS-Logger\code\id_code_test\DEE.c	478;"	l	line:478
-erasure	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	221;"	l	line:221
+erasure	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	231;"	l	line:231
 err	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	9109;"	l	line:9109
 err	C:\Users\mdunne\Documents\SLUGS-Logger\code\id_code_test\id_code.c	13;"	l	line:13
 err	C:\Users\mdunne\Documents\SLUGS-Logger\code\id_code_test\id_code.c	33;"	l	line:33
@@ -1002,6 +1002,8 @@ month	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	2891;"	
 monthday	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	2405;"	l	line:2405
 moredataexpected	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\Include\MDD File System\SD-SPI.h	151;"	m	line:151
 ms	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\SD-SPI.c	809;"	l	line:809
+mytext	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	111;"	l	line:111
+mytext1	C:\Users\mdunne\Documents\ANIMA\code\LCD\lcd_test.c	112;"	l	line:112
 n	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	8231;"	l	line:8231
 n	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	8296;"	l	line:8296
 name	C:\Users\mdunne\Documents\SLUGS-Logger\code\FAT16 Microchip\FSIO.c	2049;"	l	line:2049

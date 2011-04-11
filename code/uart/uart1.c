@@ -144,6 +144,8 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 	//temp=U2RXREG;
 	//UART2PutChar('e');
 	//UART1PutMsg(NMEA_SWITCH);
+	//UART2PutChar(U1RXREG);
+	
 	switch (Cur_State)
 	{
 		case WAIT_DOLLAR:
@@ -155,7 +157,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 				if(msg_count>=2)
 				{
 					Cur_State=GPS_WAIT;
-					UART1PutMsg(NMEA_SWITCH);
+					//UART1PutMsg(FINAL_BAUD);
 					writeBack(UART1_receiveBuffer, cur_char);
 					gpsControlData.newDatatoParse=1;
 				}
@@ -197,6 +199,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 			}
 			break;
 	}
+	UART2PutChar(U1RXREG);
 	/*while(U1STAbits.URXDA == 1){
 		//if (prev_char==''&&)
 		writeBack(UART1_receiveBuffer, (unsigned char)U1RXREG);
@@ -206,7 +209,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 	if (U1STAbits.OERR == 1){
 		U1STAbits.OERR = 0;
 	}
-	
+	//yayUART2PutChar(cur_char);
 	/*// clear the interrupt*/
 	IFS0bits.U1RXIF = 0;
 }
@@ -249,4 +252,18 @@ unsigned char get_overflowcount()
 void print_circ_buf()
 {
 	printCircBuf(UART1_receiveBuffer);
+}
+
+int UART1GetSendLength()
+{
+	int length=getLength(UART1_transmitBuffer);
+	//printf("size in uart stack: %d\r\n",length);
+	return length;
+}
+
+void UART1ChangeBaud(int baud_rate)
+{
+		U1MODEbits.UARTEN = 0;
+		U1BRG = baud_rate;
+		U1MODEbits.UARTEN = 1;
 }	

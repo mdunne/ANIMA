@@ -52,7 +52,6 @@ int main (void)
 {
 
    FSFILE * pointer=NULL;
-   DWORD first_sector;
    SearchRec rec;
    pointer=NULL;
    unsigned char attributes;
@@ -79,7 +78,7 @@ int main (void)
    char filename[9];
    sprintf(filename,"%05d.bin",id);
    // Create a file
-   TRISAbits.TRISA5=0;
+   /*TRISAbits.TRISA5=0;
    _RA5=0;
    Delay( Delay_5mS_Cnt);
    _RA5=1;
@@ -101,13 +100,23 @@ int main (void)
    _RA5=0;
    Delay_Us(Delay_15mS_Cnt);
    _RA5=1;
-   
+   */
+   	LATA = 0xFF00; 
+	/* set LED pins (D3-D10/RA0-RA7) as outputs */
+	TRISA = 0xFF00; 
    printf("filename will be: %s\r\n",filename);
    //while(1);
    Init_LCD();
+   const char mytext[] =  " dsPIC33F Demo ";
+   const char mytext1[] = "Press S3 to cont";
    home_clr();
-   home_it();
-   puts_lcd((unsigned char*) &filename[0],9);
+   //home_it();
+   //puts_lcd((unsigned char*) &filename[0],9);
+   puts_lcd( (char*) &mytext[0], sizeof(mytext) -1 );
+   line_2();
+
+   puts_lcd( (char*) &mytext1[0], sizeof(mytext1) -1 );
+   while(1);
    //waits for a card to be inserted
    	while (!MDD_MediaDetect());
 	#ifdef __DEBUG
