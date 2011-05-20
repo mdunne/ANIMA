@@ -51,14 +51,14 @@ file_005=no
 file_006=no
 file_007=no
 [FILE_INFO]
-file_000=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\circBuffer.c
-file_001=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\uart2.c
-file_002=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\write.c
-file_003=freescale_accel_test.c
-file_004=freescale_accel.c
-file_005=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\circBuffer.h
-file_006=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\uart2.h
-file_007=freescale_accel.h
+file_000=freescale_accel.c
+file_001=freescale_accel_test.c
+file_002=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\circBuffer.c
+file_003=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\uart2.c
+file_004=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\write.c
+file_005=freescale_accel.h
+file_006=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\circBuffer.h
+file_007=C:\Users\mdunne\Documents\ANIMA\code\testing rig\uart\uart2.h
 [SUITE_INFO]
 suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
 suite_state=
