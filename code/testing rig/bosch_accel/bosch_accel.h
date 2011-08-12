@@ -8,8 +8,8 @@ int bosch_GetYData(void);
 int bosch_GetZData(void);
 
 int bosch_ReadInt(char address);
-unsigned char bosch_WriteReg(char address,char data);
-unsigned char bosch_ReadReg(char address);
+unsigned char bosch_WriteReg(unsigned char address,unsigned char data);
+unsigned char bosch_ReadReg(unsigned char address);
 unsigned char bosch_GetScale();
 unsigned char bosch_SetScale(char scale);
 void bosch_ChangeMode(char Mode);
@@ -27,14 +27,14 @@ typedef enum{
         BOSCH_16GSCALE,
 	BOSCH_STANDBYMODE,
 	BOSCH_ACTIVEMODE,
-	BOSCH_800HERTZ=0,
-	BOSCH_400HERTZ,
-	BOSCH_200HERTZ,
-	BOSCH_100HERTZ,
-	BOSCH_50HERTZ,
-	BOSCH_12P5HERTZ,
-	BOSCH_6P25HERTZ,
-	BOSCH_1P56HERTZ,
+	BOSCH_10HERTZ=0,
+	BOSCH_20HERTZ,
+	BOSCH_40HERTZ,
+	BOSCH_75HERTZ,
+	BOSCH_150HERTZ,
+	BOSCH_300HERTZ,
+	BOSCH_600HERTZ,
+	BOSCH_1200HERTZ,
 		
 }COMMANDS;
 #endif

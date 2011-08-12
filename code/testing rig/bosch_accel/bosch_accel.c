@@ -10,8 +10,8 @@
 #define YDATA 0x03
 #define ZDATA 0x05
 #define SCALE_MASK 0b00001110
-#define RATE_MASK 0b00111000
-#define MODE_MASK 0b00000010
+#define RATE_MASK  0b11110000
+#define MODE_MASK  0b00000010
 
 typedef enum {
     CHIP_ID = 0,
@@ -161,29 +161,32 @@ int bosch_ReadInt(char address) {
 
 //
 
-unsigned char bosch_WriteReg(char address, char data) {
-
+unsigned char bosch_WriteReg(unsigned char address, unsigned char data) {
+    int hmm=0;
+    hmm=data;
+    data&=0x00FF;
+    printf("Data to write is %X\r\n",(data));
     I2C1CONbits.SEN = 1;
     while (I2C1CONbits.SEN == 1);
     I2C1TRN = (I2C_ADDRESS << 1);
     while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK upon addressing");
-        while (1);
-    }
+    //if (I2C1STATbits.ACKSTAT == 1) {
+    //    printf("Device Responded with NACK upon addressing");
+    //    while (1);
+    //}
 
     I2C1TRN = address;
     while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK upon address to wake");
-        while (1);
-    }
+    //if (I2C1STATbits.ACKSTAT == 1) {
+    //    printf("Device Responded with NACK upon address to write");
+    //    while (1);
+    //}
     I2C1TRN = data;
     while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK upon changing to awake mode");
-        while (1);
-    }
+    //if (I2C1STATbits.ACKSTAT == 1) {
+    //    printf("Device Responded with NACK upon data");
+    //    while (1);
+    //}
     I2C1CONbits.PEN = 1;
     while (I2C1CONbits.PEN == 1);
 
@@ -192,7 +195,7 @@ unsigned char bosch_WriteReg(char address, char data) {
 
 //
 
-unsigned char bosch_ReadReg(char address) {
+unsigned char bosch_ReadReg(unsigned char address) {
     unsigned char data = 0;
     I2C1CONbits.SEN = 1;
     while (I2C1CONbits.SEN == 1);
@@ -232,7 +235,7 @@ unsigned char bosch_ReadReg(char address) {
 
 void bosch_ChangeMode(char Mode) {
     return;
-    char Cur_Mode = 0;
+    unsigned char Cur_Mode = 0;
     Cur_Mode = bosch_ReadReg(CTRL_REG1);
     Cur_Mode &= (~MODE_MASK); //remove current mode
     if (Mode == BOSCH_STANDBYMODE) {
@@ -256,7 +259,7 @@ unsigned char bosch_GetScale() {
 }
 
 unsigned char bosch_SetScale(char scale) {
-    char regist = 0;
+    unsigned char regist = 0;
     //bosch_ChangeMode(BOSCH_STANDBYMODE);
     regist = bosch_ReadReg(OFFSET_LSB1);
     //printf("\r\nRegist is %u\r\n",regist);
@@ -267,7 +270,7 @@ unsigned char bosch_SetScale(char scale) {
     return 0;
 
 }
-/*
+
 //
 
 
@@ -276,38 +279,23 @@ unsigned char bosch_SetScale(char scale) {
         Rate=255;
         regist=bosch_ReadReg(CTRL_REG1);
         regist&=RATE_MASK;
-        Rate=regist>>2;
+        Rate=regist>>4;
         //printf("regist: %X\r\n",regist);
-        /*if (regist==0)
-                Scale=BOSCH_2GSCALE;
-        if (regist==1)
-                Scale=BOSCH_4GSCALE;
-        if (regist==2)
-                Scale=BOSCH_8GSCALE;
-
         return Rate;
 }
  //
 unsigned char bosch_SetRate(char Rate){
-        char regist;
-        bosch_ChangeMode(BOSCH_STANDBYMODE);
-        regist=bosch_ReadReg(CTRL_REG1);
+        unsigned char regist;
+        //bosch_ChangeMode(BOSCH_STANDBYMODE);
+        regist=bosch_ReadReg(BW_TCS);
         regist&=(~RATE_MASK);
-        regist=regist+(Rate<<2);
-	
-        //if (scale==BOSCH_2GSCALE)
-        //	regist=(regist&(~SCALE_MASK))+0;
-        //if (scale==BOSCH_4GSCALE)
-        //	regist=(regist&(~SCALE_MASK))+1;
-        //if (scale==BOSCH_8GSCALE)
-        //	regist=(regist&(~SCALE_MASK))+2;
-		
-        bosch_WriteReg(CTRL_REG1,regist);
-        bosch_ChangeMode(BOSCH_ACTIVEMODE);
+        regist=regist+(Rate<<4);
+        bosch_WriteReg(BW_TCS,regist);
+        //bosch_ChangeMode(BOSCH_ACTIVEMODE);
         return 0;
 	
 }
-//
+/*//
 
 
  */
