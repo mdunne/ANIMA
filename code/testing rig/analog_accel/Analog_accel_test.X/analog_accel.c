@@ -3,7 +3,7 @@
 #include "stdio.h"
 
 
-#include "bosch_accel.h"
+#include "analog_accel.h"
 
 
 #define XDATA 0x01
@@ -13,33 +13,46 @@
 #define RATE_MASK  0b11110000
 #define MODE_MASK  0b00000010
 
+
+//only the
+
 typedef enum {
-    CHIP_ID = 0,
-    VERSION,
-    ACC_X_LSB,
-    ACC_X_MSB,
-    ACC_Y_LSB,
-    ACC_Y_MSB,
-    ACC_Z_LSB,
-    ACC_Z_MSB,
-    STATUS_REG1 = 0x09,
-    STATUS_REG2,
-    STATUS_REG3,
-    STATUS_REG4,
-    CTRL_REG0,
-    CTRL_REG1,
-    CTRL_REG2,
-    BW_TCS = 0x20,
-    CTRL_REG3,
-    CTRL_REG4,
-    TCO_Z = 0x30,
-    OFFSET_LSB1 = 0x35,
+    DEVID = 0,
+    THRESH_TAP = 0x1D,
+    OFSX,
+    OFSY,
+    OFSZ,
+    DUR,
+    Latent,
+    Window,
+    THRESH_ACT,
+    THRESH_INACT,
+    TIME_INACT,
+    ACT_INACT_CTL,
+    THRESH_FF,
+    TIME_FF,
+    TAP_AXES,
+    ACT_TAP_STATUS,
+    BW_RATE,
+    POWER_CTL,
+    INT_ENABLE,
+    INT_MAP,
+    INT_SOURCE,
+    DATA_FORMAT,
+    DATAX0,
+    DATAX1,
+    DATAY0,
+    DATAY1,
+    DATAZ0,
+    DATAZ1,
+    FIFO_CTL,
+    FIFO_STATUS
 } REGISTERS;
 
 
-#define I2C_ADDRESS 0x40
+#define I2C_ADDRESS 0x1D
 
-void bosch_accel_init(void) {
+void analog_accel_init(void) {
     char response = 0;
     TRISBbits.TRISB9 = 0;
     TRISBbits.TRISB8 = 0;
@@ -54,38 +67,44 @@ void bosch_accel_init(void) {
     I2C1CONbits.I2CEN = 1;
 
     printf("Awakening Device\r\n");
-    //bosch_ChangeMode(BOSCH_ACTIVEMODE);
+    analog_WriteReg(POWER_CTL, 1 << 3);
+    //set the bandwidth to 400Hz
+    analog_WriteReg(BW_RATE, 0xC);
+    //set the output to full range
+    analog_WriteReg(DATA_FORMAT, 1 << 2);
+    //analog_WriteReg(DATA_FORMAT,);
+    //analog_ChangeMode(analog_ACTIVEMODE);
     printf("Device Awakened\r\n");
-    response=bosch_ReadReg(CTRL_REG0);
-    response|=0x10;
-    bosch_WriteReg(CTRL_REG0,response);
+    //response = analog_ReadReg(CTRL_REG0);
+    response |= 0x10;
+    //analog_WriteReg(CTRL_REG0, response);
     //printf("Control Reg 0: %X",CTRL_REG0);
     return;
 
 
 }
 
-int bosch_GetXData(void) {
+int analog_GetXData(void) {
     int XData;
-    XData = bosch_ReadInt(ACC_X_LSB);
+    XData = analog_ReadInt(DATAX0);
     return XData;
 
 }
 
-int bosch_GetYData(void) {
+int analog_GetYData(void) {
     int YData;
-    YData = bosch_ReadInt(ACC_Y_LSB);
+    YData = analog_ReadInt(DATAY0);
     return YData;
 
 }
 
-int bosch_GetZData(void) {
+int analog_GetZData(void) {
     int ZData;
-    ZData = bosch_ReadInt(ACC_Z_LSB);
+    ZData = analog_ReadInt(DATAZ0);
     return ZData;
 }
 
-int bosch_ReadInt(char address) {
+int analog_ReadInt(char address) {
     int Data = 0, msB = 0, lsB = 0;
 
     //Send Start condition and wait
@@ -165,11 +184,11 @@ int bosch_ReadInt(char address) {
 
 //
 
-unsigned char bosch_WriteReg(unsigned char address, unsigned char data) {
-    int hmm=0;
-    hmm=data;
-    data&=0x00FF;
-    printf("Data to write is %X\r\n",(data));
+unsigned char analog_WriteReg(unsigned char address, unsigned char data) {
+    int hmm = 0;
+    hmm = data;
+    data &= 0x00FF;
+    printf("Data to write is %X\r\n", (data));
     I2C1CONbits.SEN = 1;
     while (I2C1CONbits.SEN == 1);
     I2C1TRN = (I2C_ADDRESS << 1);
@@ -199,7 +218,7 @@ unsigned char bosch_WriteReg(unsigned char address, unsigned char data) {
 
 //
 
-unsigned char bosch_ReadReg(unsigned char address) {
+unsigned char analog_ReadReg(unsigned char address) {
     unsigned char data = 0;
     I2C1CONbits.SEN = 1;
     while (I2C1CONbits.SEN == 1);
@@ -237,69 +256,69 @@ unsigned char bosch_ReadReg(unsigned char address) {
     return data;
 }
 
-void bosch_ChangeMode(char Mode) {
+void analog_ChangeMode(char Mode) {
+    /*
     return;
     unsigned char Cur_Mode = 0;
-    Cur_Mode = bosch_ReadReg(CTRL_REG1);
+    Cur_Mode = analog_ReadReg(CTRL_REG1);
     Cur_Mode &= (~MODE_MASK); //remove current mode
-    if (Mode == BOSCH_STANDBYMODE) {
-        bosch_WriteReg(CTRL_REG1, Cur_Mode);
+    if (Mode == analog_STANDBYMODE) {
+        analog_WriteReg(CTRL_REG1, Cur_Mode);
     }
-    if (Mode == BOSCH_ACTIVEMODE) {
+    if (Mode == analog_ACTIVEMODE) {
         Cur_Mode |= MODE_MASK;
-        bosch_WriteReg(CTRL_REG1, Cur_Mode);
+        analog_WriteReg(CTRL_REG1, Cur_Mode);
     }
+     */
 }
 //
 
-unsigned char bosch_GetScale() {
+unsigned char analog_GetScale() {
+    /*
     unsigned char Scale, regist;
     Scale = 255;
-    regist = bosch_ReadReg(OFFSET_LSB1);
+    regist = analog_ReadReg(OFFSET_LSB1);
     regist &= SCALE_MASK;
     Scale = regist >> 1;
     //printf("regist: %X\r\n",regist);
     return Scale;
+     * */
 }
 
-unsigned char bosch_SetScale(char scale) {
+unsigned char analog_SetScale(char scale) {
+    /*
     unsigned char regist = 0;
-    //bosch_ChangeMode(BOSCH_STANDBYMODE);
-    regist = bosch_ReadReg(OFFSET_LSB1);
+    //analog_ChangeMode(analog_STANDBYMODE);
+    regist = analog_ReadReg(OFFSET_LSB1);
     //printf("\r\nRegist is %u\r\n",regist);
-    regist = (regist & (~SCALE_MASK)) + (scale<<1);
+    regist = (regist & (~SCALE_MASK)) + (scale << 1);
     //printf("\r\nRegist is now %u\r\n",regist);
-    bosch_WriteReg(OFFSET_LSB1, regist);
-    //bosch_ChangeMode(BOSCH_ACTIVEMODE);
+    analog_WriteReg(OFFSET_LSB1, regist);
+    //analog_ChangeMode(analog_ACTIVEMODE);
     return 0;
-
+     */
 }
 
 //
 
-
- unsigned char bosch_GetRate(){
-        unsigned char Rate,regist;
-        Rate=255;
-        regist=bosch_ReadReg(CTRL_REG1);
-        regist&=RATE_MASK;
-        Rate=regist>>4;
-        //printf("regist: %X\r\n",regist);
-        return Rate;
+unsigned char analog_GetRate() {/*
+    unsigned char Rate, regist;
+    Rate = 255;
+    regist = analog_ReadReg(CTRL_REG1);
+    regist &= RATE_MASK;
+    Rate = regist >> 4;
+    //printf("regist: %X\r\n",regist);
+    return Rate;*/
 }
- //
-unsigned char bosch_SetRate(char Rate){
-        unsigned char regist;
-        //bosch_ChangeMode(BOSCH_STANDBYMODE);
-        regist=bosch_ReadReg(BW_TCS);
-        regist&=(~RATE_MASK);
-        regist=regist+(Rate<<4);
-        bosch_WriteReg(BW_TCS,regist);
-        //bosch_ChangeMode(BOSCH_ACTIVEMODE);
-        return 0;
-	
+
+unsigned char analog_SetRate(char Rate) {/*
+    unsigned char regist;
+    //analog_ChangeMode(analog_STANDBYMODE);
+    regist = analog_ReadReg(BW_TCS);
+    regist &= (~RATE_MASK);
+    regist = regist + (Rate << 4);
+    analog_WriteReg(BW_TCS, regist);
+    //analog_ChangeMode(analog_ACTIVEMODE);
+    return 0;
+*/
 }
-/*//
-
-
- */
