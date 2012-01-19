@@ -4,6 +4,7 @@
 
 
 #include "freescale_mag.h"
+#include <I2C.h>
 
 
 #define XDATA 0x01
@@ -36,22 +37,14 @@ typedef enum {
 
 #define I2C_ADDRESS 0xE
 
-void free_mag_accel_init(void) {
+void free_mag_init(void) {
     char response = 0;
-    TRISBbits.TRISB9 = 0;
-    TRISBbits.TRISB8 = 0;
-    I2C1CONbits.I2CEN = 0;
-    I2C1CONbits.A10M = 0;
-    I2C1CONbits.SCLREL = 1;
-    I2C1CONbits.ACKDT = 0;
-    I2C1CONbits.DISSLW = 1;
-    I2C1BRG = 511;
-    I2C1RCV = 0x0000;
-    I2C1TRN = 0;
-    I2C1CONbits.I2CEN = 1;
+    //TRISBbits.TRISB9 = 0;
+    //TRISBbits.TRISB8 = 0;
 
+    I2C_Init(511);
     printf("Awakening Device\r\n");
-    free_mag_WriteReg(CTRL_REG1,0x1);
+    I2C_WriteReg(I2C_ADDRESS,CTRL_REG1,0x1);
     //free_mag_ChangeMode(free_mag_ACTIVEMODE);
     printf("Device Awakened\r\n");
     return;
@@ -61,168 +54,30 @@ void free_mag_accel_init(void) {
 
 int free_mag_GetXData(void) {
     int XData;
-    XData = free_mag_ReadInt(OUT_X_MSB);
+    XData = I2C_ReadInt(I2C_ADDRESS,OUT_X_MSB);
     return XData;
 
 }
 
 int free_mag_GetYData(void) {
     int YData;
-    YData = free_mag_ReadInt(OUT_Y_MSB);
+    YData = I2C_ReadInt(I2C_ADDRESS,OUT_Y_MSB);
     return YData;
 
 }
 
 int free_mag_GetZData(void) {
     int ZData;
-    ZData = free_mag_ReadInt(OUT_Z_MSB);
+    ZData = I2C_ReadInt(I2C_ADDRESS,OUT_Z_MSB);
     return ZData;
 
 }
 
-int free_mag_ReadInt(char address) {
-    int Data = 0;
-    I2C1CONbits.SEN = 1;
-    while (I2C1CONbits.SEN == 1);
-    //char debugchar='0';
 
-    I2C1TRN = I2C_ADDRESS << 1;
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK");
-        while (1);
-    }
-    //printf("Accel Ackowledged\r\n");
-    I2C1TRN = address;
-    //UART2PutChar(debugchar);  //0
-    //debugchar++;
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK");
-        while (1);
-    }
-    I2C1CONbits.RSEN = 1;
-    //UART2PutChar(debugchar); //1
-    //debugchar++;
-    while (I2C1CONbits.RSEN == 1);
-    I2C1TRN = (I2C_ADDRESS << 1) + 1;
-    //UART2PutChar(debugchar); //2
-    //debugchar++;
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK");
-        while (1);
-    }
-    //UART2PutChar(debugchar); //3
-    //debugchar++;
-    I2C1CONbits.RCEN = 1;
-    //while(I2C1CONbits.RCEN==1);
-    while (I2C1STATbits.RBF != 1);
-    Data = I2C1RCV << 8;
-
-
-    //	UART2PutChar(debugchar);//4
-    //debugchar++;
-    I2C1CONbits.ACKEN = 1;
-    while (I2C1CONbits.ACKEN == 1);
-    //UART2PutChar(debugchar);
-    I2C1CONbits.RCEN = 1;
-
-    //debugchar++;
-
-    while (I2C1STATbits.RBF != 1);
-    Data += I2C1RCV;
-    I2C1CONbits.ACKDT = 1;
-    I2C1CONbits.ACKEN = 1;
-
-    //UART2PutChar(debugchar);
-    //debugchar++;
-
-    while (I2C1CONbits.ACKEN == 1);
-    I2C1CONbits.ACKDT = 0;
-    I2C1CONbits.PEN = 1;
-
-    //UART2PutChar(debugchar);
-    //debugchar++;
-
-    while (I2C1CONbits.PEN == 1);
-    Data = Data;
-    return Data;
-
-
-}
 
 
 //
 
-unsigned char free_mag_WriteReg(char address, char data) {
-
-    I2C1CONbits.SEN = 1;
-    while (I2C1CONbits.SEN == 1);
-    I2C1TRN = (I2C_ADDRESS << 1);
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK upon addressing");
-        while (1);
-    }
-
-    I2C1TRN = address;
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK upon address to wake");
-        while (1);
-    }
-    I2C1TRN = data;
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK upon changing to awake mode");
-        while (1);
-    }
-    I2C1CONbits.PEN = 1;
-    while (I2C1CONbits.PEN == 1);
-
-    return 1;
-}
-
-//
-
-unsigned char free_mag_ReadReg(char address) {
-    unsigned char data = 0;
-    I2C1CONbits.SEN = 1;
-    while (I2C1CONbits.SEN == 1);
-
-    I2C1TRN = I2C_ADDRESS << 1;
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK");
-        while (1);
-    }
-
-    I2C1TRN = address;
-
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK");
-        while (1);
-    }
-    I2C1CONbits.RSEN = 1;
-
-    while (I2C1CONbits.RSEN == 1);
-    I2C1TRN = (I2C_ADDRESS << 1) + 1;
-
-    while (I2C1STATbits.TRSTAT != 0);
-    if (I2C1STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK");
-        while (1);
-    }
-    I2C1CONbits.RCEN = 1;
-    //while(I2C1CONbits.RCEN==1);
-    while (I2C1STATbits.RBF != 1);
-    data = I2C1RCV;
-    I2C1CONbits.PEN = 1;
-    while (I2C1CONbits.PEN == 1);
-    return data;
-}
 //ALL FUNCTIONS BEYOND THIS POINT ARE UN-IMPLEMENTED
 unsigned char free_mag_GetScale() {
     /*

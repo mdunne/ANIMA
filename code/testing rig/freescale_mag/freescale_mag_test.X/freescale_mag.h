@@ -2,12 +2,12 @@
 #define freescale_mag_H
 
 
-void free_mag_accel_init (void);
+void free_mag_init (void);
 int free_mag_GetXData(void);
 int free_mag_GetYData(void);
 int free_mag_GetZData(void);
 
-int free_mag_ReadInt(char address);
+
 unsigned char free_mag_WriteReg(char address,char data);
 unsigned char free_mag_ReadReg(char address);
 unsigned char free_mag_GetScale();

@@ -5,7 +5,7 @@
 #include "p33FJ64MC802.h"
 #include "stdio.h"
 #include "uart2.h"
-//#include "freescale_mag.h"
+#include "freescale_mag.h"
 
 
 _FOSCSEL(FNOSC_FRC);
@@ -38,7 +38,7 @@ int main (void)
 	
 	printf("Microstick FreeScale Magnetometer test\r\nAll input should be mirrored back to you\r\n");
         //while(1);
-	free_mag_accel_init();
+	free_mag_init();
 	//printf("Scale is set to %d \r\n",free_mag_GetScale());
 	//free_mag_SetScale(free_mag_4GSCALE);
 	//printf("Scale is set to %d and should be %d\r\n",free_mag_GetScale(),free_mag_4GSCALE);
