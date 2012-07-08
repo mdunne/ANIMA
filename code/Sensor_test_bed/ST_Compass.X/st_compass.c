@@ -102,6 +102,7 @@ union Reg_Access {
     {
         unsigned SIM : 1;
         unsigned : 2;
+        unsigned resolution : 1;
         unsigned Scale : 2;
         unsigned Endedness : 1;
         unsigned Block_Update : 1;
@@ -137,7 +138,12 @@ void st_compass_init(void) {
     //printf("The value: %X and its switched counterpart %X",(short)testval,(short)switch_endedness(testval));
     //I2C_WriteReg(MAG_I2C_ADDRESS,CRA_REG_M,0b00011100);
     //I2C_WriteReg(MAG_I2C_ADDRESS,MR_REG_M,0);
-    st_mag_ChangeMode(ST_MAG_CONTINUOUS_MODE);
+    //st_mag_ChangeMode(ST_MAG_CONTINUOUS_MODE);
+    Reg_Access.full_register=I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A);
+    Reg_Access.CTRL_REG4_A.Endedness=1;
+    Reg_Access.CTRL_REG4_A.Block_Update=0;
+    Reg_Access.CTRL_REG4_A.resolution=1;
+    I2C_WriteReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A,Reg_Access.full_register);
     printf("Device Awakened\r\n");
     return;
 
@@ -153,7 +159,9 @@ short switch_endedness(short format_num){
 
 int st_Get_AccelXData(void) {
     int XData;
-    XData = switch_endedness(I2C_ReadInt(ACCEL_I2C_ADDRESS,OUT_X_L_A));
+    char reg_status;
+    XData = I2C_ReadInt(ACCEL_I2C_ADDRESS,OUT_X_L_A);
+    printf("status reg: %X\t",I2C_ReadReg(ACCEL_I2C_ADDRESS,STATUS_REG_A));
     //XData = st_ReadInt(OUT_X_L_A);
     return XData;
 
@@ -161,14 +169,14 @@ int st_Get_AccelXData(void) {
 
 int st_Get_AccelYData(void) {
     int YData;
-    YData = switch_endedness(I2C_ReadInt(ACCEL_I2C_ADDRESS, OUT_Y_L_A));
+    YData = I2C_ReadInt(ACCEL_I2C_ADDRESS, OUT_Y_L_A);
     return YData;
 
 }
 
 int st_Get_AccelZData(void) {
     int ZData;
-    ZData = switch_endedness(I2C_ReadInt(ACCEL_I2C_ADDRESS, OUT_Z_L_A));
+    ZData = I2C_ReadInt(ACCEL_I2C_ADDRESS, OUT_Z_L_A);
     return ZData;
 
 }
@@ -228,6 +236,7 @@ unsigned char st_mag_SetGain(char newGain) {
 void st_mag_ChangeMode(char Mode) {
 
     Reg_Access.full_register = I2C_ReadReg(MAG_I2C_ADDRESS,MR_REG_M);
+    printf("After reading of register\r\n");
     switch(Mode)
     {
         case ST_MAG_CONTINUOUS_MODE:
@@ -259,7 +268,7 @@ unsigned char st_mag_SetRate(char Rate) {
 unsigned char st_mag_GetRate() {
     unsigned char Rate, regist;
     Rate = 255;
-    Reg_Access.full_register=0;
+    //Reg_Access.full_register=0;
     //    for (Rate=0; Rate<=7;Rate++)
     //{
       //  Reg_Access.Rate_Reg.Rate=Rate;
@@ -300,10 +309,13 @@ unsigned char st_accel_GetScale() {
  * @return
  */
 unsigned char st_accel_SetScale(char scale) {
+    unsigned char regist;
     Reg_Access.full_register=I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A);
     Reg_Access.CTRL_REG4_A.Scale=scale;
-    Reg_Access.CTRL_REG4_A.Block_Update=1;
+    
     I2C_WriteReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A,Reg_Access.full_register);
+        regist=I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A);
+    printf("Regist: %X\r\n",regist);
 //    char regToRead;
 //    st_ChangeMode(STMICRO_STANDBYMODE);
 //    regToRead = st_ReadReg(CTRL_REG4_A);
@@ -345,8 +357,10 @@ unsigned char st_accel_SetRate(char Rate) {
     Reg_Access.CTRL_REG1_A.Rate=Rate;
     //printf("status of axis: %d%d%d\r\n",Reg_Access.CTRL_REG1_A.XEnable,Reg_Access.CTRL_REG1_A.YEnable,Reg_Access.CTRL_REG1_A.ZEnable);
     I2C_WriteReg(ACCEL_I2C_ADDRESS,CTRL_REG1_A,Reg_Access.full_register);
-    //regist=I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG1_A);
-    //printf("Regist: %X\r\n",regist);
+    regist=I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG1_A);
+    printf("Regist: %X\r\n",regist);
+    //regist=I2C_ReadReg(ACCEL_I2C_ADDRESS,FIFO_CTRL_REG_A);
+    //printf("FIFO Regist: %X\r\n",regist);
     return 0;
 
 }

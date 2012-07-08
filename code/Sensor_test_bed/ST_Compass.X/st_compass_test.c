@@ -57,11 +57,9 @@ int main(void) {
             if (IsTransmitEmpty())
                 //printf("hmm\t");
                 printf("Accel ");
-                printf("X: %d \tY: %d \tZ: %d", st_Get_AccelXData(), st_Get_AccelYData(), st_Get_AccelZData());
+                printf("X: %05d \tY: %05d \tZ: %05d", st_Get_AccelXData(), st_Get_AccelYData(), st_Get_AccelZData());
                 printf("\tMag ");
-                printf("X: %d \tY: %d \tZ: %d\r\n", st_Get_MagXData(), st_Get_MagYData(), st_Get_MagZData());
-            DELAY();
-            DELAY();
+                printf("X: %5d \tY: %5d \tZ: %5d\r\n", st_Get_MagXData(), st_Get_MagYData(), st_Get_MagZData());
             DELAY();
         } else {
             printf("max X: %d \tmax Y: %d \tmax Z: %d \tmin X: %d \tmin Y: %d min Z: %d\r\n", maxX, maxY, maxZ, minX, minY, minZ);
