@@ -3,13 +3,13 @@
 
 
 void st_compass_init(void);
-int st_Get_AccelXData(void);
-int st_Get_AccelYData(void);
-int st_Get_AccelZData(void);
+short st_Get_AccelXData(void);
+short st_Get_AccelYData(void);
+short st_Get_AccelZData(void);
 
-int st_Get_MagXData(void);
-int st_Get_MagYData(void);
-int st_Get_MagZData(void);
+short st_Get_MagXData(void);
+short st_Get_MagYData(void);
+short st_Get_MagZData(void);
 
 
 void st_mag_ChangeMode(char Mode);
@@ -59,5 +59,5 @@ typedef enum {
     ST_MAG_RATE_30HERTZ,
     ST_MAG_RATE_75HERTZ,
     ST_MAG_RATE_220HERTZ
-} COMMANDS;
+} ST_COMPASS_COMMANDS;
 #endif

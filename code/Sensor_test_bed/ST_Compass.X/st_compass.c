@@ -7,12 +7,24 @@
 #include "st_compass.h"
 
 
+
+//#define DEBUG_VERBOSE
+
+#ifdef DEBUG_VERBOSE
+    #define dbprintf(...) printf(__VA_ARGS__)
+#else
+    #define dbprintf(...)
+#endif
+
+
 #define XDATA 0x01
 #define YDATA 0x03
 #define ZDATA 0x05
 #define SCALE_MASK 0b00011000
 #define RATE_MASK  0b11110000
 #define MODE_MASK  0b00000111
+
+
 
 typedef enum {
     WHO_AM_I = 0x0F,
@@ -130,7 +142,7 @@ void st_compass_init(void) {
     I2C_Init(100000);
 
     //while(1);
-    printf("Awakening Device\r\n");
+    dbprintf("Awakening Device\r\n");
     //I2C_WriteReg(ACCEL_I2C_ADDRESS,CTRL_REG1_A,0b00010000);
     //st_ChangeMode(STMICRO_ACTIVEMODE);
     //printf("Control reg: %X",I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG1_A));
@@ -144,7 +156,7 @@ void st_compass_init(void) {
     Reg_Access.CTRL_REG4_A.Block_Update=0;
     Reg_Access.CTRL_REG4_A.resolution=1;
     I2C_WriteReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A,Reg_Access.full_register);
-    printf("Device Awakened\r\n");
+    dbprintf("Device Awakened\r\n");
     return;
 
 
@@ -157,50 +169,73 @@ short switch_endedness(short format_num){
 
 }
 
-int st_Get_AccelXData(void) {
-    int XData;
+short st_Get_AccelXData(void) {
+    short XData;
     char reg_status;
     XData = I2C_ReadInt(ACCEL_I2C_ADDRESS,OUT_X_L_A);
-    printf("status reg: %X\t",I2C_ReadReg(ACCEL_I2C_ADDRESS,STATUS_REG_A));
+    //printf("status reg: %X\t",I2C_ReadReg(ACCEL_I2C_ADDRESS,STATUS_REG_A));
     //XData = st_ReadInt(OUT_X_L_A);
     return XData;
 
 }
 
-int st_Get_AccelYData(void) {
-    int YData;
+short st_Get_AccelYData(void) {
+    short YData;
     YData = I2C_ReadInt(ACCEL_I2C_ADDRESS, OUT_Y_L_A);
     return YData;
 
 }
 
-int st_Get_AccelZData(void) {
-    int ZData;
+short st_Get_AccelZData(void) {
+    short ZData;
     ZData = I2C_ReadInt(ACCEL_I2C_ADDRESS, OUT_Z_L_A);
     return ZData;
 
 }
 
-int st_Get_MagXData(void) {
-    int XData;
+
+
+short st_Get_MagXData(void) {
+    short XData;
     XData = I2C_ReadInt(MAG_I2C_ADDRESS, OUT_X_H_M);
     return XData;
 
 }
 
-int st_Get_MagYData(void) {
-    int YData;
+short st_Get_MagYData(void) {
+    short YData;
     YData = I2C_ReadInt(MAG_I2C_ADDRESS, OUT_Y_H_M);
     return YData;
 
 }
 
-int st_Get_MagZData(void) {
-    int ZData;
+short st_Get_MagZData(void) {
+    short ZData;
     ZData = I2C_ReadInt(MAG_I2C_ADDRESS, OUT_Z_H_M);
     return ZData;
 
 }
+
+
+void st_GetMagTriplet(short *AxisData) {
+    unsigned char RegContents[6];
+
+    char iterate;
+    //I2C_ReadMultiple(I2C_ADDRESS, OUT_X_MSB, RegContents, 6);
+    //Data_Access.full_data = 0;
+    //Data_Access.msb = 0xDE;
+    //Data_Access.lsb = 0xAD;
+    //printf("acceleration: %X\r\n", Data_Access.accelation_data.acceleration);
+    //printf("full short: %X\r\n", Data_Access.full_data);
+
+    //for Big-Endian lsb should be iterate and msb iterate+1
+    for (iterate = 0; iterate < 6; iterate += 2) {
+        //Data_Access.lsb = RegContents[iterate];
+        //Data_Access.msb = RegContents[iterate + 1];
+        //AxisData[iterate >> 1] = Data_Access.AccelData;
+    }
+}
+
 
 
 

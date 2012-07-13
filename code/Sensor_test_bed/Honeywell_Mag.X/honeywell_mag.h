@@ -36,5 +36,5 @@ typedef enum {
     HONEY_SINGLE_MEASUREMENT_MODE,
     HONEY_IDLE_MODE,
 
-} COMMANDS;
+} HONEY_COMMANDS;
 #endif

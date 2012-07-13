@@ -60,14 +60,14 @@ void honey_mag_init(void) {
     //TRISBbits.TRISB8 = 0;
 
     I2C_Init(100000);
-    printf("Awakening Device\r\n");
+    //printf("Awakening Device\r\n");
     honey_mag_ChangeMode(HONEY_CONTINUOUS_MODE);
     //I2C_WriteReg(I2C_ADDRESS,MODE_REG,0);
     //response=I2C_ReadReg(I2C_ADDRESS,CTRL_REG1);
     //printf("Control Reg: %X\r\n",response);
     //while(1);
     //honey_mag_ChangeMode(honey_mag_ACTIVEMODE);
-    printf("Device Awakened\r\n");
+   // printf("Device Awakened\r\n");
     return;
 
 

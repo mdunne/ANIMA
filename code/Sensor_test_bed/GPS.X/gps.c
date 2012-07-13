@@ -66,6 +66,16 @@ CBRef GreceiveBuffer;
 
 
 
+//#define DEBUG_VERBOSE
+
+#ifdef DEBUG_VERBOSE
+    #define dbprintf(...) printf(__VA_ARGS__)
+#else
+    #define dbprintf(...)
+#endif
+
+
+
 
 
 /*******************************************************************************
@@ -121,6 +131,8 @@ void GPS_Configure(void) {
     UARTEnable(UART2, UART_DISABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
     UARTSetDataRate(UART2, F_PB, 115200);
     UARTEnable(UART2, UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
+    dbprintf("UART at Higher BaudRate\r\n");
+    
     //while(!GPS_IsReceiveEmpty());
     while (GPS_GetChar() != '$');
     GPS_PutString(MEDIATEK_NMEA);
@@ -647,7 +659,7 @@ unsigned char myTokenizer(char* stringToTokenize, char token, char * returnToken
 void parseRMC(char* stream) {
     // declare the local vars
     char token[15]; // Tokens set to 15 characters in length
-    char tmp [3] = {0, 0, '\0'}, tmp3[4] = {0, 0, 0, '\0'};
+    char tmp [3] = {0, 0, '\0'}, tmp3[4] = {0, 0, 0, '\0'}, tmp4[5]={0,0,0,'\0'};
     unsigned char chTmp = 0;
 
 
@@ -657,6 +669,7 @@ void parseRMC(char* stream) {
 
     // 1.- hhmmss.ssss
     myTokenizer(NULL, ',', token);
+    //printf("Token for time: %s\t",token);
     if (strlen(token) > 5) {
         tmp[0] = token[0];
         tmp[1] = token[1];
@@ -667,6 +680,13 @@ void parseRMC(char* stream) {
         tmp[0] = token[4];
         tmp[1] = token[5];
         gpsControlData.sec = (unsigned char) atoi(tmp);
+        tmp4[0]=token[7];
+        tmp4[1]=token[8];
+        tmp4[2]=token[9];
+        tmp4[3]=token[10];
+        //printf("%s\t",tmp4);
+        gpsControlData.millisec=(unsigned short) atoi(tmp4);
+        
     }
 
     // 2.- Status of position Fix

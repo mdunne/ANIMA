@@ -89,52 +89,54 @@ char GPS_IsReceiveEmpty(void);
 
 
 void GPS_Configure(void);
-void GPS_PutString(char *MEDIATEK_CHANGE_BAUD);;
+void GPS_PutString(char *MEDIATEK_CHANGE_BAUD);
+;
 
-typedef union{
-	unsigned char    chData[2];
-	unsigned short   usData;
+typedef union {
+    unsigned char chData[2];
+    unsigned short usData;
 } tUnsignedShortToChar;
 
-typedef union{
-	unsigned char    chData[2];
-	short   		 shData;
+typedef union {
+    unsigned char chData[2];
+    short shData;
 } tShortToChar;
 
-typedef union{
-	unsigned char   chData[4];
-	unsigned int   	uiData;
+typedef union {
+    unsigned char chData[4];
+    unsigned int uiData;
 } tUnsignedIntToChar;
 
-typedef union{
-	unsigned char   chData[4];
-	int   			inData;
+typedef union {
+    unsigned char chData[4];
+    int inData;
 } tIntToChar;
 
-typedef union{
-	unsigned char   chData[4];
-	float   		flData;
-	unsigned short	shData[2];
+typedef union {
+    unsigned char chData[4];
+    float flData;
+    unsigned short shData[2];
 } tFloatToChar;
 
-typedef struct tGpsData{
-	unsigned char	 		year;
-	unsigned char			month;
-	unsigned char			day;
-	unsigned char			hour;
-	unsigned char			min;
-	unsigned char			sec;
-	float					lat;
-	float		 			lon;
-	float		 			height;
-	tUnsignedShortToChar	cog;
-	tUnsignedShortToChar	sog;
-	tUnsignedShortToChar	hdop;
-	unsigned char			fix;
-	unsigned char 			sats;
-	unsigned char			newData; // Flag for whether this struct stores new data
-	unsigned char 			newDatatoParse; //Flag to tell whether there is data to be parsed
-}tGpsData;
+typedef struct tGpsData {
+    unsigned char year;
+    unsigned char month;
+    unsigned char day;
+    unsigned char hour;
+    unsigned char min;
+    unsigned char sec;
+    unsigned short millisec;
+    float lat;
+    float lon;
+    float height;
+    tUnsignedShortToChar cog;
+    tUnsignedShortToChar sog;
+    tUnsignedShortToChar hdop;
+    unsigned char fix;
+    unsigned char sats;
+    unsigned char newData; // Flag for whether this struct stores new data
+    unsigned char newDatatoParse; //Flag to tell whether there is data to be parsed
+} tGpsData;
 
 
 extern tGpsData gpsControlData;
