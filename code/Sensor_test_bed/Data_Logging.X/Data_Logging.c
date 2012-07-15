@@ -29,7 +29,7 @@ MEDIA_INFORMATION *mediaInformation;
 #define ENTRIES_IN_DIRECTORY (((BYTES_USED_FOR_DIRECTORY)/(ENTRY_SIZE_IN_BYTES))-1)
 #define MAX_ENTRY (ENTRIES_IN_DIRECTORY-1)
 #define CARD_IDENTITY 0xDEAD
-#define CHUNK_IN_SECTORS 5
+#define CHUNK_IN_SECTORS 100
 //#define DATA_SIZE (MEDIA_SECTOR_SIZE - 2)
 
 
@@ -225,7 +225,7 @@ void DataLogging_PrintDirectory(void) {
     printf("Directory ID: %d\t Last Sector: %d\r\n",Directory.Card_Identifier,Directory.Last_Entry_Used);
     for (EntryCount = 0; EntryCount < ENTRIES_IN_DIRECTORY; EntryCount++) {
         if (Directory.Entries[EntryCount].Start_Address != 0)
-            printf("Block ID: %d\t Start: %d Stop: %d\t Size: %d\r\n", Directory.Entries[EntryCount].ID, Directory.Entries[EntryCount].Start_Address, Directory.Entries[EntryCount].Stop_Address, Directory.Entries[EntryCount].Stop_Address - Directory.Entries[EntryCount].Start_Address);
+            printf("Block ID: %u\t Start: %u Stop: %u\t Size: %u\r\n", Directory.Entries[EntryCount].ID, Directory.Entries[EntryCount].Start_Address, Directory.Entries[EntryCount].Stop_Address, Directory.Entries[EntryCount].Stop_Address - Directory.Entries[EntryCount].Start_Address);
         while(!IsTransmitEmpty());
 
 

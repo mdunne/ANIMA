@@ -350,7 +350,7 @@ unsigned char st_accel_SetScale(char scale) {
     
     I2C_WriteReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A,Reg_Access.full_register);
         regist=I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG4_A);
-    printf("Regist: %X\r\n",regist);
+    //printf("Regist: %X\r\n",regist);
 //    char regToRead;
 //    st_ChangeMode(STMICRO_STANDBYMODE);
 //    regToRead = st_ReadReg(CTRL_REG4_A);
@@ -393,7 +393,7 @@ unsigned char st_accel_SetRate(char Rate) {
     //printf("status of axis: %d%d%d\r\n",Reg_Access.CTRL_REG1_A.XEnable,Reg_Access.CTRL_REG1_A.YEnable,Reg_Access.CTRL_REG1_A.ZEnable);
     I2C_WriteReg(ACCEL_I2C_ADDRESS,CTRL_REG1_A,Reg_Access.full_register);
     regist=I2C_ReadReg(ACCEL_I2C_ADDRESS,CTRL_REG1_A);
-    printf("Regist: %X\r\n",regist);
+    //printf("Regist: %X\r\n",regist);
     //regist=I2C_ReadReg(ACCEL_I2C_ADDRESS,FIFO_CTRL_REG_A);
     //printf("FIFO Regist: %X\r\n",regist);
     return 0;

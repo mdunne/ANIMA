@@ -16,7 +16,7 @@
 #include "Data_Logging.h"
 #include "I2C_Driver.h"
 
-//#define DEBUG_VERBOSE
+#define DEBUG_VERBOSE
 
 #ifdef DEBUG_VERBOSE
     #define dbprintf(...) printf(__VA_ARGS__)
@@ -111,7 +111,7 @@ void Sensor_Integration_Init() {
 
     SetLedState(GPS_INIT);
     dbprintf("Initiating Initialization of GPS\r\n");
-    GPS_Init();
+    //GPS_Init();
     dbprintf("GPS Initialized\r\n");
 
     SetLedState(DATA_LOGGING_INIT);
@@ -133,28 +133,39 @@ void Sensor_Integration_TakeData(void) {
     SensorData.SensorData.Entries[curDataSet].FreeAccel.X = free_GetXData();
     SensorData.SensorData.Entries[curDataSet].FreeAccel.Y = free_GetYData();
     SensorData.SensorData.Entries[curDataSet].FreeAccel.Z = free_GetZData();
-
-    bosch_GetTriplet(AxisData);
+    //dbprintf("FreeAccel time:%d\r\n",GetTime()-curTime);
+    //curTime=GetTime();
+    //bosch_GetTriplet(AxisData);
     SensorData.SensorData.Entries[curDataSet].BoschAccel.X = AxisData[0];
     SensorData.SensorData.Entries[curDataSet].BoschAccel.Y = AxisData[1];
     SensorData.SensorData.Entries[curDataSet].BoschAccel.Z = AxisData[2];
+    //dbprintf("Bosch time:%d\r\n",GetTime()-curTime);
+    //curTime=GetTime();
 
     SensorData.SensorData.Entries[curDataSet].STCompass_Accel.X = st_Get_AccelXData();
     SensorData.SensorData.Entries[curDataSet].STCompass_Accel.Y = st_Get_AccelYData();
     SensorData.SensorData.Entries[curDataSet].STCompass_Accel.Z = st_Get_AccelZData();
+    //dbprintf("stAccel time:%d\r\n",GetTime()-curTime);
+    //curTime=GetTime();
 
     free_GetTriplet(AxisData);
     SensorData.SensorData.Entries[curDataSet].FreeMag.X = AxisData[0];
     SensorData.SensorData.Entries[curDataSet].FreeMag.Y = AxisData[1];
     SensorData.SensorData.Entries[curDataSet].FreeMag.Z = AxisData[2];
+    //dbprintf("FreeMag time:%d\r\n",GetTime()-curTime);
+    //curTime=GetTime();
 
     SensorData.SensorData.Entries[curDataSet].HoneyMag.X = honey_mag_GetXData();
     SensorData.SensorData.Entries[curDataSet].HoneyMag.Y = honey_mag_GetXData();
     SensorData.SensorData.Entries[curDataSet].HoneyMag.Z = honey_mag_GetXData();
+    //dbprintf("honeyMag time:%d\r\n",GetTime()-curTime);
+    //curTime=GetTime();
 
     SensorData.SensorData.Entries[curDataSet].STCompass_Mag.X = st_Get_MagXData();
     SensorData.SensorData.Entries[curDataSet].STCompass_Mag.Y = st_Get_MagYData();
     SensorData.SensorData.Entries[curDataSet].STCompass_Mag.Z = st_Get_MagZData();
+    //dbprintf("stMag time:%d\r\n",GetTime()-curTime);
+    //curTime=GetTime();
 
     SensorData.SensorData.Entries[curDataSet].GPS.lat = gpsControlData.lat;
     SensorData.SensorData.Entries[curDataSet].GPS.lon = gpsControlData.lon;
@@ -213,13 +224,14 @@ void Sensor_Integration_HandleData(void) {
         case WAITING:
             if (IsTimerExpired(DATA_TIMER)) {
                 SetLedState(TAKING_DATA);
-                dbprintf("Time Expired at %d, Taking datapoint set\r\n",GetTime());
+                InitTimer(DATA_TIMER, SampleTime);
+                //dbprintf("Time Expired at %d, Taking datapoint set\r\n",GetTime());
                 Sensor_Integration_TakeData();
                 if (curDataSet >= DATA_POINTS) {
                     DataLogging_Log(SensorData.SectorAccess);
                     curDataSet = 0;
                 }
-                InitTimer(DATA_TIMER, SampleTime);
+                
                 SetLedState(WAITING_FOR_POINT);
 
             }
