@@ -22,7 +22,7 @@ int main(void) {
     INTEnableSystemMultiVectoredInt();
     TIMERS_Init();
     //UART2PutChar('a');
-    printf("sUno32 Bosch Accelerometer test\r\nAfter confirming settings reading will be taken\r\n");
+    printf("sUno32 Bosch Accelerometer test on Laptop\r\nAfter confirming settings reading will be taken\r\n");
     bosch_accel_init();
     short AxisData[3];
     //bosch_GetTriplet(AxisData);

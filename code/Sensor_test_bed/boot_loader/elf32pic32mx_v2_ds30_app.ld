@@ -14,7 +14,7 @@ ENTRY(_reset)
 EXTERN (_min_stack_size _min_heap_size)
 PROVIDE(_min_stack_size = 0x400) ;
 PROVIDE(_min_heap_size = 0) ;
-INCLUDE "C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\boot_loader\procdefs_v2_ds30_app_128_af_1p.ld"
+INCLUDE "..\boot_loader\procdefs_v2_ds30_app_128_af_1p.ld"
 PROVIDE(_DBG_CODE_ADDR = 0xBFC02000) ;
 PROVIDE(_DBG_CODE_SIZE = 0xFF0) ;
 SECTIONS

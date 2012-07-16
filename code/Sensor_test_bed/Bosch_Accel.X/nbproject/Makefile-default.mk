@@ -62,7 +62,7 @@ LDLIBSOPTIONS=
 FIXDEPS=fixDeps
 
 .build-conf:  ${BUILD_SUBPROJECTS}
-	${MAKE}  -f nbproject/Makefile-default.mk dist/${CND_CONF}/${IMAGE_TYPE}/Bosch_Accel.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+	${MAKE} ${MAKE_OPTIONS} -f nbproject/Makefile-default.mk dist/${CND_CONF}/${IMAGE_TYPE}/Bosch_Accel.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
 MP_PROCESSOR_OPTION=32MX320F128H
 MP_LINKER_FILE_OPTION=,--script="..\boot_loader\elf32pic32mx_v2_ds30_app.ld"
@@ -84,53 +84,53 @@ ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 ${OBJECTDIR}/_ext/1436657880/serial.o: ../118_Libraries/src/serial.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1436657880 
 	@${RM} ${OBJECTDIR}/_ext/1436657880/serial.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c  
 	
 ${OBJECTDIR}/bosch_accel.o: bosch_accel.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/bosch_accel.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/bosch_accel.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel.o.d" -o ${OBJECTDIR}/bosch_accel.o bosch_accel.c  
+	@${FIXDEPS} "${OBJECTDIR}/bosch_accel.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel.o.d" -o ${OBJECTDIR}/bosch_accel.o bosch_accel.c  
 	
 ${OBJECTDIR}/bosch_accel_test.o: bosch_accel_test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/bosch_accel_test.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/bosch_accel_test.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel_test.o.d" -o ${OBJECTDIR}/bosch_accel_test.o bosch_accel_test.c  
+	@${FIXDEPS} "${OBJECTDIR}/bosch_accel_test.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel_test.o.d" -o ${OBJECTDIR}/bosch_accel_test.o bosch_accel_test.c  
 	
 ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o: ../I2C_Driver.X/I2C_Driver.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1602749850 
 	@${RM} ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" -o ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o ../I2C_Driver.X/I2C_Driver.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" -o ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o ../I2C_Driver.X/I2C_Driver.c  
 	
 ${OBJECTDIR}/_ext/1436657880/timers.o: ../118_Libraries/src/timers.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1436657880 
 	@${RM} ${OBJECTDIR}/_ext/1436657880/timers.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/timers.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/timers.o.d" -o ${OBJECTDIR}/_ext/1436657880/timers.o ../118_Libraries/src/timers.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/timers.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/timers.o.d" -o ${OBJECTDIR}/_ext/1436657880/timers.o ../118_Libraries/src/timers.c  
 	
 else
 ${OBJECTDIR}/_ext/1436657880/serial.o: ../118_Libraries/src/serial.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1436657880 
 	@${RM} ${OBJECTDIR}/_ext/1436657880/serial.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c  
 	
 ${OBJECTDIR}/bosch_accel.o: bosch_accel.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/bosch_accel.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/bosch_accel.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel.o.d" -o ${OBJECTDIR}/bosch_accel.o bosch_accel.c  
+	@${FIXDEPS} "${OBJECTDIR}/bosch_accel.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel.o.d" -o ${OBJECTDIR}/bosch_accel.o bosch_accel.c  
 	
 ${OBJECTDIR}/bosch_accel_test.o: bosch_accel_test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/bosch_accel_test.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/bosch_accel_test.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel_test.o.d" -o ${OBJECTDIR}/bosch_accel_test.o bosch_accel_test.c  
+	@${FIXDEPS} "${OBJECTDIR}/bosch_accel_test.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/bosch_accel_test.o.d" -o ${OBJECTDIR}/bosch_accel_test.o bosch_accel_test.c  
 	
 ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o: ../I2C_Driver.X/I2C_Driver.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1602749850 
 	@${RM} ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" -o ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o ../I2C_Driver.X/I2C_Driver.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d" -o ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o ../I2C_Driver.X/I2C_Driver.c  
 	
 ${OBJECTDIR}/_ext/1436657880/timers.o: ../118_Libraries/src/timers.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1436657880 
 	@${RM} ${OBJECTDIR}/_ext/1436657880/timers.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/timers.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/I2C_Driver.X" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/timers.o.d" -o ${OBJECTDIR}/_ext/1436657880/timers.o ../118_Libraries/src/timers.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/timers.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../I2C_Driver.X" -I"../118_Libraries/include" -I"../LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/timers.o.d" -o ${OBJECTDIR}/_ext/1436657880/timers.o ../118_Libraries/src/timers.c  
 	
 endif
 

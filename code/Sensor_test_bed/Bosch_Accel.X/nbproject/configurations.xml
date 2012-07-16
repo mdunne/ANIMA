@@ -69,7 +69,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\I2C_Driver.X;C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\118_Libraries\include;C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\LED.X"/>
+                  value="..\I2C_Driver.X;..\118_Libraries\include;..\LED.X"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
