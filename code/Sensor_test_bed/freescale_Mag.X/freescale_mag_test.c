@@ -9,6 +9,7 @@
 #define DELAY() for(i=0; i< NOPCOUNT; i++) __asm("nop")
 #define NOPCOUNT 150000
 #include <LED.h>
+#include <timers.h>
 
 int main(void) {
 
@@ -18,7 +19,7 @@ int main(void) {
 
     SERIAL_Init();
     INTEnableSystemMultiVectoredInt();
-
+    TIMERS_Init();
     printf("Uno32 FreeScale Magnetometer test\r\n");
     printf("Size of short:%d\r\n", sizeof (short));
     printf("Size of char:%d\r\n", sizeof (char));
@@ -30,11 +31,15 @@ int main(void) {
     //printf("Scale is set to %d and should be %d\r\n",free_mag_GetScale(),free_mag_4GSCALE);
     //free_mag_SetScale(free_mag_2GSCALE);
     //printf("Scale is set to %d and should be %d\r\n",free_mag_GetScale(),free_mag_2GSCALE);
-    //printf("Rate is set to %d \r\n",free_mag_GetRate());
-    //free_mag_SetRate(free_mag_200HERTZ);
-    //printf("Rate is set to %d and should be %d\r\n",free_mag_GetRate(),free_mag_200HERTZ);
-    //free_mag_SetRate(free_mag_800HERTZ);
-    //printf("Rate is set to %d and should be %d\r\n",free_mag_GetRate(),free_mag_800HERTZ);
+    printf("Rate is set to %d \r\n", free_mag_GetRate());
+    free_mag_SetRate(FREE_MAG_0P08HERTZ_128_OVERRATIO);
+    printf("Rate is set to %d and should be %d\r\n", free_mag_GetRate(), FREE_MAG_0P08HERTZ_128_OVERRATIO);
+    //InitTimer(0, 1000);
+    //while (!IsTimerExpired(0));
+
+    free_mag_SetRate(FREE_MAG_40HERTZ_32_OVERRATIO);
+    printf("Rate is set to %d and should be %d\r\n", free_mag_GetRate(), FREE_MAG_40HERTZ_32_OVERRATIO);
+    while (1);
     char humanread = 1;
     int i, j, data;
     //for (i = 0; i != 1600; i++)
@@ -50,7 +55,7 @@ int main(void) {
             if (IsTransmitEmpty()) {
                 //                printf("Cur X: %d \tCur Y: %d \tCur Z: %d\r\n", free_mag_GetXData(), free_mag_GetYData(), free_mag_GetZData());
                 free_mag_GetTriplet(AxisData);
-                printf("Cur X: %d \tCur Y: %d \tCur Z: %d\tTotal: %d\r\n", AxisData[0], AxisData[1], AxisData[2],AxisData[0]*AxisData[0]+AxisData[1]*AxisData[1]+AxisData[2]*AxisData[2]);
+                printf("Cur X: %d \tCur Y: %d \tCur Z: %d\tTotal: %d\r\n", AxisData[0], AxisData[1], AxisData[2], AxisData[0] * AxisData[0] + AxisData[1] * AxisData[1] + AxisData[2] * AxisData[2]);
             }
         } else {
             //data=free_mag_GetXData();

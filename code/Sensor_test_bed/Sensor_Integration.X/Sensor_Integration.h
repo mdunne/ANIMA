@@ -87,9 +87,17 @@ typedef union tSensorData {
 extern tSensorData SensorData;
 
 
+enum
+{
+    APPROX_SEVENTY_HERTZ=0
+}SENSOR_RATES;
+
 void Sensor_Integration_Init();
 void Sensor_Integration_HandleData(void);
 void Sensor_Integration_TakeData(void);
 void Sensor_Integration_SetSampleTime(unsigned int milliseconds);
+void Sensor_Integration_DataDump();
+void Sensor_Integration_DataDumpLatest();
+void Sensor_Integration_SetSensorScale(int Scale);
 
 #endif

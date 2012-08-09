@@ -31,6 +31,7 @@
       <itemPath>freescale_mag.c</itemPath>
       <itemPath>freescale_mag_test.c</itemPath>
       <itemPath>../LED.X/LED.c</itemPath>
+      <itemPath>../118_Libraries/src/timers.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

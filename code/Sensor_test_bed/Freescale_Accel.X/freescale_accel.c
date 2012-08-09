@@ -66,17 +66,18 @@ union Data_Access {
         unsigned : 2;
         signed AccelData : 14;
     };
+
     struct {
         unsigned char msb;
         unsigned char lsb;
+
     };
     short full_data;
 } Data_Access;
 
-union Reg_Access{
-    
+union Reg_Access {
     unsigned char full_register;
-}Reg_Access;
+} Reg_Access;
 
 #define I2C_ADDRESS 0x1C
 
@@ -92,37 +93,47 @@ void free_accel_init(void) {
 
 int free_GetXData(void) {
     int XData;
-    XData = I2C_ReadInt(I2C_ADDRESS, OUT_X_MSB);
+    XData = I2C_ReadInt(I2C_ADDRESS, OUT_X_MSB)>>2;
     return XData;
 
 }
 
 int free_GetYData(void) {
     int YData;
-    YData = I2C_ReadInt(I2C_ADDRESS, OUT_Y_MSB);
+    YData = I2C_ReadInt(I2C_ADDRESS, OUT_Y_MSB)>>2;
     return YData;
 
 }
 
 int free_GetZData(void) {
     int ZData;
-    ZData = I2C_ReadInt(I2C_ADDRESS, OUT_Z_MSB);
+    ZData = I2C_ReadInt(I2C_ADDRESS, OUT_Z_MSB)>>2;
     return ZData;
 
 }
 
 
 //TODO: triplet is acting funny, as the read setting for this are tricky
+
 void free_GetTriplet(short *AxisData) {
     unsigned char RegContents[6];
 
     char iterate;
+    //RegContents[0]=I2C_ReadReg(I2C_ADDRESS,CTRL_REG1);
+    //printf("CTRL_REG1: %X",RegContents[0]);
+    //while(1);
+
     I2C_ReadMultiple(I2C_ADDRESS, OUT_X_MSB, RegContents, 6);
     Data_Access.full_data = 0;
+
     //Data_Access.msb = 0xDE;
     //Data_Access.lsb = 0xAD;
-    //printf("acceleration: %X\r\n", Data_Access.accelation_data.acceleration);
-    //printf("full short: %X\r\n", Data_Access.full_data);
+    //printf("acceleration: %d\r\n", Data_Access.AccelData);
+    //Data_Access.AccelData=-1;
+    //printf("msb: %X\r\n", Data_Access.msb);
+    //printf("lsb: %X\r\n", Data_Access.lsb);
+    //printf("full short: %d\r\n", Data_Access.full_data);
+    //while(1);
 
     //for Big-Endian lsb should be iterate and msb iterate+1
     for (iterate = 0; iterate < 6; iterate += 2) {

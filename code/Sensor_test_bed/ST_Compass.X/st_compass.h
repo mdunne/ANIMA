@@ -11,6 +11,9 @@ short st_Get_MagXData(void);
 short st_Get_MagYData(void);
 short st_Get_MagZData(void);
 
+void st_GetAccelTriplet(short *AxisData);
+void st_GetMagTriplet(short *AxisData);
+
 
 void st_mag_ChangeMode(char Mode);
 unsigned char st_mag_GetRate();

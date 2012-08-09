@@ -201,6 +201,12 @@ UsedLibrary="C:/Program Files (x86)/EAGLE-5.11.0/lbr/zilog.lbr"
 UsedLibrary="C:/Users/mdunne/Documents/ANIMA/hardware/ANIMAlib.lbr"
 
 [Win_1]
+Type="Control Panel"
+Loc="640 94 1505 613"
+State=0
+Number=0
+
+[Win_2]
 Type="CAM Processor"
 Loc="1945 25 2544 490"
 State=0
@@ -208,7 +214,7 @@ Number=4
 File="C:/Users/mdunne/Downloads/Thesis/Thesis/Main_Board.brd"
 Job="C:/Program Files (x86)/EAGLE-5.11.0/cam/cream.cam"
 
-[Win_2]
+[Win_3]
 Type="Library Editor"
 Loc="482 292 1370 882"
 State=3
@@ -248,19 +254,13 @@ PadsSameType=0
 Layer=21
 Package="MICRO-SD-SOCKET-PP"
 
-[Win_3]
-Type="Control Panel"
-Loc="640 94 1505 613"
-State=0
-Number=0
-
 [Win_4]
 Type="Schematic Editor"
 Loc="100 100 699 499"
 State=3
 Number=2
-File="ANIMA Sensor Breakout.sch"
-View="1060489 906549 2312597 1840365"
+File="C:/Users/mdunne/Documents/My Dropbox/Current Teaching/118 renovations/chipKIT_Uno32_bysa/chipKIT Uno32.sch"
+View="-57845 -44887 2683893 2022999"
 WireWidths=" 0 3048 6096 8128 10160 12700 14224 16764 17780 19304 21844 25400 38100 64516 4064 1524"
 PadDiameters=" 2540 3048 4064 6096 8128 10160 12700 14224 16764 17780 19304 21844 25400 38100 64516 0"
 PadDrills=" 5000 6000 7000 9000 10000 11000 12000 13000 14000 15000 16000 20000 22000 28000 32000 8000"
@@ -292,16 +292,15 @@ ArcDirection=0
 AddLevel=2
 PadsSameType=0
 Layer=91
-Views=" 2: 1060489 906549 2312597 1840365"
-Sheet=2
+Sheet=1
 
 [Win_5]
 Type="Board Editor"
 Loc="150 150 749 549"
 State=1
 Number=1
-File="ANIMA Sensor Breakout.brd"
-View="288344 292708 357050 345562"
+File="C:/Users/mdunne/Documents/My Dropbox/Current Teaching/118 renovations/chipKIT_Uno32_bysa/chipKIT Uno32.brd"
+View="112238 130758 653500 535512"
 WireWidths=" 0 14224 16764 17780 19304 21844 25400 38100 64516 10160 2032 8128 5080 4064 2540 3048"
 PadDiameters=" 2540 3048 6096 8128 10160 12700 14224 16764 17780 19304 21844 25400 38100 64516 4064 0"
 PadDrills=" 6000 7000 9000 10000 11000 12000 13000 14000 15000 16000 20000 22000 28000 32000 8000 3810"

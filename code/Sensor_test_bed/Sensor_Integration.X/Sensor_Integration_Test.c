@@ -14,15 +14,21 @@
 /*
  * 
  */
+#define SEVENTY_HERTZ 14
 int main(void) {
     INTEnableSystemMultiVectoredInt();
     
     SERIAL_Init();
     // Turn on the interrupts
     short hi=836;
-    printf("\r\nStarting the Sensor Integration Test: \r\n");
+    printf("\r\nStarting the Sensor Integration Test V%f \r\n",0.9);
+//    printf("\r\nStarting the Sensor Integration Test V \r\n",0.9);
     Sensor_Integration_Init();
-    Sensor_Integration_SetSampleTime(250);
+    //Sensor_Integration_DataDump();
+   // while(1);
+    Sensor_Integration_SetSampleTime(SEVENTY_HERTZ);
+    Sensor_Integration_SetSensorRate(APPROX_SEVENTY_HERTZ);
+    Sensor_Integration_SetSensorScale(1);
     //Sensor_Integration_TakeData();
     
 

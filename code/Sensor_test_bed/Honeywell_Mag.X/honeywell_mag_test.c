@@ -35,6 +35,7 @@ int main(void) {
     printf("Rate is set to %d and should be %d\r\n",honey_mag_GetRate(),HONEY_RATE_30HERTZ);
     //while(1);
     char humanread = 1;
+    short AxisData[3];
     int i, j, data;
     //for (i = 0; i != 1600; i++)
       //for (j = 0; j != 100; j++)
@@ -48,7 +49,8 @@ int main(void) {
         if (humanread == 1) {
             if (IsTransmitEmpty())
                 //printf("In Here at Least\r\n");
-                printf("Cur X: %d \tCur Y: %d \tCur Z: %d\r\n", honey_mag_GetXData(), honey_mag_GetYData(), honey_mag_GetZData());
+                honey_GetMagTriplet(AxisData);
+                printf("Cur X: %d \tCur Y: %d \tCur Z: %d\r\n", AxisData[0],AxisData[1], AxisData[2]);
             DELAY();
             DELAY();
             DELAY();

@@ -1,54 +1,4 @@
-/*****************************************************************************
- 
-                Microchip Memory Disk Drive File System
- 
- *****************************************************************************
- FileName:        Demonstration3.c
- Dependencies:    FSIO.h
- Processor:       PIC32
- Compiler:        C32 
- Company:         Microchip Technology, Inc.
 
- Software License Agreement
-
- The software supplied herewith by Microchip Technology Incorporated
- (the �Company�) for its PICmicro� Microcontroller is intended and
- supplied to you, the Company�s customer, for use solely and
- exclusively on Microchip PICmicro Microcontroller products. The
- software is owned by the Company and/or its supplier, and is
- protected under applicable copyright laws. All rights are reserved.
- Any use in violation of the foregoing restrictions may subject the
- user to criminal sanctions under applicable laws, as well as to
- civil liability for the breach of the terms and conditions of this
- license.
-
- THIS SOFTWARE IS PROVIDED IN AN �AS IS� CONDITION. NO WARRANTIES,
- WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED
- TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
- IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
- CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
-
-
-   Note:  This file is included to give you a basic demonstration of how the
-           functions in this library work.  Prototypes for these functions,
-           along with more information about them, can be found in FSIO.h
- *****************************************************************************/
-
-//DOM-IGNORE-BEGIN
-/********************************************************************
- Change History:
-  Rev            Description
-  ----           -----------------------
-  1.3.0   		Initial Revision to support Long File Name Format
-  1.3.4         Cleaned up the unnecessary part of main() function.
- ********************************************************************/
-//DOM-IGNORE-END
-
-/*******************************************************************************
-//NOTE : ENABLE MACRO "SUPPORT_LFN" IN "FSconfig.h" FILE TO WORK WITH THIS DEMO.
-         THIS DEMO IS INTENDED TO SHOW THE UTF16 FILE NAME OPERATIONS
- ********************************************************************************/
 
 #include "FSIO.h"
 #include <serial.h>
@@ -96,7 +46,6 @@ union d_test
 
 
 int main(void) {
-    FSFILE * pointer;
 #if defined(SUPPORT_LFN)
     char count = 80;
 #endif
@@ -144,6 +93,12 @@ int main(void) {
     // Create a file
      count= GetTime();
     DataLogging_Init();
+    
+    DataLogging_PrintDirectory();
+    printf("Total Entries: %d\r\n",DataLogging_NumEntries());
+    printf("Size of entry %d is: %d\r\n",DataLogging_NumEntries()/2,DataLogging_GetEntrySize(DataLogging_NumEntries()/2));
+    
+    while(1);
     unsigned char test_array[510];
     test_array[0]=30;
     for (count=0;count<300;count++)
@@ -157,6 +112,6 @@ int main(void) {
         //while (1);
     //printf("File being closed\r\n");
     DataLogging_CloseLog();
-    DataLogging_DumpInterface();
+    //DataLogging_DumpInterface();
     //printf("It took %d milliseconds to perform operations",GetTime()-count);
 }

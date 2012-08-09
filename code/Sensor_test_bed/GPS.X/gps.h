@@ -88,6 +88,8 @@ char GPS_IsTransmitEmpty(void);
 char GPS_IsReceiveEmpty(void);
 
 
+unsigned char GPS_GetLength(void);
+
 void GPS_Configure(void);
 void GPS_PutString(char *MEDIATEK_CHANGE_BAUD);
 ;

@@ -17,11 +17,7 @@
  ******************************************************************************/
 //#define LED_TEST
 //#define DEBUG_VERBOSE
-#ifdef DEBUG_VERBOSE
-    #define dbprintf(...) printf(__VA_ARGS__)
-#else
-    #define dbprintf(...)
-#endif
+
 
 #define NUMLEDBANKS 3
 #define NUMLEDSPERBANK 4
@@ -112,16 +108,22 @@ char LED_SetFullState(unsigned short int pattern);
 char LED_Init(unsigned char banks)
 {
     char i;
-    dbprintf("\nInitializing LED subsystem");
-    dbprintf("\nNote that SPI jumpers should be set into MASTER position");
-    dbprintf("\nand that the LED jumpers should be installed.");
+#ifdef DEBUG_VERBOSE
+    printf("\nInitializing LED subsystem");
+    printf("\nNote that SPI jumpers should be set into MASTER position");
+    printf("\nand that the LED jumpers should be installed.");
+#endif
     if ((ledStatus.led_on)||(banks == 0)||(banks > 0x07)) {
-        dbprintf("\nError: LED subsystem initialization failed");
+#ifdef DEBUG_VERBOSE
+        printf("\nError: LED subsystem initialization failed");
+#endif
         return ERROR;
     }
     ledStatus.led_on = TRUE;
     if (banks & LED_BANK1) {
-        dbprintf("\nLED Bank1 enabled");
+#ifdef DEBUG_VERBOSE
+        printf("\nLED Bank1 enabled");
+#endif
         ledStatus.one_on = TRUE;
         for (i = 0; i < NUMLEDSPERBANK; i++) {
             LED_SetPinOutput(i);
@@ -129,7 +131,9 @@ char LED_Init(unsigned char banks)
         }
     }
     if (banks & LED_BANK2) {
-        dbprintf("\nLED Bank2 enabled");
+#ifdef DEBUG_VERBOSE
+        printf("\nLED Bank2 enabled");
+#endif
         ledStatus.two_on = TRUE;
         for (i = 0; i < NUMLEDSPERBANK; i++) {
             LED_SetPinOutput(i+BANK2OFFSET);
@@ -137,14 +141,18 @@ char LED_Init(unsigned char banks)
         }
     }
     if (banks & LED_BANK3) {
-        dbprintf("\nLED Bank3 enabled");
+#ifdef DEBUG_VERBOSE
+        printf("\nLED Bank3 enabled");
+#endif
         ledStatus.three_on = TRUE;
         for (i = 0; i < NUMLEDSPERBANK; i++) {
             LED_SetPinOutput(i+BANK3OFFSET);
             LED_On(i+BANK3OFFSET);
         }
     }
-    dbprintf("\nLED Subsystem Enabled");
+#ifdef DEBUG_VERBOSE
+    printf("\nLED Subsystem Enabled");
+#endif
     return SUCCESS;
 }
 
@@ -389,13 +397,19 @@ char LED_SetFullState(unsigned short int pattern)
 char LED_End(void)
 {
     char i;
-    dbprintf("\nShutting down the LED subsystem");
+#ifdef DEBUG_VERBOSE
+    printf("\nShutting down the LED subsystem");
+#endif
     if (!ledStatus.led_on) {
-        dbprintf("\nERROR: System not initialized");
+#ifdef DEBUG_VERBOSE
+        printf("\nERROR: System not initialized");
+#endif
         return ERROR;
     }
     if (ledStatus.one_on) { // shut down bank one
-        dbprintf("\nShutting down bank one");
+#ifdef DEBUG_VERBOSE
+        printf("\nShutting down bank one");
+#endif
         ledStatus.one_on = FALSE;
         for (i = 0; i < NUMLEDSPERBANK; i++) {
             LED_Off(i);
@@ -403,7 +417,9 @@ char LED_End(void)
         }
     }
     if (ledStatus.two_on) { // shut down bank two
-        dbprintf("\nShutting down bank two");
+#ifdef DEBUG_VERBOSE
+        printf("\nShutting down bank two");
+#endif
         ledStatus.two_on = FALSE;
         for (i = 0; i < NUMLEDSPERBANK; i++) {
             LED_Off(i+BANK2OFFSET);
@@ -411,7 +427,9 @@ char LED_End(void)
         }
     }
     if (ledStatus.three_on) { // shut down bank one
-        dbprintf("\nShutting down bank three");
+#ifdef DEBUG_VERBOSE
+        printf("\nShutting down bank three");
+#endif
         ledStatus.three_on = FALSE;
         for (i = 0; i < NUMLEDSPERBANK; i++) {
             LED_Off(i+BANK3OFFSET);
@@ -437,16 +455,16 @@ int main(void) {
     INTEnableSystemMultiVectoredInt();
 
 
-    dbprintf("\nLED Module Unit Test\n\n");
+    printf("\nLED Module Unit Test\n\n");
     LED_Init(LED_BANK1);
 
     for(count=0; count<10; count++) {
-        dbprintf("\nTesting LED_OnBank");
+        printf("\nTesting LED_OnBank");
         for(j=0;j<NUMLEDBANKS;j++) {
             LED_OnBank((1<<j),0x0F);
         }
         DELAY();
-        dbprintf("\nTesting LED OffBank");
+        printf("\nTesting LED OffBank");
         for(j=0;j<NUMLEDBANKS;j++) {
             LED_OffBank((1<<j),0x0F);
         }
@@ -471,7 +489,7 @@ int main(void) {
         LED_OnBank(LED_BANK2,0x01);
         LED_OnBank(LED_BANK3,0x01);
         DELAY();
-        dbprintf("\nTesting LED_InvertBank");
+        printf("\nTesting LED_InvertBank");
         for(k=0;k<3;k++) {
             for(j=0;j<NUMLEDBANKS;j++) {
                 LED_InvertBank((1<<j),(0x03<<k));
@@ -484,7 +502,7 @@ int main(void) {
             }
             DELAY();
         }
-        dbprintf("\nTesting LED_SetFullState");
+        printf("\nTesting LED_SetFullState");
         LED_SetFullState(0x00);
         DELAY();
         for(j=0;j<12;j++) {
@@ -495,7 +513,7 @@ int main(void) {
             LED_SetFullState(0x800 >> j);
             DELAY();
         }
-        dbprintf("\nTesting LED_SetBank");
+        printf("\nTesting LED_SetBank");
         pat = 0x05;
         for(k=0;k<4;k++) {
             for(j=0;j<NUMLEDBANKS;j++) {

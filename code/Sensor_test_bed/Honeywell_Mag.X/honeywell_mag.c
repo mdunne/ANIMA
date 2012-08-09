@@ -31,28 +31,40 @@ typedef enum {
 
 #define I2C_ADDRESS 0x1E
 
+#define swap(x,y) x^=y; y^=x; x^=y
 
 //bit fields are reversed from what makes sense
+
 union Reg_Access {
-    struct
-    {
+
+    struct {
         unsigned : 5;
         unsigned int Gain : 3;
-        
-    }Gain_Reg;
-    struct
-    {
+
+    } Gain_Reg;
+
+    struct {
         unsigned Mode : 2;
-        unsigned :6;
-    }Mode_Reg;
-    struct
-    {
+        unsigned : 6;
+    } Mode_Reg;
+
+    struct {
         unsigned : 2;
         unsigned Rate : 3;
         unsigned : 3;
-    }Rate_Reg;
+    } Rate_Reg;
     unsigned char full_register;
 } Reg_Access;
+
+union Data_Access {
+
+    struct {
+        unsigned char msb;
+        unsigned char lsb;
+
+    };
+    short full_data;
+} Data_Access;
 
 void honey_mag_init(void) {
     char response = 0;
@@ -67,7 +79,7 @@ void honey_mag_init(void) {
     //printf("Control Reg: %X\r\n",response);
     //while(1);
     //honey_mag_ChangeMode(honey_mag_ACTIVEMODE);
-   // printf("Device Awakened\r\n");
+    // printf("Device Awakened\r\n");
     return;
 
 
@@ -94,67 +106,84 @@ int honey_mag_GetZData(void) {
 
 }
 
+void honey_GetMagTriplet(short *AxisData) {
+    unsigned char RegContents[6];
 
+    char iterate;
+    I2C_ReadMultiple(I2C_ADDRESS, OUT_X_MSB, RegContents, 6);
+    //Data_Access.full_data = 0;
+    //Data_Access.msb = 0xDE;
+    //Data_Access.lsb = 0xAD;
+    //printf("acceleration: %X\r\n", Data_Access.accelation_data.acceleration);
+    //printf("full short: %X\r\n", Data_Access.full_data);
+
+    //for Big-Endian lsb should be iterate and msb iterate+1
+    //for Little-Endian msb should be iterate and lsb iterate+1
+    for (iterate = 0; iterate < 6; iterate += 2) {
+        Data_Access.lsb = RegContents[iterate];
+        Data_Access.msb = RegContents[iterate + 1];
+        AxisData[iterate >> 1] = Data_Access.full_data;
+    }
+    //swap Y and Z as they are switched on the Mag
+    swap(AxisData[1], AxisData[2]);
+}
 
 
 //
 
-
-
 unsigned char honey_mag_GetGain() {
-    
+
     unsigned char Gain;
 
-/*    for (Scale=0; Scale<=7;Scale++)
-    {
-        Reg_Access.Gain_Reg.Gain=Scale;
-        printf("Gain:%X \tReg:%X\r\n",Scale,Reg_Access.full_register);
-    }*/
-    Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS,CONFIG_REG_B);
-    Gain=Reg_Access.Gain_Reg.Gain;
+    /*    for (Scale=0; Scale<=7;Scale++)
+        {
+            Reg_Access.Gain_Reg.Gain=Scale;
+            printf("Gain:%X \tReg:%X\r\n",Scale,Reg_Access.full_register);
+        }*/
+    Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS, CONFIG_REG_B);
+    Gain = Reg_Access.Gain_Reg.Gain;
     //printf("regist: %X\r\n",regist);
     return Gain;
 }
 
 unsigned char honey_mag_SetGain(char newGain) {
-    
-        char regist, fun = CONFIG_REG_B;
-        //honey_mag_ChangeMode(honey_mag_STANDBYMODE);
-        Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS,CONFIG_REG_B);
-        Reg_Access.Gain_Reg.Gain=newGain;
-        I2C_WriteReg(I2C_ADDRESS,CONFIG_REG_B,Reg_Access.full_register);
-        //honey_mag_ChangeMode(honey_mag_ACTIVEMODE);
-        return 0;
-     
+
+    char regist, fun = CONFIG_REG_B;
+    //honey_mag_ChangeMode(honey_mag_STANDBYMODE);
+    Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS, CONFIG_REG_B);
+    Reg_Access.Gain_Reg.Gain = newGain;
+    I2C_WriteReg(I2C_ADDRESS, CONFIG_REG_B, Reg_Access.full_register);
+    //honey_mag_ChangeMode(honey_mag_ACTIVEMODE);
+    return 0;
+
 }
 
 //
 
 void honey_mag_ChangeMode(char Mode) {
-    
-    Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS,MODE_REG);
-    switch(Mode)
-    {
+
+    Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS, MODE_REG);
+    switch (Mode) {
         case HONEY_CONTINUOUS_MODE:
-            Reg_Access.Mode_Reg.Mode=0;
-            I2C_WriteReg(I2C_ADDRESS,MODE_REG,Reg_Access.full_register);
+            Reg_Access.Mode_Reg.Mode = 0;
+            I2C_WriteReg(I2C_ADDRESS, MODE_REG, Reg_Access.full_register);
             break;
         case HONEY_SINGLE_MEASUREMENT_MODE:
-            Reg_Access.Mode_Reg.Mode=1;
-            I2C_WriteReg(I2C_ADDRESS,MODE_REG,Reg_Access.full_register);
+            Reg_Access.Mode_Reg.Mode = 1;
+            I2C_WriteReg(I2C_ADDRESS, MODE_REG, Reg_Access.full_register);
             break;
         case HONEY_IDLE_MODE:
-            Reg_Access.Mode_Reg.Mode=2;
-            I2C_WriteReg(I2C_ADDRESS,MODE_REG,Reg_Access.full_register);
-            break;         
+            Reg_Access.Mode_Reg.Mode = 2;
+            I2C_WriteReg(I2C_ADDRESS, MODE_REG, Reg_Access.full_register);
+            break;
     }
 }
 //
 
 unsigned char honey_mag_SetRate(char Rate) {
     Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS, CONFIG_REG_A);
-    Reg_Access.Rate_Reg.Rate=Rate;
-    I2C_WriteReg(I2C_ADDRESS,CONFIG_REG_A,Reg_Access.full_register);
+    Reg_Access.Rate_Reg.Rate = Rate;
+    I2C_WriteReg(I2C_ADDRESS, CONFIG_REG_A, Reg_Access.full_register);
     /*
     char regist;
     honey_mag_ChangeMode(honey_mag_STANDBYMODE);
@@ -171,23 +200,23 @@ unsigned char honey_mag_SetRate(char Rate) {
      
     honey_mag_WriteReg(CTRL_REG1, regist);
     honey_mag_ChangeMode(honey_mag_ACTIVEMODE);
-      */
+     */
     return 0;
-     
+
 }
 //
 
 unsigned char honey_mag_GetRate() {
     unsigned char Rate, regist;
     Rate = 255;
-    Reg_Access.full_register=0;
+    Reg_Access.full_register = 0;
     //    for (Rate=0; Rate<=7;Rate++)
     //{
-      //  Reg_Access.Rate_Reg.Rate=Rate;
-        //printf("Gain:%X \tReg:%X\r\n",Rate,Reg_Access.full_register);
+    //  Reg_Access.Rate_Reg.Rate=Rate;
+    //printf("Gain:%X \tReg:%X\r\n",Rate,Reg_Access.full_register);
     //}
     Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS, CONFIG_REG_A);
-    Rate=Reg_Access.Rate_Reg.Rate;
+    Rate = Reg_Access.Rate_Reg.Rate;
     //regist &= RATE_MASK;
     //Rate = regist >> 2;
     //printf("regist: %X\r\n",regist);

@@ -6,12 +6,17 @@
 #include "freescale_mag.h"
 #include <I2C_Driver.h>
 
+
+#define DELAY() for(i=0; i< NOPCOUNT; i++) __asm("nop")
+#define NOPCOUNT 150000
+
 #define XDATA 0x01
 #define YDATA 0x03
 #define ZDATA 0x05
 #define SCALE_MASK 0b00000011
-#define RATE_MASK 0b00111000
+#define RATE_MASK 0b11100000
 #define MODE_MASK 0x01
+#define OVER_MASK 0b00011000
 
 typedef enum {
     STATUS = 0x00,
@@ -46,8 +51,8 @@ union Reg_Access {
         unsigned operating_mode : 1;
         unsigned trigger_measurement : 1;
         unsigned fast_read : 1;
-        unsigned oversample : 2;
-        unsigned Rate : 3;
+        unsigned CombinedRate : 5;
+
     } CtrlReg_1;
 
     struct {
@@ -75,13 +80,14 @@ void free_mag_init(void) {
     //TRISBbits.TRISB8 = 0;
 
     I2C_Init(100000);
-   // printf("Awakening Device\r\n");
+    // printf("Awakening Device\r\n");
     //I2C_WriteReg(I2C_ADDRESS, CTRL_REG1, 0x1);
     //response=I2C_ReadReg(I2C_ADDRESS,CTRL_REG1);
     //printf("Control Reg: %X\r\n",response);
     //while(1);
-    Reg_Access.CtrlReg_1.oversample=0b11;
-    I2C_WriteReg(I2C_ADDRESS,CTRL_REG1,Reg_Access.full_register);
+    //Reg_Access.CtrlReg_1.oversample = 0b11;
+    Reg_Access.CtrlReg_1.CombinedRate=0b11;
+    I2C_WriteReg(I2C_ADDRESS, CTRL_REG1, Reg_Access.full_register);
     free_mag_ChangeMode(FREE_MAG_ACTIVEMODE);
     //printf("Device Awakened\r\n");
     return;
@@ -89,6 +95,7 @@ void free_mag_init(void) {
 
 }
 //don't use until you've switched endedness
+
 int free_mag_GetXData(void) {
     int XData;
     XData = I2C_ReadInt(I2C_ADDRESS, OUT_X_MSB);
@@ -152,21 +159,10 @@ unsigned char free_mag_GetScale() {
 }
 
 unsigned char free_mag_SetScale(char scale) {
-    /*
-        char regist, fun = XYZ_DATA_CFG;
-        free_mag_ChangeMode(free_mag_STANDBYMODE);
-        regist = free_mag_ReadReg(XYZ_DATA_CFG);
 
-        if (scale == free_mag_2GSCALE)
-            regist = (regist & (~SCALE_MASK)) + 0;
-        if (scale == free_mag_4GSCALE)
-            regist = (regist & (~SCALE_MASK)) + 1;
-        if (scale == free_mag_8GSCALE)
-            regist = (regist & (~SCALE_MASK)) + 2;
-        free_mag_WriteReg(XYZ_DATA_CFG, regist);
-        free_mag_ChangeMode(free_mag_ACTIVEMODE);
-        return 0;
-     */
+
+
+
 }
 
 //
@@ -181,40 +177,28 @@ void free_mag_ChangeMode(char Mode) {
 //
 
 unsigned char free_mag_SetRate(char Rate) {
-    /*
-    char regist;
-    free_mag_ChangeMode(free_mag_STANDBYMODE);
-    regist = free_mag_ReadReg(CTRL_REG1);
-    regist &= (~RATE_MASK);
-    regist = regist + (Rate << 2);
-    /*
-    if (scale==free_mag_2GSCALE)
-            regist=(regist&(~SCALE_MASK))+0;
-    if (scale==free_mag_4GSCALE)
-            regist=(regist&(~SCALE_MASK))+1;
-    if (scale==free_mag_8GSCALE)
-            regist=(regist&(~SCALE_MASK))+2;
-     
-    free_mag_WriteReg(CTRL_REG1, regist);
-    free_mag_ChangeMode(free_mag_ACTIVEMODE);
+    int i;
+    free_mag_ChangeMode(FREE_MAG_STANDBYMODE);
+    DELAY();
+    DELAY();
+    DELAY();
+    DELAY();
+    Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS, CTRL_REG1);
+    //Reg_Access.CtrlReg_1.Rate = (scale & RATE_MASK);
+    //Reg_Access.CtrlReg_1.oversample = (scale & OVER_MASK);
+    Reg_Access.CtrlReg_1.CombinedRate = Rate;
+    //printf("scale: %X\tFull Register: %X\r\n", Rate, Reg_Access.full_register);
+    //while (1);
+    I2C_WriteReg(I2C_ADDRESS, CTRL_REG1, Reg_Access.full_register);
+    Reg_Access.full_register=I2C_ReadReg(I2C_ADDRESS,CTRL_REG1);
+    //printf("scale: %X\tFull Register: %X\r\n", Rate, Reg_Access.full_register);
+    free_mag_ChangeMode(FREE_MAG_ACTIVEMODE);
     return 0;
-     */
 }
 //
 
 unsigned char free_mag_GetRate() {
-    unsigned char Rate, regist;
-    Rate = 255;
-    regist = I2C_ReadReg(I2C_ADDRESS, CTRL_REG1);
-    regist &= RATE_MASK;
-    Rate = regist >> 2;
-    //printf("regist: %X\r\n",regist);
-    /*if (regist==0)
-            Scale=free_mag_2GSCALE;
-    if (regist==1)
-            Scale=free_mag_4GSCALE;
-    if (regist==2)
-            Scale=free_mag_8GSCALE;
-     */
-    return Rate;
+    Reg_Access.full_register = I2C_ReadReg(I2C_ADDRESS, CTRL_REG1);
+
+    return Reg_Access.CtrlReg_1.CombinedRate;
 }

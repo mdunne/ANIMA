@@ -66,13 +66,8 @@ CBRef GreceiveBuffer;
 
 
 
-//#define DEBUG_VERBOSE
+#define DEBUG_VERBOSE
 
-#ifdef DEBUG_VERBOSE
-    #define dbprintf(...) printf(__VA_ARGS__)
-#else
-    #define dbprintf(...)
-#endif
 
 
 
@@ -131,15 +126,20 @@ void GPS_Configure(void) {
     UARTEnable(UART2, UART_DISABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
     UARTSetDataRate(UART2, F_PB, 115200);
     UARTEnable(UART2, UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
-    dbprintf("UART at Higher BaudRate\r\n");
-    
+#ifdef DEBUG_VERBOSE
+    printf("UART at Higher BaudRate\r\n");
+#endif
+
     //while(!GPS_IsReceiveEmpty());
     while (GPS_GetChar() != '$');
     GPS_PutString(MEDIATEK_NMEA);
-    //while(!GPS_IsReceiveEmpty());
+    while (!GPS_IsTransmitEmpty());
+    while (!GPS_IsReceiveEmpty()) {
+        GPS_GetChar();
+    }
     while (GPS_GetChar() != '$');
     GPS_PutString(MEDIATEK_REFRESH_RATE);
-    //printf("GPS Should be at 115200");
+    printf("GPS Should be at 115200");
 
 }
 
@@ -204,11 +204,13 @@ void GPS_PutString(char *instring) {
  ****************************************************************************/
 char GPS_GetChar(void) {
     char ch;
+
     if (GPSgetLength(GreceiveBuffer) == 0) {
         ch = 0;
     } else {
         ch = GPSreadFront(GreceiveBuffer);
     }
+    //printf("%d",ch);
     return ch;
 }
 
@@ -278,7 +280,7 @@ char GPS_IsTransmitEmpty(void) {
  Author
  Max Dunne, 2011.12.15
  ****************************************************************************/
-char GPS_GetLength(void) {
+unsigned char GPS_GetLength(void) {
     return GPSgetLength(GreceiveBuffer);
 
 }
@@ -560,7 +562,7 @@ void buildAndCheckSentence(unsigned char characterIn) {
 }
 
 void processNewGpsData() {
-    //printf("Buffer length: %d\r\n",GPS_GetLength());
+    //printf("Buffer length: %d\t%c\r\n",GPS_GetLength(),GPS_GetChar());
     while (GPS_GetLength() > 0) {
         //printf("Buffer length: %d\r\n",GPS_GetLength());
         buildAndCheckSentence(GPS_GetChar());
@@ -659,7 +661,7 @@ unsigned char myTokenizer(char* stringToTokenize, char token, char * returnToken
 void parseRMC(char* stream) {
     // declare the local vars
     char token[15]; // Tokens set to 15 characters in length
-    char tmp [3] = {0, 0, '\0'}, tmp3[4] = {0, 0, 0, '\0'}, tmp4[5]={0,0,0,'\0'};
+    char tmp [3] = {0, 0, '\0'}, tmp3[4] = {0, 0, 0, '\0'}, tmp4[5] = {0, 0, 0, 0, '\0'};
     unsigned char chTmp = 0;
 
 
@@ -680,13 +682,13 @@ void parseRMC(char* stream) {
         tmp[0] = token[4];
         tmp[1] = token[5];
         gpsControlData.sec = (unsigned char) atoi(tmp);
-        tmp4[0]=token[7];
-        tmp4[1]=token[8];
-        tmp4[2]=token[9];
-        tmp4[3]=token[10];
+        tmp4[0] = token[7];
+        tmp4[1] = token[8];
+        tmp4[2] = token[9];
+        tmp4[3] = token[10];
         //printf("%s\t",tmp4);
-        gpsControlData.millisec=(unsigned short) atoi(tmp4);
-        
+        gpsControlData.millisec = (unsigned short) atoi(tmp4);
+
     }
 
     // 2.- Status of position Fix
