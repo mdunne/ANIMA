@@ -2,12 +2,13 @@
 
 
 
-#include <p32xxxx.h>
+#include <xc.h>
 #include "stdio.h"
 #include <serial.h>
 #include "honeywell_mag.h"
 #define DELAY() for(i=0; i< NOPCOUNT; i++) __asm("nop")
 #define NOPCOUNT 150000
+
 //#include <LED.h>
 int main(void) {
 

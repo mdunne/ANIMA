@@ -98,6 +98,7 @@ void Sensor_Integration_TakeData(void);
 void Sensor_Integration_SetSampleTime(unsigned int milliseconds);
 void Sensor_Integration_DataDump();
 void Sensor_Integration_DataDumpLatest();
+void Sensor_Integration_DataDumpWholeCard(void);
 void Sensor_Integration_SetSensorScale(int Scale);
 
 #endif

@@ -293,7 +293,7 @@ int DataLogging_GetEntrySize(int Entry) {
 
 }
 
-void DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray) {
+int DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray) {
     t_Sector inSector;
     int ByteCount = 0;
     int Address = Directory.Entries[Entry].Start_Address + Sector;
@@ -303,4 +303,5 @@ void DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArra
         //while(!IsTransmitEmpty());
         SectorArray[ByteCount] = inSector.Data[ByteCount];
     }
+    return inSector.ID;
 }

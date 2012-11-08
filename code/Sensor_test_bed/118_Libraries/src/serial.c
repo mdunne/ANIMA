@@ -9,9 +9,9 @@
 #include <p32xxxx.h>
 #include "serial.h"
 #include <peripheral/uart.h>
-//#include <plib.h>
+#include <plib.h>
+#include <sys/attribs.h>
 //#include <stdlib.h>
-
 
 
 /*******************************************************************************
@@ -473,7 +473,7 @@ unsigned char getOverflow(CBRef cB) {
 #ifdef SERIAL_TEST
 
 
-    #include <p32xxxx.h>
+    #include <xc.h>
     #include "serial.h"
     #include <GenericTypeDefs.h>
 //#include <plib.h>

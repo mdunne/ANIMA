@@ -116,7 +116,13 @@ void Sensor_Integration_Init() {
             inChar = GetChar();
             if (inChar == 'a') {
                 DataLogging_Init();
+                //DataLogging_PrintDirectory();
+                Sensor_Integration_DataDumpWholeCard();
+                printf("Data has been dumped\r\n");
+                while (1);
                 Sensor_Integration_DataDump();
+
+
                 while (1);
             }
             if (inChar == 'b') {
@@ -382,7 +388,7 @@ void Sensor_Integration_SetSensorScale(int Scale) {
     honey_mag_SetGain(HONEY_GAIN_1090);
     //printf("%d %d\r\n",HONEY_GAIN_1090,honey_mag_GetGain());
     //while(1);
-    
+
 }
 //will dump all the data on the card in a csv file format to the terminal
 
@@ -456,4 +462,40 @@ void Sensor_Integration_DataDumpLatest() {
         }
 
     }
+}
+
+void Sensor_Integration_DataDumpWholeCard(void) {
+    int Entry, CurEntrySize, CurPos, CurDataPoint;
+    unsigned int SectorCount = 0;
+    //first need to print the header which also establishes the data order
+    printf("ID,Bosch_Accel_X,Bosch_Accel_Y,Bosch_Accel_Z,Free_Accel_X,Free_Accel_Y,Free_Accel_Z,Free_Mag_X,Free_Mag_Y,Free_Mag_Z,");
+    while (!IsTransmitEmpty());
+    printf("Honey_Mag_X,Honey_Mag_Y,Honey_Mag_Z,STCompass_Mag_X,STCompass_Mag_Y,STCompass_Mag_Z,STCompass_Accel_X,STCompass_Accel_Y,STCompass_Accel_Z,");
+    while (!IsTransmitEmpty());
+    printf("lat,lon,alt,gps_year,gps_month,gps_day,gps_hour,gps_minute,gps_second,gps_millisecond,gps_fix\r\n");
+    while (!IsTransmitEmpty());
+
+    DataLogging_GetEntrySector(0, SectorCount, SensorData.SectorAccess);
+    for (SectorCount = 0; SectorCount < 400000; SectorCount++) {
+        Entry=DataLogging_GetEntrySector(0, SectorCount, SensorData.SectorAccess);
+        //printf("%d\r\n", Entry);
+        for (CurDataPoint = 0; CurDataPoint < DATA_POINTS; CurDataPoint++) {
+            printf("%d,", Entry);
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].BoschAccel.X, SensorData.SensorData.Entries[CurDataPoint].BoschAccel.Y, SensorData.SensorData.Entries[CurDataPoint].BoschAccel.Z);
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].FreeAccel.X, SensorData.SensorData.Entries[CurDataPoint].FreeAccel.Y, SensorData.SensorData.Entries[CurDataPoint].FreeAccel.Z);
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].FreeMag.X, SensorData.SensorData.Entries[CurDataPoint].FreeMag.Y, SensorData.SensorData.Entries[CurDataPoint].FreeMag.Z);
+            while (!IsTransmitEmpty());
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].HoneyMag.X, SensorData.SensorData.Entries[CurDataPoint].HoneyMag.Y, SensorData.SensorData.Entries[CurDataPoint].HoneyMag.Z);
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].STCompass_Mag.X, SensorData.SensorData.Entries[CurDataPoint].STCompass_Mag.Y, SensorData.SensorData.Entries[CurDataPoint].STCompass_Mag.Z);
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].STCompass_Accel.X, SensorData.SensorData.Entries[CurDataPoint].STCompass_Accel.Y, SensorData.SensorData.Entries[CurDataPoint].STCompass_Accel.Z);
+            while (!IsTransmitEmpty());
+            printf("%f,%f,%f,", SensorData.SensorData.Entries[CurDataPoint].GPS.lat, SensorData.SensorData.Entries[CurDataPoint].GPS.lon, SensorData.SensorData.Entries[CurDataPoint].GPS.height);
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].GPS.Date.year, SensorData.SensorData.Entries[CurDataPoint].GPS.Date.month, SensorData.SensorData.Entries[CurDataPoint].GPS.Date.day);
+            printf("%d,%d,%d,", SensorData.SensorData.Entries[CurDataPoint].GPS.Time.hour, SensorData.SensorData.Entries[CurDataPoint].GPS.Time.minute, SensorData.SensorData.Entries[CurDataPoint].GPS.Time.second);
+            printf("%d,%d", SensorData.SensorData.Entries[CurDataPoint].GPS.Time.millisecond, SensorData.SensorData.Entries[CurDataPoint].GPS.fix);
+            printf("\r\n");
+            while (!IsTransmitEmpty());
+        }
+    }
+
 }

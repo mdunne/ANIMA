@@ -24,7 +24,7 @@ void DataLogging_PrintDirectory(void);
 void DataLogging_DumpInterface();
 
 int DataLogging_NumEntries(void);
-void DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray);
+int DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray);
 
 
 
