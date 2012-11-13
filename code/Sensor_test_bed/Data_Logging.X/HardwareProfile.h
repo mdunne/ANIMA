@@ -933,6 +933,5 @@
     #endif
 #endif
 
-#include <uart2.h>
 
 #endif

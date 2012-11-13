@@ -6,30 +6,30 @@
                    projectFiles="true">
       <itemPath>FSconfig.h</itemPath>
       <itemPath>HardwareProfile.h</itemPath>
-      <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/GenericTypeDefs.h</itemPath>
-      <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/Compiler.h</itemPath>
-      <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/MDD File System/FSDefs.h</itemPath>
-      <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/Include/MDD File System/SD-SPI.h</itemPath>
       <itemPath>../118_Libraries/include/serial.h</itemPath>
       <itemPath>Data_Logging.h</itemPath>
       <itemPath>../118_Libraries/include/timers.h</itemPath>
       <itemPath>../LED.X/LED.h</itemPath>
+      <itemPath>Compiler.h</itemPath>
+      <itemPath>FSDefs.h</itemPath>
+      <itemPath>FSIO.h</itemPath>
+      <itemPath>SD-SPI.h</itemPath>
+      <itemPath>GenericTypeDefs.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>../boot_loader/elf32pic32mx_v2_ds30_app.ld</itemPath>
-      <itemPath>../boot_loader/procdefs_v2_ds30_app_128_af_1p.ld</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>../../../../../../../Microchip Solutions v2012-04-03/Microchip/MDD File System/SD-SPI.c</itemPath>
       <itemPath>../118_Libraries/src/serial.c</itemPath>
       <itemPath>Data_Logging.c</itemPath>
       <itemPath>../118_Libraries/src/timers.c</itemPath>
       <itemPath>data_logging_test.c</itemPath>
       <itemPath>../LED.X/LED.c</itemPath>
+      <itemPath>FSIO.c</itemPath>
+      <itemPath>SD-SPI.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -45,8 +45,8 @@
         <targetDevice>PIC32MX320F128H</targetDevice>
         <targetHeader></targetHeader>
         <platformTool>PICkit3PlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.10</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -76,7 +76,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="..\118_Libraries\include;C:\Microchip Solutions v2012-04-03\Microchip\Include;C:\Microchip Solutions v2012-04-03\Microchip\Include\MDD File System;C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\Data_Logging.X;C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\LED.X"/>
+                  value="..\118_Libraries\include;C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\Data_Logging.X;C:\Users\mdunne\Documents\ANIMA\code\Sensor_test_bed\LED.X"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>

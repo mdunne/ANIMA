@@ -6,7 +6,7 @@
  * Created on November 10, 2011, 8:42 AM
  */
 
-#include <p32xxxx.h>
+#include <xc.h>
 #include "serial.h"
 #include <peripheral/uart.h>
 #include <plib.h>

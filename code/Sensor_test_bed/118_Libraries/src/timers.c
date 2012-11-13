@@ -5,7 +5,7 @@
  * Created on November 15, 2011, 9:53 AM
  */
 
-#include <p32xxxx.h>
+#include <xc.h>
 #include <peripheral/timer.h>
 #include "timers.h"
 #include <GenericTypeDefs.h>
@@ -338,7 +338,7 @@ void __ISR(_TIMER_1_VECTOR, ipl3) Timer1IntHandler(void) {
 
 #ifdef TIMERS_TEST
 
-    #include <p32xxxx.h>
+    #include <xc.h>
     #include "serial.h"
     #include "timers.h"
     #include <GenericTypeDefs.h>

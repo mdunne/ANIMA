@@ -3,7 +3,7 @@
 
 #include <Data_Logging.h>
 #include "FSIO.h"
-#include <p32xxxx.h>
+#include <xc.h>
 #include <stdio.h>
 #include <SD-SPI.h>
 #include "timers.h"

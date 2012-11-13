@@ -1,10 +1,9 @@
 
-
+#include <xc.h>
 #include "FSIO.h"
 #include <serial.h>
 #include "Data_Logging.h"
 #include "timers.h"
-#include <p32xxxx.h>
 
 
 char sendBuffer[] = "This is test string 1";
@@ -55,6 +54,8 @@ int main(void) {
     unsigned char size = 0, i;
     SERIAL_Init();
     // Turn on the interrupts
+    //INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
+    
     INTEnableSystemMultiVectoredInt();
     TIMERS_Init();
     printf("Starting the Data Logging Test\r\n");

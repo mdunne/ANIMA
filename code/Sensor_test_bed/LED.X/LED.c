@@ -5,7 +5,7 @@
  * Created on December 18, 2011, 7:58 PM
  */
 
-#include <p32xxxx.h>
+#include <xc.h>
 #include <plib.h>
 #include <stdio.h>
 #include "serial.h"
