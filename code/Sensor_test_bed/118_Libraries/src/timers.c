@@ -5,7 +5,7 @@
  * Created on November 15, 2011, 9:53 AM
  */
 
-#include <xc.h>
+#include <p32xxxx.h>
 #include <peripheral/timer.h>
 #include "timers.h"
 #include <GenericTypeDefs.h>

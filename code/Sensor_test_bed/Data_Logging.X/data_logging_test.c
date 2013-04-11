@@ -61,25 +61,32 @@ int main(void) {
     printf("Starting the Data Logging Test\r\n");
     int count;
 
-    //while (!MDD_MediaDetect());
-    //MEDIA_INFORMATION   *mediaInformation;
-    //MDD_SDSPI_InitIO();
-    //mediaInformation = MDD_SDSPI_MediaInitialize();
-
-    //FSInit();
-        //char teststring[]="hello world";
-        //pointer = FSfopen ("hmm.txt", "w");
-   // FSfwrite(teststring,1,11,pointer);
-    //FSfclose(pointer);
-    //printf("file_closed\r\n");
-    //while(1);
+    while (!MDD_MediaDetect());
+    printf("Media Detected\r\n");
+    MEDIA_INFORMATION   *mediaInformation;
+    MDD_SDSPI_InitIO();
+    mediaInformation = MDD_SDSPI_MediaInitialize();
+    FSFILE * pointer;
+//    FSInit();
+//    printf("File system Initialized\r\n");
+//    //while(1);
+//        char teststring[]="hello world";
+//        //pointer = FSfopen ("hmm.txt", "w");
+//        printf("File Opened\r\n");
+//    //FSfwrite(teststring,1,11,pointer);
+//    printf("File Written to\r\n");
+//    //FSfclose(pointer);
+//    printf("file_closed\r\n");
+//    attributes = ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN;
+//    FindFirst("*.txt",attributes,&rec);
+//    printf("FileName is %s\r\n",rec.filename);
+//    while(1);
     d_test.multi_d[0][0]=0xDE;
     d_test.multi_d[0][1]=0xAD;
     d_test.multi_d[0][2]=0xBE;
     d_test.multi_d[1][0]=0xEF;
     d_test.multi_d[1][1]=0xFE;
     d_test.multi_d[1][2]=0xED;
-
     //printf("%X\t%X\t%X\r\n",d_test.entry_one,d_test.entry_two,d_test.entry_three);
     //while(1);
     //SYSTEMConfigPerformance(GetSystemClock());
@@ -94,7 +101,9 @@ int main(void) {
     // Create a file
      count= GetTime();
     DataLogging_Init();
-    
+    DataLogging_CloseLog();
+    printf("Test Complete\r\n");
+    while(1);
     DataLogging_PrintDirectory();
     printf("Total Entries: %d\r\n",DataLogging_NumEntries());
     printf("Size of entry %d is: %d\r\n",DataLogging_NumEntries()/2,DataLogging_GetEntrySize(DataLogging_NumEntries()/2));

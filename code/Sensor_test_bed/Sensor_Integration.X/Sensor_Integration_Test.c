@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <xc.h>
 #include "Sensor_Integration.h"
 
 

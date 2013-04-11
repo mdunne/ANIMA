@@ -44,9 +44,10 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX320F128H</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC32</languageToolchain>
-        <languageToolchainVersion>1.10</languageToolchainVersion>
+        <languageToolchainVersion>1.20</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -110,6 +111,8 @@
       </C32-AS>
       <C32-LD>
       </C32-LD>
+      <C32CPP>
+      </C32CPP>
       <C32Global>
         <property key="legacy-libc" value="false"/>
       </C32Global>

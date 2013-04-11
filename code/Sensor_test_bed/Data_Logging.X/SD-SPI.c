@@ -248,7 +248,7 @@ static inline __attribute__((always_inline)) unsigned char SPICalutateBRG(unsign
 BYTE MDD_SDSPI_MediaDetect (void)
 {
 #ifndef MEDIA_SOFT_DETECT
-    return(SD_CD);
+    return(!SD_CD);
 #else
 	MMC_RESPONSE    response;
 

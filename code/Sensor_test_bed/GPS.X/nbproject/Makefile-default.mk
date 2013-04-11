@@ -8,10 +8,14 @@
 
 
 # Include project Makefile
+ifeq "${IGNORE_LOCAL}" "TRUE"
+# do not include local makefile. User is passing all local related variables already
+else
 include Makefile
 # Include makefile containing local settings
 ifeq "$(wildcard nbproject/Makefile-local-default.mk)" "nbproject/Makefile-local-default.mk"
 include nbproject/Makefile-local-default.mk
+endif
 endif
 
 # Environment
@@ -84,47 +88,54 @@ ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 ${OBJECTDIR}/_ext/1436657880/serial.o: ../118_Libraries/src/serial.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1436657880 
 	@${RM} ${OBJECTDIR}/_ext/1436657880/serial.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c   
 	
 ${OBJECTDIR}/gps_test.o: gps_test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/gps_test.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/gps_test.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps_test.o.d" -o ${OBJECTDIR}/gps_test.o gps_test.c  
+	@${FIXDEPS} "${OBJECTDIR}/gps_test.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps_test.o.d" -o ${OBJECTDIR}/gps_test.o gps_test.c   
 	
 ${OBJECTDIR}/gps.o: gps.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/gps.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/gps.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps.o.d" -o ${OBJECTDIR}/gps.o gps.c  
+	@${FIXDEPS} "${OBJECTDIR}/gps.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps.o.d" -o ${OBJECTDIR}/gps.o gps.c   
 	
 else
 ${OBJECTDIR}/_ext/1436657880/serial.o: ../118_Libraries/src/serial.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/1436657880 
 	@${RM} ${OBJECTDIR}/_ext/1436657880/serial.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c  
+	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/serial.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/_ext/1436657880/serial.o.d" -o ${OBJECTDIR}/_ext/1436657880/serial.o ../118_Libraries/src/serial.c   
 	
 ${OBJECTDIR}/gps_test.o: gps_test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/gps_test.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/gps_test.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps_test.o.d" -o ${OBJECTDIR}/gps_test.o gps_test.c  
+	@${FIXDEPS} "${OBJECTDIR}/gps_test.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps_test.o.d" -o ${OBJECTDIR}/gps_test.o gps_test.c   
 	
 ${OBJECTDIR}/gps.o: gps.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/gps.o.d 
-	@${FIXDEPS} "${OBJECTDIR}/gps.o.d" $(SILENT) -c ${MP_CC} $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps.o.d" -o ${OBJECTDIR}/gps.o gps.c  
+	@${FIXDEPS} "${OBJECTDIR}/gps.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/118_Libraries/include" -I"C:/Users/mdunne/Documents/ANIMA/code/Sensor_test_bed/LED.X" -MMD -MF "${OBJECTDIR}/gps.o.d" -o ${OBJECTDIR}/gps.o gps.c   
 	
+endif
+
+# ------------------------------------------------------------------------------------
+# Rules for buildStep: compileCPP
+ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+else
 endif
 
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   
+dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    ../boot_loader/elf32pic32mx_v2_ds30_app.ld
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE)  -mdebugger -D__MPLAB_DEBUGGER_ICD3=1 -mprocessor=$(MP_PROCESSOR_OPTION)  -o dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX} ${OBJECTFILES_QUOTED_IF_SPACED}       -Wl,--defsym=__MPLAB_BUILD=1$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION),--defsym=__MPLAB_DEBUG=1,--defsym=__ICD2RAM=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_ICD3=1 
+	${MP_CC} $(MP_EXTRA_LD_PRE)  -mdebugger -D__MPLAB_DEBUGGER_ICD3=1 -mprocessor=$(MP_PROCESSOR_OPTION)  -o dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX} ${OBJECTFILES_QUOTED_IF_SPACED}          -Wl,--defsym=__MPLAB_BUILD=1$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION),--defsym=__ICD2RAM=1,--defsym=__MPLAB_DEBUG=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_ICD3=1
+	
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   
+dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   ../boot_loader/elf32pic32mx_v2_ds30_app.ld
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE)  -mprocessor=$(MP_PROCESSOR_OPTION)  -o dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} ${OBJECTFILES_QUOTED_IF_SPACED}       -Wl,--defsym=__MPLAB_BUILD=1$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION)
-	${MP_CC_DIR}\\pic32-bin2hex dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  
+	${MP_CC} $(MP_EXTRA_LD_PRE)  -mprocessor=$(MP_PROCESSOR_OPTION)  -o dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} ${OBJECTFILES_QUOTED_IF_SPACED}          -Wl,--defsym=__MPLAB_BUILD=1$(MP_EXTRA_LD_POST)$(MP_LINKER_FILE_OPTION)
+	${MP_CC_DIR}\\xc32-bin2hex dist/${CND_CONF}/${IMAGE_TYPE}/GPS.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX} 
 endif
 
 

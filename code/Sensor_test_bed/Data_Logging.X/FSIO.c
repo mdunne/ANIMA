@@ -79,6 +79,7 @@
 #include "stdlib.h"
 #include "ctype.h"
 #include "FSDefs.h"
+#include "serial.h"
 
 #ifdef ALLOW_FSFPRINTF
 #include "stdarg.h"
@@ -4176,6 +4177,166 @@ BYTE FILEallocate_new_cluster( FILEOBJ fo, BYTE mode)
 } // allocate new cluster
 #endif
 
+
+BYTE FAT_print_cluster_chain (DWORD cluster, DISK * dsk)
+{
+    DWORD     c,c2,ClusterFailValue;
+    enum    _status {Good, Fail, Exit}status;
+
+    status = Good;
+	
+    /* Settings based on FAT type */
+            ClusterFailValue = CLUSTER_FAIL_FAT16;
+            c2 =  LAST_CLUSTER_FAT16;
+	printf("Starting to print cluster chain\r\n");
+	printf("%lu\t",cluster);
+    // Make sure there is actually a cluster assigned
+    if(cluster == 0 || cluster == 1)  // Cluster assigned can't be "0" and "1"
+    {
+        status = Exit;
+    }
+    else
+    {
+        while(status == Good)
+        {
+            // Get the FAT entry
+            if((c = ReadFAT( dsk, cluster)) == ClusterFailValue)
+                status = Fail;
+            else
+            {
+                if(c == 0 || c == 1)  // Cluster assigned can't be "0" and "1"
+                {
+                    status = Exit;
+                }
+                else
+                {
+                    // compare against max value of a cluster in FATxx
+                    // look for the last cluster in the chain
+                    if ( c >= c2)
+                        status = Exit;
+
+                    // Now erase this FAT entry
+                    //if(WriteFAT(dsk, cluster, CLUSTER_EMPTY, FALSE) == ClusterFailValue)
+                      //  status = Fail;
+					printf("%lu\t",c);
+					while(!IsTransmitEmpty());
+                    // now update what the current cluster is
+                    cluster = c;
+                }
+            }
+        }// while status
+    }// cluster == 0
+	printf("\r\n");
+    //WriteFAT (dsk, 0, 0, TRUE);
+    
+    if(status == Exit)
+        return(TRUE);
+    else
+        return(FALSE);
+} // Erase cluster
+
+
+/***********************************************************************
+  Function:
+    BYTE FILEallocate_multiple_cluster( FILEOBJ fo, DWORD NumSectors)
+  Summary;
+    Allocate a new cluster to a file
+  Conditions:
+    Should not be called by the user.
+  Input:
+    fo -    Pointer to file structure
+    NumSectors - Number of Sectors to increase the file by
+  Return Values:
+    CE_GOOD -      Cluster allocated
+    CE_DISK_FULL - No clusters available
+  Side Effects:
+    None
+  Description:
+    This function will find an empty cluster on the device using the
+    FATfindEmptyCluster function.  It will then mark it as the last
+    cluster in the file in the FAT chain, and link the current last
+    cluster of the passed file to the new cluster.  If the new
+    cluster is a directory cluster, it will be erased (so there are no
+    extraneous directory entries).  If it's allocated to a non-directory
+    file, it doesn't need to be erased; extraneous data in the cluster
+    will be unviewable because of the file size parameter.
+  Remarks:
+    None.
+  ***********************************************************************/
+
+#ifdef ALLOW_WRITES
+BYTE FILEallocate_multiple_clusters( FILEOBJ fo, DWORD NumSectors)
+{
+    DISK *      dsk;
+    DWORD c,curcls, num_clusters, cluster_count,first_cluster;
+    
+    dsk = fo->dsk;
+    c = fo->ccls;
+    first_cluster=c;
+    curcls=dsk->SecPerClus;
+    printf("First Cluster: %d\r\n",c);
+    printf("cur Size: %d\r\n",fo->size);
+    while(!IsTransmitEmpty());
+    // find the next empty cluster
+    //c = FATfindEmptyCluster(fo);
+    //if (c == 0)      // "0" is just an indication as Disk full in the fn "FATfindEmptyCluster()"
+        //return CE_DISK_FULL;
+
+    num_clusters=NumSectors/curcls;
+    printf("NumSectors: %d\r\nnum Clusters to take: %d\r\nSectors Per Cluster: %d\r\n",NumSectors,num_clusters,curcls);
+    while(!IsTransmitEmpty());
+    // mark the clusters as taken, and last in chain, assume there are no used clusters afterwards
+            // should not be an issue if card is not written to via the os as the MDD system does not do load bearing
+    if(fo->size==0)
+    {
+        c=FATfindEmptyCluster(fo);
+        printf("first time allocation\r\n");
+    }
+    else
+    {
+        printf("non-first time allocation\r\n");
+    c=fo->ccls+1;
+    }
+    for (cluster_count=c;cluster_count<(c+num_clusters);cluster_count++)
+    {
+    WriteFAT( dsk, cluster_count, cluster_count+1, FALSE);
+    }
+
+    cluster_count--;
+    if(dsk->type == FAT12)
+        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT12, FALSE);
+    else if (dsk->type == FAT16)
+        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT16, FALSE);
+
+#ifdef SUPPORT_FAT32 // If FAT32 supported.
+    else
+        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT32, FALSE);
+#endif
+    
+    WriteFAT(dsk,0,0,TRUE);
+    // link current cluster to the new one
+    curcls = fo->ccls;
+
+    WriteFAT( dsk, curcls, 0, FALSE);
+
+    // update the FILE structure
+    //fo->cluster = c;
+    fo->ccls=cluster_count;
+    fo->size=fo->size+NumSectors*(dsk->sectorSize);
+    gNeedFATWrite=TRUE;
+    fo->flags.write=TRUE;
+    FSfclose(fo);
+    FAT_print_cluster_chain(first_cluster,dsk);
+    // IF this is a dir, we need to erase the cluster
+    // If it's a file, we can leave it- the file size
+    // will limit the data we see to the data that's been
+    // written
+
+        return CE_GOOD;
+
+} // allocate new cluster
+#endif
+
 /***********************************************
   Function:
     DWORD FATfindEmptyCluster(FILEOBJ fo)
@@ -4197,6 +4358,28 @@ BYTE FILEallocate_new_cluster( FILEOBJ fo, BYTE mode)
   Remarks:
     Should not be called by user
   ***********************************************/
+/***********************************************
+  Function:
+    DWORD FATfindEmptyCluster(FILEOBJ fo)
+  Summary:
+    Find the next available cluster on the device
+  Conditions:
+    This function should not be called by the
+    user.
+  Input:
+    fo -  Pointer to file structure
+  Return Values:
+    DWORD - Address of empty cluster
+    0 -     Could not find empty cluster
+  Side Effects:
+    None
+  Description:
+    This function will search through the FAT to
+    find the next available cluster on the device.
+  Remarks:
+    Should not be called by user
+  ***********************************************/
+
 
 #ifdef ALLOW_WRITES
 DWORD FATfindEmptyCluster(FILEOBJ fo)

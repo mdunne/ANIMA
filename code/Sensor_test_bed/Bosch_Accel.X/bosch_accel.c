@@ -1,5 +1,5 @@
 
-#include <p32xxxx.h>
+#include <xc.h>
 #include "serial.h"
 #include "I2C_Driver.h"
 #include "bosch_accel.h"

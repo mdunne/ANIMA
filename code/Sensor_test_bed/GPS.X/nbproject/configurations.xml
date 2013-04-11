@@ -33,9 +33,10 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX320F128H</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
-        <languageToolchain>C32</languageToolchain>
-        <languageToolchainVersion>2.02</languageToolchainVersion>
+        <languageToolchain>XC32</languageToolchain>
+        <languageToolchainVersion>1.20</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
