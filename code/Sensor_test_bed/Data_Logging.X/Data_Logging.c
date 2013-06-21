@@ -2,15 +2,12 @@
 
 
 #include <Data_Logging.h>
-//#include "FSIO.h"
+#include "FSIO.h"
 #include <xc.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "SD-SPI.h"
 #include "timers.h"
 #include "serial.h"
-#include "MDD File System/SD-SPI.h"
-#include "LED.h"
 
 
 MEDIA_INFORMATION *mediaInformation;
@@ -33,7 +30,7 @@ MEDIA_INFORMATION *mediaInformation;
 #define ENTRIES_IN_DIRECTORY (((BYTES_USED_FOR_DIRECTORY)/(ENTRY_SIZE_IN_BYTES))-1)
 #define MAX_ENTRY (ENTRIES_IN_DIRECTORY-1)
 #define CARD_IDENTITY 0xDEAD
-#define CHUNK_IN_SECTORS 500
+#define CHUNK_IN_SECTORS 256
 //#define DATA_SIZE (MEDIA_SECTOR_SIZE - 2)
 
 typedef struct {
@@ -66,8 +63,11 @@ static int CurSectorCount;
 static int CurSector;
 static int SectorforCurrentEntry;
 static int CurDirectorySize;
+static short curFileID;
 
+static FSFILE * FilePointer;
 
+#define FILEPATTERN "*.bin"
 
 //private function prototypes
 char DataLogging_ReadDirectory(void);
@@ -80,6 +80,7 @@ char DataLogging_Init() {
     //while (!FSInit());
     //printf("Dir_Entry: %d\r\n ", sizeof (Dir_Entry));
     int ByteCount, SectorCount;
+    SearchRec rec;
     t_Sector curSector;
     unsigned char filenum = 1;
     char filename[7];
@@ -104,88 +105,68 @@ char DataLogging_Init() {
 
     //printf("total entries: %d",ENTRIES_IN_DIRECTORY);
     //printf("sizeof(Dir_Entry):%d",sizeof(char));
-    printf("Waiting for media\r\n");
     while (!MDD_MediaDetect());
-    printf("Media Found\r\n");
     //while (1);
-    //FILEallocate_multiple_clusters(FilePointer,128);
-    //and then increase the file size to the chunk size
     MDD_SDSPI_InitIO();
-    //MDD_SDSPI_InitIO();
     int count = 0;
-    printf("About to Init Card\r\n");
     mediaInformation = MDD_MediaInitialize();
     if (mediaInformation->errorCode != 0) {
         printf("Media not initialized with error code: %d\r\n", mediaInformation->errorCode);
         while (1);
     }
-    printf("Card is responding, continuing steps\r\n");
-    //DataLogging_ReadDirectory();
-    MDD_SDSPI_SectorRead(0, curSector.Sector_Access);
-    //check for ID
-
-    if (curSector.ID != CARD_IDENTITY) {
-#ifdef DEBUG_MESSAGE
-        printf("Card not formatted\r\n");
-#endif
-        printf("No Card found\r\nstalling out for data retrieval");
+    if (!FSInit()) {
+        printf("File System Initializaion Failed");
         while (1);
-        Directory.Card_Identifier = CARD_IDENTITY;
-        Directory.Last_Entry_Used = 0;
-        Directory.Entries[0].ID = 0;
-        Directory.Entries[0].Start_Address = SECTORS_USED_FOR_DIRECTORY;
-        Directory.Entries[0].Stop_Address = Directory.Entries[0].Start_Address + CHUNK_IN_SECTORS;
+    }
+    //We now need to find the new file name
+    char Searchresult;
+    //search for the first file matching filepattern
+    Searchresult = FindFirst(FILEPATTERN, ATTR_MASK, &rec);
+    printf("%d\r\n", Searchresult);
+    if (Searchresult == -1) {
+        //we have no logs created so we can create the first one
+#ifdef DEBUG_MESSAGE
+        printf("No Logs Found, First Created\r\n");
+#endif
+        filecount = 0;
 
+        //FSfwrite("aaa",1,3,FilePointer);
+        //FSfclose(FilePointer);
     } else {
-        DataLogging_ReadDirectory();
-        MDD_SDSPI_SectorRead(Directory.Entries[Directory.Last_Entry_Used].Start_Address, curSector.Sector_Access);
-        if (curSector.ID == Directory.Last_Entry_Used) {
-#ifdef DEBUG_MESSAGE
-            printf("Card Formatted and data written, directory updated\r\n");
-#endif
-            //we have written to this directory at least once so we assume it has been used
+        //we find the largest log and increment by one
+#ifdef DEBUG_VERBOSE
+        printf("Logs Found iterating to largest\r\n");
 
-            //so we increment the last_entry_used and add 1 to the stop address of the old entry
-            //as we update the directory when we start to use the new chunk
-            Directory.Last_Entry_Used++;
-            Directory.Entries[Directory.Last_Entry_Used].ID = Directory.Last_Entry_Used;
-            Directory.Entries[Directory.Last_Entry_Used].Start_Address = Directory.Entries[Directory.Last_Entry_Used - 1].Stop_Address + 1;
-            Directory.Entries[Directory.Last_Entry_Used].Stop_Address = Directory.Entries[Directory.Last_Entry_Used].Start_Address + CHUNK_IN_SECTORS;
-            CurDirectorySize = CHUNK_IN_SECTORS;
-        } else {
-            //we assume that data was never written to this directory so we can use it again
-            //we merely enforce the size constraint and change nothing else
-#ifdef DEBUG_MESSAGE
-            printf("Card Formatted But No New Data Has Been Written\r\n No Changes made to the table\r\n");
 #endif
-            Directory.Entries[Directory.Last_Entry_Used].Stop_Address = Directory.Entries[Directory.Last_Entry_Used].Start_Address + CHUNK_IN_SECTORS;
+        while (Searchresult != -1) {
+            filenum = atoi(rec.filename);
+            if (filenum >= filecount) {
+                filecount = filenum + 1;
+            }
+            printf("%d\t%s\r\n", filenum, rec.filename);
+            Searchresult = FindNext(&rec);
         }
     }
-
-    //we now set the CurSectorCount for writing to the log and write the directory back to the card
-    CurSectorCount = Directory.Entries[Directory.Last_Entry_Used].Start_Address;
-    curSector.ID = Directory.Last_Entry_Used;
-    //MDD_SDSPI_SectorWrite(Directory.Entries[Directory.Last_Entry_Used].Start_Address,curSector.Sector_Access,TRUE);
-    //DataLogging_WriteDirectory();
-    //need to determine what sector of the directory the current ID is held
-    //we know the size of the entries and the header so we need to simply multiply and then divide by 512
-    SectorforCurrentEntry = (HEADER_SIZE_IN_BYTES + (ADDRESS_SIZE_IN_BYTES + ADDRESS_SIZE_IN_BYTES + sizeof (short))*8) / 512;
-    printf("Sector for Current: %d\r\n", SectorforCurrentEntry);
-    //while (1);
-#ifdef DEBUG_MESSAGE
-    printf("Data logging Initialized\r\n");
-    printf("Directory Structure\r\n");
-    DataLogging_PrintDirectory();
+    curFileID = filecount;
+    sprintf(filename, "%03d.bin", filecount);
+    FilePointer = FSfopen(filename, "w");
+    //we extract the first sector of the file
+    CurSectorCount = Cluster2Sector(FilePointer->dsk, FilePointer->cluster) + FilePointer->sec;
+#ifdef DEBUG_VERBOSE
+    printf("First Sector of File is: %d\r\n", CurSector);
+    while (!IsTransmitEmpty());
 #endif
-    //DataLogging_PrintDirectory();
-    return 0;
+    //while(1);
+    FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
+    //while (1);
+
 }
 
 
 //we assume that this is 510 in size
 
 char DataLogging_Log(unsigned char *Sector_block) {
-    static unsigned char ChunkCount = 0;
+    static unsigned int ChunkCount = 0;
     t_Sector inSector;
     unsigned char SPI_Status = FALSE;
     int ByteCount = 0;
@@ -195,7 +176,7 @@ char DataLogging_Log(unsigned char *Sector_block) {
     for (ByteCount = 0; ByteCount < DATA_SIZE; ByteCount++) {
         inSector.Data[ByteCount] = Sector_block[ByteCount];
     }
-    inSector.ID = Directory.Entries[Directory.Last_Entry_Used].ID;
+    inSector.ID = curFileID;
     //printf("ID value: %d",inSector.ID);
     while (SPI_Status == FALSE) {
         SPI_Status = MDD_SDSPI_SectorWrite(CurSectorCount, inSector.Sector_Access, TRUE);
@@ -204,34 +185,29 @@ char DataLogging_Log(unsigned char *Sector_block) {
             printf("Card failed to write at one point\r\n");
 #endif
             while (MDD_SDSPI_MediaInitialize() != MEDIA_NO_ERROR);
-
         }
     }
 
     CurSectorCount++;
     ChunkCount++;
+    //printf("%d\r\n",ChunkCount);
     if (ChunkCount >= CHUNK_IN_SECTORS) {
-
-        Directory.Entries[Directory.Last_Entry_Used].Stop_Address += CHUNK_IN_SECTORS;
-        CurDirectorySize = CurDirectorySize + CHUNK_IN_SECTORS;
-        if (Directory.Entries[Directory.Last_Entry_Used].Stop_Address < Directory.Entries[Directory.Last_Entry_Used].Start_Address) {
-            Directory.Entries[Directory.Last_Entry_Used].Stop_Address = CurDirectorySize;
-        }
-        //printf("%d\r\n",Directory.Entries[Directory.Last_Entry_Used].Stop_Address);
-        //DataLogging_WriteDirectory();
-        DataLogging_UpdateEntryAddress();
+#ifdef DEBUG_VERBOSE
+        printf("Card allocated more sectors\r\n");
+#endif
+        FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
         ChunkCount = 0;
     }
     //printf("ChunkCount: %d\tCurSectorCount: %d\r\n",ChunkCount,CurSectorCount);
-    while (!IsTransmitEmpty());
+
 }
 
 char DataLogging_CloseLog(void) {
-    DataLogging_WriteDirectory();
-    //FSfclose(FilePointer);
+    FSfclose(FilePointer);
 }
 
 char DataLogging_ReadDirectory(void) {
+
     int SectorCount = 0;
     for (SectorCount = 0; SectorCount < SECTORS_USED_FOR_DIRECTORY; SectorCount++) {
         MDD_SDSPI_SectorRead(SectorCount, Directory.Sector_Access[SectorCount]);
@@ -239,7 +215,7 @@ char DataLogging_ReadDirectory(void) {
 }
 
 char DataLogging_WriteDirectory(void) {
-    return 0;
+    return;
     int SectorCount = 0;
     int write_result = 0;
     for (SectorCount = 0; SectorCount < SECTORS_USED_FOR_DIRECTORY; SectorCount++) {
@@ -281,7 +257,7 @@ void DataLogging_PrintDirectory(void) {
 
 void DataLogging_DumpInterface() {
     //on st
-    //WipeCard();
+    WipeCard();
 }
 
 void WipeCard(void) {
@@ -319,14 +295,8 @@ int DataLogging_GetEntrySize(int Entry) {
 int DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray) {
     t_Sector inSector;
     int ByteCount = 0;
-    unsigned char sectorReadResult = FALSE;
     int Address = Directory.Entries[Entry].Start_Address + Sector;
-    while (sectorReadResult == FALSE) {
-        sectorReadResult = MDD_SDSPI_SectorRead(Address, inSector.Sector_Access);
-        if (sectorReadResult == FALSE) {
-            while (MDD_SDSPI_MediaInitialize() != MEDIA_NO_ERROR);
-        }
-    }
+    MDD_SDSPI_SectorRead(Address, inSector.Sector_Access);
     for (ByteCount = 0; ByteCount < DATA_SIZE; ByteCount++) {
         //printf("Byte: %d\r\n",inSector.Data[ByteCount]);
         //while(!IsTransmitEmpty());

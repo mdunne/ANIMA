@@ -9,6 +9,7 @@
 #define DATA_LOGGING_H
 
 #include "FSconfig.h"
+#include "FSIO.h"
 
 #define DATA_SIZE (MEDIA_SECTOR_SIZE - 2)
 #define SD_SECTOR_SIZE MEDIA_SECTOR_SIZE

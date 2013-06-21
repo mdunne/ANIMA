@@ -4287,46 +4287,77 @@ BYTE FILEallocate_multiple_clusters( FILEOBJ fo, DWORD NumSectors)
     while(!IsTransmitEmpty());
     // mark the clusters as taken, and last in chain, assume there are no used clusters afterwards
             // should not be an issue if card is not written to via the os as the MDD system does not do load bearing
+
     if(fo->size==0)
     {
-        c=FATfindEmptyCluster(fo);
-        printf("first time allocation\r\n");
+        //if the file is new it will have no size so we increase the file size to accomodate it
+        fo->size=curcls*dsk->sectorSize;
     }
-    else
-    {
-        printf("non-first time allocation\r\n");
-    c=fo->ccls+1;
-    }
-    for (cluster_count=c;cluster_count<(c+num_clusters);cluster_count++)
-    {
-    WriteFAT( dsk, cluster_count, cluster_count+1, FALSE);
-    }
+    for (cluster_count = 0; cluster_count < num_clusters; cluster_count++) {
+        printf("Allocating cluster #%d\r\n",cluster_count);
+        c = FATfindEmptyCluster(fo);
+        if (c == 0) // "0" is just an indication as Disk full in the fn "FATfindEmptyCluster()"
+            return CE_DISK_FULL;
 
-    cluster_count--;
-    if(dsk->type == FAT12)
-        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT12, FALSE);
-    else if (dsk->type == FAT16)
-        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT16, FALSE);
+
+        // mark the cluster as taken, and last in chain
+        if (dsk->type == FAT12)
+            WriteFAT(dsk, c, LAST_CLUSTER_FAT12, FALSE);
+        else if (dsk->type == FAT16)
+            WriteFAT(dsk, c, LAST_CLUSTER_FAT16, FALSE);
 
 #ifdef SUPPORT_FAT32 // If FAT32 supported.
-    else
-        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT32, FALSE);
+        else
+            WriteFAT(dsk, c, LAST_CLUSTER_FAT32, FALSE);
 #endif
+
+        // link current cluster to the new one
+        curcls = fo->ccls;
+
+        WriteFAT(dsk, curcls, c, FALSE);
+
+        // update the FILE structure
+        fo->ccls = c;
+    }    //    if(fo->size==0)
+    //    {
+    //        c=FATfindEmptyCluster(fo);
+    //        printf("first time allocation\r\n");
+    //    }
+    //    else
+//    {
+//        printf("non-first time allocation\r\n");
+//    c=fo->ccls+1;
+//    }
+//    for (cluster_count=c;cluster_count<(c+num_clusters);cluster_count++)
+//    {
+//    WriteFAT( dsk, cluster_count, cluster_count+1, FALSE);
+//    }
+//
+//    cluster_count--;
+//    if(dsk->type == FAT12)
+//        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT12, FALSE);
+//    else if (dsk->type == FAT16)
+//        WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT16, FALSE);
+
+//#ifdef SUPPORT_FAT32 // If FAT32 supported.
+    //else
+       // WriteFAT( dsk, cluster_count, LAST_CLUSTER_FAT32, FALSE);
+//#endif
     
     WriteFAT(dsk,0,0,TRUE);
     // link current cluster to the new one
-    curcls = fo->ccls;
+    //curcls = fo->ccls;
 
-    WriteFAT( dsk, curcls, 0, FALSE);
+    //WriteFAT( dsk, curcls, 0, FALSE);
 
     // update the FILE structure
     //fo->cluster = c;
-    fo->ccls=cluster_count;
+    //fo->ccls=cluster_count;
     fo->size=fo->size+NumSectors*(dsk->sectorSize);
     gNeedFATWrite=TRUE;
     fo->flags.write=TRUE;
     FSfclose(fo);
-    FAT_print_cluster_chain(first_cluster,dsk);
+    //FAT_print_cluster_chain(first_cluster,dsk);
     // IF this is a dir, we need to erase the cluster
     // If it's a file, we can leave it- the file size
     // will limit the data we see to the data that's been
@@ -11934,50 +11965,41 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
 						#endif
                     } // Check to see if it's a DIR entry
                 }// Check non-dir entry to see if its a valid file
-                else
-                {
+                else {
                     handle++;
                 }
 
-                if (recache)
-                {
+                if (recache) {
                     recache = FALSE;
                     cwdptr->dirccls = cwdptr->dirclus;
-                    entry = Cache_File_Entry (cwdptr, &handle, TRUE);
+                    entry = Cache_File_Entry(cwdptr, &handle, TRUE);
+                } else {
+                    entry = Cache_File_Entry(cwdptr, &handle, FALSE);
                 }
-                else
-                {
-                    entry = Cache_File_Entry (cwdptr, &handle, FALSE);
-                }
-                
-				if (entry == NULL)
-                {
-					#if defined(SUPPORT_LFN)
-					tempCWD-> utf16LFNlength = 0;
-					fo-> utf16LFNlength = 0;
-					#endif
-                    FileObjectCopy (cwdptr, tempCWD);
+
+                if (entry == NULL) {
+#if defined(SUPPORT_LFN)
+                    tempCWD-> utf16LFNlength = 0;
+                    fo-> utf16LFNlength = 0;
+#endif
+                    FileObjectCopy(cwdptr, tempCWD);
                     FSerrno = CE_BADCACHEREAD;
                     return -1;
                 }
-            }
-            else
-            {
-				#if defined(SUPPORT_LFN)
-				tempCWD-> utf16LFNlength = 0;
-				fo-> utf16LFNlength = 0;
-				#endif
+            } else {
+#if defined(SUPPORT_LFN)
+                tempCWD-> utf16LFNlength = 0;
+                fo-> utf16LFNlength = 0;
+#endif
 
                 // We have reached the end of the directory
-                if (subDirDepth != 0)
-                {
+                if (subDirDepth != 0) {
                     handle2 = 0;
 
                     cwdptr->dirccls = cwdptr->dirclus;
-                    entry = Cache_File_Entry (cwdptr, &handle2, TRUE);
-                    if (entry == NULL)
-                    {
-                        FileObjectCopy (cwdptr, tempCWD);
+                    entry = Cache_File_Entry(cwdptr, &handle2, TRUE);
+                    if (entry == NULL) {
+                        FileObjectCopy(cwdptr, tempCWD);
                         FSerrno = CE_BADCACHEREAD;
                         return -1;
                     }
@@ -11986,41 +12008,39 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
                     handle2 = GetFullClusterNumber(entry); // Get complete cluster number.
 
 #ifndef __18CXX
-	#ifdef SUPPORT_LFN
-	if(utfModeFileName)
+#ifdef SUPPORT_LFN
+                    if (utfModeFileName)
 
-        Index3 = FSchdir (".\0.\0\0");
+                        Index3 = FSchdir(".\0.\0\0");
 
-	else
-
-	#endif
-        Index3 = FSchdir ("..");
-
-#else
-	#ifdef SUPPORT_LFN
-	if(utfModeFileName)
-
-        Index3 = FSchdir (dotdotname1);
-
-	else
-
-	#endif
-        Index3 = FSchdir (dotdotname);
+                    else
 
 #endif
-                    if(Index3)
-                    {
-                        FileObjectCopy (cwdptr, tempCWD);
+                        Index3 = FSchdir("..");
+
+#else
+#ifdef SUPPORT_LFN
+                    if (utfModeFileName)
+
+                        Index3 = FSchdir(dotdotname1);
+
+                    else
+
+#endif
+                        Index3 = FSchdir(dotdotname);
+
+#endif
+                    if (Index3) {
+                        FileObjectCopy(cwdptr, tempCWD);
                         FSerrno = CE_DIR_NOT_FOUND;
                         return -1;
                     }
                     // Return to our previous position in this directory
                     handle = 2;
                     cwdptr->dirccls = cwdptr->dirclus;
-                    entry = Cache_File_Entry (cwdptr, &handle, TRUE);
-                    if (entry == NULL)
-                    {
-                        FileObjectCopy (cwdptr, tempCWD);
+                    entry = Cache_File_Entry(cwdptr, &handle, TRUE);
+                    if (entry == NULL) {
+                        FileObjectCopy(cwdptr, tempCWD);
                         FSerrno = CE_BADCACHEREAD;
                         return -1;
                     }
@@ -12029,14 +12049,12 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
                     TempClusterCalc = GetFullClusterNumber(entry); // Get complete cluster number.
 
                     while ((TempClusterCalc != handle2) ||
-                    ((TempClusterCalc == handle2) &&
-                    (((unsigned char)entry->DIR_Name[0] == 0xE5) || (entry->DIR_Attr == ATTR_VOLUME))))
-                    {
+                            ((TempClusterCalc == handle2) &&
+                            (((unsigned char) entry->DIR_Name[0] == 0xE5) || (entry->DIR_Attr == ATTR_VOLUME)))) {
                         handle++;
-                        entry = Cache_File_Entry (cwdptr, &handle, FALSE);
-                        if (entry == NULL)
-                        {
-                            FileObjectCopy (cwdptr, tempCWD);
+                        entry = Cache_File_Entry(cwdptr, &handle, FALSE);
+                        if (entry == NULL) {
+                            FileObjectCopy(cwdptr, tempCWD);
                             FSerrno = CE_BADCACHEREAD;
                             return -1;
                         }
@@ -12044,98 +12062,86 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
                         TempClusterCalc = GetFullClusterNumber(entry); // Get complete cluster number in a loop.
                     }
 
-					Index3 = 0;
-					#if defined(SUPPORT_LFN)
-        			FileObjectCopy (&cwdTemp, cwdptr);
-					prevHandle = handle - 1;
-					lfno = (LFN_ENTRY *)Cache_File_Entry (cwdptr, &prevHandle, FALSE);
+                    Index3 = 0;
+#if defined(SUPPORT_LFN)
+                    FileObjectCopy(&cwdTemp, cwdptr);
+                    prevHandle = handle - 1;
+                    lfno = (LFN_ENTRY *) Cache_File_Entry(cwdptr, &prevHandle, FALSE);
 
 
-					while((lfno->LFN_Attribute == ATTR_LONG_NAME) && (lfno->LFN_SequenceNo != DIR_DEL)
-							&& (lfno->LFN_SequenceNo != DIR_EMPTY))
-					{
-						tempShift.byte.LB = lfno->LFN_Part1[0];
-						tempShift.byte.HB = lfno->LFN_Part1[1];
-						tempLFN[Index3++] = tempShift.Val;
-						tempShift.byte.LB = lfno->LFN_Part1[2];
-						tempShift.byte.HB = lfno->LFN_Part1[3];
-						tempLFN[Index3++] = tempShift.Val;
-						tempShift.byte.LB = lfno->LFN_Part1[4];
-						tempShift.byte.HB = lfno->LFN_Part1[5];
-						tempLFN[Index3++] = tempShift.Val;
-						tempShift.byte.LB = lfno->LFN_Part1[6];
-						tempShift.byte.HB = lfno->LFN_Part1[7];
-						tempLFN[Index3++] = tempShift.Val;
-						tempShift.byte.LB = lfno->LFN_Part1[8];
-						tempShift.byte.HB = lfno->LFN_Part1[9];
-						tempLFN[Index3++] = tempShift.Val;
+                    while ((lfno->LFN_Attribute == ATTR_LONG_NAME) && (lfno->LFN_SequenceNo != DIR_DEL)
+                            && (lfno->LFN_SequenceNo != DIR_EMPTY)) {
+                        tempShift.byte.LB = lfno->LFN_Part1[0];
+                        tempShift.byte.HB = lfno->LFN_Part1[1];
+                        tempLFN[Index3++] = tempShift.Val;
+                        tempShift.byte.LB = lfno->LFN_Part1[2];
+                        tempShift.byte.HB = lfno->LFN_Part1[3];
+                        tempLFN[Index3++] = tempShift.Val;
+                        tempShift.byte.LB = lfno->LFN_Part1[4];
+                        tempShift.byte.HB = lfno->LFN_Part1[5];
+                        tempLFN[Index3++] = tempShift.Val;
+                        tempShift.byte.LB = lfno->LFN_Part1[6];
+                        tempShift.byte.HB = lfno->LFN_Part1[7];
+                        tempLFN[Index3++] = tempShift.Val;
+                        tempShift.byte.LB = lfno->LFN_Part1[8];
+                        tempShift.byte.HB = lfno->LFN_Part1[9];
+                        tempLFN[Index3++] = tempShift.Val;
 
-						tempLFN[Index3++] = lfno->LFN_Part2[0];
-						tempLFN[Index3++] = lfno->LFN_Part2[1];
-						tempLFN[Index3++] = lfno->LFN_Part2[2];
-						tempLFN[Index3++] = lfno->LFN_Part2[3];
-						tempLFN[Index3++] = lfno->LFN_Part2[4];
-						tempLFN[Index3++] = lfno->LFN_Part2[5];
+                        tempLFN[Index3++] = lfno->LFN_Part2[0];
+                        tempLFN[Index3++] = lfno->LFN_Part2[1];
+                        tempLFN[Index3++] = lfno->LFN_Part2[2];
+                        tempLFN[Index3++] = lfno->LFN_Part2[3];
+                        tempLFN[Index3++] = lfno->LFN_Part2[4];
+                        tempLFN[Index3++] = lfno->LFN_Part2[5];
 
-						tempLFN[Index3++] = lfno->LFN_Part3[0];
-						tempLFN[Index3++] = lfno->LFN_Part3[1];
-				
-						prevHandle = prevHandle - 1;
-						lfno = (LFN_ENTRY *)Cache_File_Entry (cwdptr, &prevHandle, FALSE);
-					}
+                        tempLFN[Index3++] = lfno->LFN_Part3[0];
+                        tempLFN[Index3++] = lfno->LFN_Part3[1];
 
-					FileObjectCopy (cwdptr, &cwdTemp);
+                        prevHandle = prevHandle - 1;
+                        lfno = (LFN_ENTRY *) Cache_File_Entry(cwdptr, &prevHandle, FALSE);
+                    }
 
-					#endif
+                    FileObjectCopy(cwdptr, &cwdTemp);
 
-					if(Index3 == 0)
-					{
-                	    memset (tempArray, 0x00, 12);
-                	    for (Index = 0; Index < 8; Index++)
-                	    {
-                	        tempArray[(BYTE)Index] = entry->DIR_Name[(BYTE)Index];
-                	    }
-                	    for (Index = 0; Index < 3; Index++)
-                	    {
-                	        tempArray[(BYTE)Index + 8] = entry->DIR_Extension[(BYTE)Index];
-                	    }
-						#if defined(SUPPORT_LFN)
-						cwdptr->utf16LFNlength = 0;
-						#endif
-					}
-					#if defined(SUPPORT_LFN)
-					else
-					{
-						cwdptr->utf16LFNlength = Index3;
-						
-						for(Index = 12;Index >= 0;Index--)
-						{
-							if((tempLFN[Index3 - Index - 1]) == 0x0000)
-							{
-								cwdptr->utf16LFNlength = Index3 - Index;
-								break;
-							}
-						}
+#endif
 
-						cwdptr->utf16LFNptr = (unsigned short int *)&tempArray[0];
-					}
-					#endif
+                    if (Index3 == 0) {
+                        memset(tempArray, 0x00, 12);
+                        for (Index = 0; Index < 8; Index++) {
+                            tempArray[(BYTE) Index] = entry->DIR_Name[(BYTE) Index];
+                        }
+                        for (Index = 0; Index < 3; Index++) {
+                            tempArray[(BYTE) Index + 8] = entry->DIR_Extension[(BYTE) Index];
+                        }
+#if defined(SUPPORT_LFN)
+                        cwdptr->utf16LFNlength = 0;
+#endif
+                    }#if defined(SUPPORT_LFN)
+                    else {
+                        cwdptr->utf16LFNlength = Index3;
+
+                        for (Index = 12; Index >= 0; Index--) {
+                            if ((tempLFN[Index3 - Index - 1]) == 0x0000) {
+                                cwdptr->utf16LFNlength = Index3 - Index;
+                                break;
+                            }
+                        }
+
+                        cwdptr->utf16LFNptr = (unsigned short int *) &tempArray[0];
+                    }
+#endif
                     // Erase the directory that we just cleared the subdirectories out of
 
-                    if (eraseDir (&tempArray[0]))
-                    {
-                        FileObjectCopy (cwdptr, tempCWD);
+                    if (eraseDir(&tempArray[0])) {
+                        FileObjectCopy(cwdptr, tempCWD);
                         FSerrno = CE_ERASE_FAIL;
                         return -1;
-                    }
-                    else
-                    {
+                    } else {
                         handle++;
                         cwdptr->dirccls = cwdptr->dirclus;
-                        entry = Cache_File_Entry (cwdptr, &handle, TRUE);
-                        if (entry == NULL)
-                        {
-                            FileObjectCopy (cwdptr, tempCWD);
+                        entry = Cache_File_Entry(cwdptr, &handle, TRUE);
+                        if (entry == NULL) {
+                            FileObjectCopy(cwdptr, tempCWD);
                             FSerrno = CE_BADCACHEREAD;
                             return -1;
                         }
@@ -12143,9 +12149,7 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
 
                     // Decrease the subdirectory depth
                     subDirDepth--;
-                }
-                else
-                {
+                } else {
                     dirCleared = TRUE;
                 } // Check subdirectory depth
             } // Check until we get an empty entry
@@ -12155,80 +12159,69 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
     // Cache the current directory name
     // tempArray is used so we don't disturb the
     // global getcwd buffer
-    if (FSgetcwd (&tempArray[0], 2) == NULL)
-    {
-        FileObjectCopy (cwdptr, tempCWD);
+    if (FSgetcwd(&tempArray[0], 2) == NULL) {
+        FileObjectCopy(cwdptr, tempCWD);
         return -1;
+    } else {
+#if defined(SUPPORT_LFN)
+        if (!cwdptr->utf16LFNlength)
+#endif
+        {
+            memset(tempArray, 0x00, 12);
+            for (Index = 0; Index < 11; Index++) {
+                tempArray[(BYTE) Index] = cwdptr->name[(BYTE) Index];
+            }
+        }
     }
-	else
-	{
-		#if defined(SUPPORT_LFN)
-			if(!cwdptr->utf16LFNlength)
-		#endif
-			{
-        		memset (tempArray, 0x00, 12);
-        		for (Index = 0; Index < 11; Index++)
-        		{
-            		tempArray[(BYTE)Index] = cwdptr->name[(BYTE)Index];
-        		}			
-			}
-	}
 
     // If we're here, this directory is empty
 #ifndef __18CXX
-	#ifdef SUPPORT_LFN
-	if(utfModeFileName)
+#ifdef SUPPORT_LFN
+    if (utfModeFileName)
 
-        Index3 = FSchdir (".\0.\0\0");
+        Index3 = FSchdir(".\0.\0\0");
 
-	else
-
-	#endif
-        Index3 = FSchdir ("..");
-
-#else
-	#ifdef SUPPORT_LFN
-	if(utfModeFileName)
-
-        Index3 = FSchdir (dotdotname1);
-
-	else
-
-	#endif
-        Index3 = FSchdir (dotdotname);
+    else
 
 #endif
-    if(Index3)
-    {
-        FileObjectCopy (cwdptr, tempCWD);
+        Index3 = FSchdir("..");
+
+#else
+#ifdef SUPPORT_LFN
+    if (utfModeFileName)
+
+        Index3 = FSchdir(dotdotname1);
+
+    else
+
+#endif
+        Index3 = FSchdir(dotdotname);
+
+#endif
+    if (Index3) {
+        FileObjectCopy(cwdptr, tempCWD);
         FSerrno = CE_DIR_NOT_FOUND;
         return -1;
     }
 
-	#if defined(SUPPORT_LFN)
-	if(cwdptr->utf16LFNlength)
-	{
-		Index3 = eraseDir((char *)cwdptr->utf16LFNptr);
-	}
-	else
-	#endif
-	{
-		Index3 = eraseDir(tempArray);
-	}
-
-    if (Index3)
+#if defined(SUPPORT_LFN)
+    if (cwdptr->utf16LFNlength) {
+        Index3 = eraseDir((char *) cwdptr->utf16LFNptr);
+    } else
+#endif
     {
-        FileObjectCopy (cwdptr, tempCWD);
+        Index3 = eraseDir(tempArray);
+    }
+
+    if (Index3) {
+        FileObjectCopy(cwdptr, tempCWD);
         FSerrno = CE_ERASE_FAIL;
         return -1;
-    }
-    else
-    {
-        FileObjectCopy (cwdptr, tempCWD);
+    } else {
+        FileObjectCopy(cwdptr, tempCWD);
         return 0;
     }
 }
-
 
 /****************************************************************
   Function:
@@ -12251,58 +12244,52 @@ int rmdirhelper (BYTE mode, char * ramptr, char * romptr, unsigned char rmsubdir
     it with the FILEerase function.
   Remarks:
     None.
-  *****************************************************************/
+ *****************************************************************/
 
-int eraseDir (char * path)
-{
+int eraseDir(char * path) {
     int result;
     BYTE Index;
     FSFILE tempCWDobj2;
 
-    if (MDD_WriteProtectState())
-    {
+    if (MDD_WriteProtectState()) {
         return (-1);
     }
 
     // preserve CWD
     FileObjectCopy(&tempCWDobj2, cwdptr);
 
-	// If long file name not present, copy the 8.3 name in cwdptr
-	#if defined(SUPPORT_LFN)
-    if(!cwdptr->utf16LFNlength)
-	#endif
+    // If long file name not present, copy the 8.3 name in cwdptr
+#if defined(SUPPORT_LFN)
+    if (!cwdptr->utf16LFNlength)
+#endif
     {
-    	for (Index = 0; Index <11; Index++)
-    	{
-        	cwdptr->name[Index] = *(path + Index);
-    	}
-	}
+        for (Index = 0; Index < 11; Index++) {
+            cwdptr->name[Index] = *(path + Index);
+        }
+    }
 
     // copy file object over
     FileObjectCopy(&gFileTemp, cwdptr);
 
     // See if the file is found
-	if(FILEfind (cwdptr, &gFileTemp, LOOK_FOR_MATCHING_ENTRY, 0) == CE_GOOD)
-	{
-		if(FILEerase(cwdptr, &cwdptr->entry, TRUE) == CE_GOOD)
-			result = 0;
-		else
-			result = -1;
-	}
-	else
-		result = -1;
+    if (FILEfind(cwdptr, &gFileTemp, LOOK_FOR_MATCHING_ENTRY, 0) == CE_GOOD) {
+        if (FILEerase(cwdptr, &cwdptr->entry, TRUE) == CE_GOOD)
+            result = 0;
+        else
+            result = -1;
+    } else
+        result = -1;
 
-	FileObjectCopy(cwdptr, &tempCWDobj2);
-	return(result);
+    FileObjectCopy(cwdptr, &tempCWDobj2);
+    return (result);
 }
 #endif
 
 
-#endif
+//#endif
 
 
 #ifdef ALLOW_FILESEARCH
-
 
 /***********************************************************************************
   Function:
@@ -12347,53 +12334,49 @@ int eraseDir (char * path)
     address of long file name if found during the operation.
   Remarks:
     Call FindFirst or FindFirstpgm before calling FindNext
-  ***********************************************************************************/
+ ***********************************************************************************/
 
-int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
-{
+int FindFirst(const char * fileName, unsigned int attr, SearchRec * rec) {
     FSFILE f;
     FILEOBJ fo = &f;
     WORD fHandle;
     BYTE j;
     BYTE Index;
-	#ifdef SUPPORT_LFN
-		short int indexLFN;
-	#endif
+#ifdef SUPPORT_LFN
+    short int indexLFN;
+#endif
 
     FSerrno = CE_GOOD;
 
-	#ifdef SUPPORT_LFN
-		fo->utf16LFNptr = &recordSearchName[0];
-		rec->utf16LFNfound = &recordFoundName[0];
-	#endif
+#ifdef SUPPORT_LFN
+    fo->utf16LFNptr = &recordSearchName[0];
+    rec->utf16LFNfound = &recordFoundName[0];
+#endif
 
-	// Format the file name as per 8.3 format or LFN format
-    if( !FormatFileName(fileName, fo, 1) )
-    {
+    // Format the file name as per 8.3 format or LFN format
+    if (!FormatFileName(fileName, fo, 1)) {
         FSerrno = CE_INVALID_FILENAME;
         return -1;
     }
 
     rec->initialized = FALSE;
 
-	#if defined(SUPPORT_LFN)
-	rec->AsciiEncodingType = fo->AsciiEncodingType;
-	recordSearchLength = fo->utf16LFNlength;
+#if defined(SUPPORT_LFN)
+    rec->AsciiEncodingType = fo->AsciiEncodingType;
+    recordSearchLength = fo->utf16LFNlength;
 
-	// If file name is 8.3 format copy it in 'searchname' string
-    if(!recordSearchLength)
-	#endif
+    // If file name is 8.3 format copy it in 'searchname' string
+    if (!recordSearchLength)
+#endif
     {
-    	for (Index = 0; (Index < 12) && (fileName[Index] != 0); Index++)
-    	{
-        	rec->searchname[Index] = fileName[Index];
-    	}
+        for (Index = 0; (Index < 12) && (fileName[Index] != 0); Index++) {
+            rec->searchname[Index] = fileName[Index];
+        }
 
-    	for (;Index < FILE_NAME_SIZE_8P3 + 2; Index++)
-    	{
-        	rec->searchname[Index] = 0;
-    	}
-	}
+        for (; Index < FILE_NAME_SIZE_8P3 + 2; Index++) {
+            rec->searchname[Index] = 0;
+        }
+    }
 
     rec->searchattr = attr;
 #ifdef ALLOW_DIRS
@@ -12404,14 +12387,14 @@ int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
 
     fo->dsk = &gDiskData;
     fo->cluster = 0;
-    fo->ccls    = 0;
+    fo->ccls = 0;
     fo->entry = 0;
     fo->attributes = attr;
 
 #ifndef ALLOW_DIRS
     // start at the root directory
-    fo->dirclus    = FatRootDirClusterValue;
-    fo->dirccls    = FatRootDirClusterValue;
+    fo->dirclus = FatRootDirClusterValue;
+    fo->dirccls = FatRootDirClusterValue;
 #else
     fo->dirclus = cwdptr->dirclus;
     fo->dirccls = cwdptr->dirccls;
@@ -12421,73 +12404,59 @@ int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
     FileObjectCopy(&gFileTemp, fo);
 
     // See if the file is found
-    if (FILEfind (fo, &gFileTemp,LOOK_FOR_MATCHING_ENTRY, 1) != CE_GOOD)
-    {
+    if (FILEfind(fo, &gFileTemp, LOOK_FOR_MATCHING_ENTRY, 1) != CE_GOOD) {
         FSerrno = CE_FILE_NOT_FOUND;
         return -1;
     }
 
     fHandle = fo->entry;
 
-    if (FILEopen (fo, &fHandle, 'r') == CE_GOOD)
-    {
-		#if defined(SUPPORT_LFN)
-		rec->utf16LFNfoundLength = fo->utf16LFNlength;
-		if(fo->utf16LFNlength)
-		{
-			indexLFN = fo->utf16LFNlength;
-			recordFoundName[indexLFN] = 0x0000;
-			while(indexLFN--)
-				recordFoundName[indexLFN] = fileFoundString[indexLFN];
-		}
-		#endif
+    if (FILEopen(fo, &fHandle, 'r') == CE_GOOD) {
+#if defined(SUPPORT_LFN)
+        rec->utf16LFNfoundLength = fo->utf16LFNlength;
+        if (fo->utf16LFNlength) {
+            indexLFN = fo->utf16LFNlength;
+            recordFoundName[indexLFN] = 0x0000;
+            while (indexLFN--)
+                recordFoundName[indexLFN] = fileFoundString[indexLFN];
+        }
+#endif
 
-		for(j = 0; j < FILE_NAME_SIZE_8P3 + 2 ; j++)
-		{
+        for (j = 0; j < FILE_NAME_SIZE_8P3 + 2; j++) {
             rec->filename[j] = 0;
-		}
+        }
 
         // Copy as much name as there is
-        if (fo->attributes != ATTR_VOLUME)
-        {
-            for (Index = 0, j = 0; (j < 8) && (fo->name[j] != 0x20); Index++, j++)
-            {
-               rec->filename[Index] = fo->name[j];
+        if (fo->attributes != ATTR_VOLUME) {
+            for (Index = 0, j = 0; (j < 8) && (fo->name[j] != 0x20); Index++, j++) {
+                rec->filename[Index] = fo->name[j];
             }
 
-			if(fo->name[8] != 0x20)
-			{
-            	rec->filename[Index++] = '.';
+            if (fo->name[8] != 0x20) {
+                rec->filename[Index++] = '.';
 
-	            // Move to the extension, even if there are more space chars
-	            for (j = 8; (j < 11) && (fo->name[j] != 0x20); Index++, j++)
-	            {
-	               rec->filename[Index] = fo->name[j];
-	            }
-			}
-        }
-        else
-        {
-            for (Index = 0; Index < DIR_NAMECOMP; Index++)
-            {
+                // Move to the extension, even if there are more space chars
+                for (j = 8; (j < 11) && (fo->name[j] != 0x20); Index++, j++) {
+                    rec->filename[Index] = fo->name[j];
+                }
+            }
+        } else {
+            for (Index = 0; Index < DIR_NAMECOMP; Index++) {
                 rec->filename[Index] = fo->name[Index];
             }
         }
 
         rec->attributes = fo->attributes;
         rec->filesize = fo->size;
-        rec->timestamp = (DWORD)((DWORD)fo->date << 16) + fo->time;
+        rec->timestamp = (DWORD) ((DWORD) fo->date << 16) + fo->time;
         rec->entry = fo->entry;
         rec->initialized = TRUE;
         return 0;
-    }
-    else
-    {
+    } else {
         FSerrno = CE_BADCACHEREAD;
         return -1;
     }
 }
-
 
 /**********************************************************************
   Function:
@@ -12519,51 +12488,45 @@ int FindFirst (const char * fileName, unsigned int attr, SearchRec * rec)
     file name if found during the operation.
   Remarks:
     Call FindFirst or FindFirstpgm before calling this function
-  **********************************************************************/
+ **********************************************************************/
 
-int FindNext (SearchRec * rec)
-{
+int FindNext(SearchRec * rec) {
     FSFILE f;
     FILEOBJ fo = &f;
     BYTE i, j;
-	#ifdef SUPPORT_LFN
-		short int indexLFN;
-	#endif
+#ifdef SUPPORT_LFN
+    short int indexLFN;
+#endif
 
     FSerrno = CE_GOOD;
 
     // Make sure we called FindFirst on this object
-    if (rec->initialized == FALSE)
-    {
+    if (rec->initialized == FALSE) {
         FSerrno = CE_NOT_INIT;
         return -1;
     }
 
     // Make sure we called FindFirst in the cwd
 #ifdef ALLOW_DIRS
-    if (rec->cwdclus != cwdptr->dirclus)
-    {
+    if (rec->cwdclus != cwdptr->dirclus) {
         FSerrno = CE_INVALID_ARGUMENT;
         return -1;
     }
 #endif
-    
-	#if defined(SUPPORT_LFN)
+
+#if defined(SUPPORT_LFN)
     fo->AsciiEncodingType = rec->AsciiEncodingType;
     fo->utf16LFNlength = recordSearchLength;
-	if(fo->utf16LFNlength)
-	{
-	    fo->utf16LFNptr = &recordSearchName[0];
-    }
-	else
-	#endif
-	{
-		// Format the file name
-	    if( !FormatFileName(rec->searchname, fo, 1) )
-	    {
-	        FSerrno = CE_INVALID_FILENAME;
-	        return -1;
-	    }
+    if (fo->utf16LFNlength) {
+        fo->utf16LFNptr = &recordSearchName[0];
+    } else
+#endif
+    {
+        // Format the file name
+        if (!FormatFileName(rec->searchname, fo, 1)) {
+            FSerrno = CE_INVALID_FILENAME;
+            return -1;
+        }
     }
 
     /* Brn: Copy the formatted name to "fo" which is necesary before calling "FILEfind" function */
@@ -12571,14 +12534,14 @@ int FindNext (SearchRec * rec)
 
     fo->dsk = &gDiskData;
     fo->cluster = 0;
-    fo->ccls    = 0;
+    fo->ccls = 0;
     fo->entry = rec->entry + 1;
     fo->attributes = rec->searchattr;
 
 #ifndef ALLOW_DIRS
     // start at the root directory
-    fo->dirclus    = FatRootDirClusterValue;
-    fo->dirccls    = FatRootDirClusterValue;
+    fo->dirclus = FatRootDirClusterValue;
+    fo->dirccls = FatRootDirClusterValue;
 #else
     fo->dirclus = cwdptr->dirclus;
     fo->dirccls = cwdptr->dirccls;
@@ -12588,58 +12551,46 @@ int FindNext (SearchRec * rec)
     FileObjectCopy(&gFileTemp, fo);
 
     // See if the file is found
-    if (CE_GOOD != FILEfind (fo, &gFileTemp,LOOK_FOR_MATCHING_ENTRY, 1))
-    {
+    if (CE_GOOD != FILEfind(fo, &gFileTemp, LOOK_FOR_MATCHING_ENTRY, 1)) {
         FSerrno = CE_FILE_NOT_FOUND;
         return -1;
-    }
-    else
-    {
-		#if defined(SUPPORT_LFN)
-		rec->utf16LFNfoundLength = fo->utf16LFNlength;
-		if(fo->utf16LFNlength)
-		{
-			indexLFN = fo->utf16LFNlength;
-			recordFoundName[indexLFN] = 0x0000;
-			while(indexLFN--)
-				recordFoundName[indexLFN] = fileFoundString[indexLFN];
-		}
-		#endif
+    } else {
+#if defined(SUPPORT_LFN)
+        rec->utf16LFNfoundLength = fo->utf16LFNlength;
+        if (fo->utf16LFNlength) {
+            indexLFN = fo->utf16LFNlength;
+            recordFoundName[indexLFN] = 0x0000;
+            while (indexLFN--)
+                recordFoundName[indexLFN] = fileFoundString[indexLFN];
+        }
+#endif
 
-		for(j = 0; j < FILE_NAME_SIZE_8P3 + 2 ; j++)
-		{
+        for (j = 0; j < FILE_NAME_SIZE_8P3 + 2; j++) {
             rec->filename[j] = 0;
-		}
+        }
 
-        if (fo->attributes != ATTR_VOLUME)
-        {
-            for (i = 0, j = 0; (j < 8) && (fo->name[j] != 0x20); i++, j++)
-            {
-               rec->filename[i] = fo->name[j];
+        if (fo->attributes != ATTR_VOLUME) {
+            for (i = 0, j = 0; (j < 8) && (fo->name[j] != 0x20); i++, j++) {
+                rec->filename[i] = fo->name[j];
             }
 
-			if(fo->name[8] != 0x20)
-			{
-            	rec->filename[i++] = '.';
+            if (fo->name[8] != 0x20) {
+                rec->filename[i++] = '.';
 
-	            // Move to the extension, even if there are more space chars
-	            for (j = 8; (j < 11) && (fo->name[j] != 0x20); i++, j++)
-	            {
-	               rec->filename[i] = fo->name[j];
-	            }
-			}
-        }
-        else
-        {
-            for (i = 0; i < DIR_NAMECOMP; i++)
-            {
+                // Move to the extension, even if there are more space chars
+                for (j = 8; (j < 11) && (fo->name[j] != 0x20); i++, j++) {
+                    rec->filename[i] = fo->name[j];
+                }
+            }
+        } else {
+            for (i = 0; i < DIR_NAMECOMP; i++) {
                 rec->filename[i] = fo->name[i];
             }
         }
 
         rec->attributes = fo->attributes;
         rec->filesize = fo->size;
-        rec->timestamp = (DWORD)((DWORD)fo->date << 16) + fo->time;
+        rec->timestamp = (DWORD) ((DWORD) fo->date << 16) + fo->time;
         rec->entry = fo->entry;
         return 0;
     }
@@ -12688,23 +12639,22 @@ int FindNext (SearchRec * rec)
     address of long file name if found during the operation.
   Remarks:
     Call FindFirst or FindFirstpgm before calling FindNext
-  ***********************************************************************************/
+ ***********************************************************************************/
 
 #ifdef SUPPORT_LFN
-int wFindFirst (const unsigned short int * fileName, unsigned int attr, SearchRec * rec)
-{
-	int result;
-	utfModeFileName = TRUE;
-	result = FindFirst ((const char *)fileName,attr,rec);
-	utfModeFileName = FALSE;
-	return result;
+
+int wFindFirst(const unsigned short int * fileName, unsigned int attr, SearchRec * rec) {
+    int result;
+    utfModeFileName = TRUE;
+    result = FindFirst((const char *) fileName, attr, rec);
+    utfModeFileName = FALSE;
+    return result;
 }
 #endif
 
 #endif
 
 #ifdef ALLOW_FSFPRINTF
-
 
 /**********************************************************************
   Function:
@@ -12726,16 +12676,14 @@ int wFindFirst (const unsigned short int * fileName, unsigned int attr, SearchRe
     character to a file.
   Remarks:
     None
-  **********************************************************************/
+ **********************************************************************/
 
-int FSputc (char c, FSFILE * file)
-{
-    if (FSfwrite ((void *)&c, 1, 1, file) != 1)
+int FSputc(char c, FSFILE * file) {
+    if (FSfwrite((void *) &c, 1, 1, file) != 1)
         return EOF;
     else
         return 0;
 }
-
 
 /**********************************************************************
   Function:
@@ -12759,14 +12707,13 @@ int FSputc (char c, FSFILE * file)
     padding a format specifier with leading spacez or zeros).
   Remarks:
     None.
-  **********************************************************************/
+ **********************************************************************/
 
 
-unsigned char str_put_n_chars (FSFILE * handle, unsigned char n, char c)
-{
+unsigned char str_put_n_chars(FSFILE * handle, unsigned char n, char c) {
     while (n--)
-    if (FSputc (c, handle) == EOF)
-        return 1;
+        if (FSputc(c, handle) == EOF)
+            return 1;
     return 0;
 }
 
@@ -12797,20 +12744,21 @@ unsigned char str_put_n_chars (FSFILE * handle, unsigned char n, char c)
   Remarks:
     Consult AN1045 for a full description of how to use format
     specifiers.
-  **********************************************************************/
+ **********************************************************************/
 
 #ifdef __18CXX
-int FSfprintf (FSFILE *fptr, const rom char *fmt, ...)
+int FSfprintf(FSFILE *fptr, const rom char *fmt, ...)
 #else
-int FSfprintf (FSFILE *fptr, const char * fmt, ...)
+
+int FSfprintf(FSFILE *fptr, const char * fmt, ...)
 #endif
 {
     va_list ap;
     int n;
 
-    va_start (ap, fmt);
-    n = FSvfprintf (fptr, fmt, ap);
-    va_end (ap);
+    va_start(ap, fmt);
+    n = FSvfprintf(fptr, fmt, ap);
+    va_end(ap);
     return n;
 }
 
@@ -12839,48 +12787,45 @@ int FSfprintf (FSFILE *fptr, const char * fmt, ...)
   Remarks:
     Consult AN1045 for a full description of how to use format
     specifiers.
-  **********************************************************************/
+ **********************************************************************/
 
 #ifdef __18CXX
-int FSvfprintf (auto FSFILE *handle, auto const rom char * formatString, auto va_list ap)
+int FSvfprintf(auto FSFILE *handle, auto const rom char * formatString, auto va_list ap)
 #else
-int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
+
+int FSvfprintf(FSFILE *handle, const char * formatString, va_list ap)
 #endif
 {
     unsigned char c;
     int count = 0;
 
-    for (c = *formatString; c; c = *++formatString)
-    {
-        if (c == '%')
-        {
-            unsigned char    flags = 0;
-            unsigned char    width = 0;
-            unsigned char    precision = 0;
-            unsigned char    have_precision = 0;
-            unsigned char    size = 0;
+    for (c = *formatString; c; c = *++formatString) {
+        if (c == '%') {
+            unsigned char flags = 0;
+            unsigned char width = 0;
+            unsigned char precision = 0;
+            unsigned char have_precision = 0;
+            unsigned char size = 0;
 #ifndef __18CXX
-            unsigned char   size2 = 0;
+            unsigned char size2 = 0;
 #endif
-            unsigned char    space_cnt;
-            unsigned char    cval;
+            unsigned char space_cnt;
+            unsigned char cval;
 #ifdef __18CXX
-            unsigned long    larg;
-            far rom char *   romstring;
+            unsigned long larg;
+            far rom char * romstring;
 #else
             unsigned long long larg;
 #endif
-            char *         ramstring;
+            char * ramstring;
             int n;
 
             FSerrno = CE_GOOD;
 
             c = *++formatString;
 
-            while ((c == '-') || (c == '+') || (c == ' ') || (c == '#') || (c == '0'))
-            {
-                switch (c)
-                {
+            while ((c == '-') || (c == '+') || (c == ' ') || (c == '#') || (c == '0')) {
+                switch (c) {
                     case '-':
                         flags |= _FLAG_MINUS;
                         break;
@@ -12900,23 +12845,17 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                 c = *++formatString;
             }
             /* the optional width field is next */
-            if (c == '*')
-            {
-                n = va_arg (ap, int);
-                if (n < 0)
-                {
+            if (c == '*') {
+                n = va_arg(ap, int);
+                if (n < 0) {
                     flags |= _FLAG_MINUS;
                     width = -n;
-                }
-                else
+                } else
                     width = n;
                 c = *++formatString;
-            }
-            else
-            {
+            } else {
                 cval = 0;
-                while ((unsigned char) isdigit (c))
-                {
+                while ((unsigned char) isdigit(c)) {
                     cval = cval * 10 + c - '0';
                     c = *++formatString;
                 }
@@ -12928,24 +12867,18 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                 flags &= ~_FLAG_ZERO;
 
             /* the optional precision field is next */
-            if (c == '.')
-            {
+            if (c == '.') {
                 c = *++formatString;
-                if (c == '*')
-                {
-                    n = va_arg (ap, int);
-                    if (n >= 0)
-                    {
+                if (c == '*') {
+                    n = va_arg(ap, int);
+                    if (n >= 0) {
                         precision = n;
                         have_precision = 1;
                     }
                     c = *++formatString;
-                }
-                else
-                {
+                } else {
                     cval = 0;
-                    while ((unsigned char) isdigit (c))
-                    {
+                    while ((unsigned char) isdigit(c)) {
                         cval = cval * 10 + c - '0';
                         c = *++formatString;
                     }
@@ -12956,53 +12889,44 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
 
             /* the optional 'h' specifier. since int and short int are
                 the same size for MPLAB C18, this is a NOP for us. */
-            if (c == 'h')
-            {
+            if (c == 'h') {
                 c = *++formatString;
                 /* if 'c' is another 'h' character, this is an 'hh'
                     specifier and the size is 8 bits */
-                if (c == 'h')
-                {
+                if (c == 'h') {
                     size = _FMT_BYTE;
                     c = *++formatString;
                 }
-            }
-            else if ((c == 't') || (c == 'z'))
+            } else if ((c == 't') || (c == 'z'))
                 c = *++formatString;
 #ifdef __18CXX
-            else if ((c == 'H') || (c == 'T') || (c == 'Z'))
-            {
+            else if ((c == 'H') || (c == 'T') || (c == 'Z')) {
                 size = _FMT_SHRTLONG;
                 c = *++formatString;
-            }
-            else if ((c == 'l') || (c == 'j'))
+            } else if ((c == 'l') || (c == 'j'))
 #else
-            else if ((c == 'q') || (c == 'j'))
-            {
+            else if ((c == 'q') || (c == 'j')) {
                 size = _FMT_LONGLONG;
                 c = *++formatString;
-            }
-            else if (c == 'l')
+            } else if (c == 'l')
 #endif
             {
                 size = _FMT_LONG;
                 c = *++formatString;
             }
 
-            switch (c)
-            {
+            switch (c) {
                 case '\0':
-                /* this is undefined behaviour. we have a trailing '%' character
-                    in the string, perhaps with some flags, width, precision
-                    stuff as well, but no format specifier. We'll, arbitrarily,
-                    back up a character so that the loop will terminate
-                    properly when it loops back and we'll output a '%'
-                    character. */
+                    /* this is undefined behaviour. we have a trailing '%' character
+                        in the string, perhaps with some flags, width, precision
+                        stuff as well, but no format specifier. We'll, arbitrarily,
+                        back up a character so that the loop will terminate
+                        properly when it loops back and we'll output a '%'
+                        character. */
                     --formatString;
-                /* fallthrough */
+                    /* fallthrough */
                 case '%':
-                    if (FSputc ('%', handle) == EOF)
-                    {
+                    if (FSputc('%', handle) == EOF) {
                         FSerrno = CE_WRITE_ERROR;
                         return EOF;
                     }
@@ -13010,29 +12934,24 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                     break;
                 case 'c':
                     space_cnt = 0;
-                    if (width > 1)
-                    {
+                    if (width > 1) {
                         space_cnt = width - 1;
                         count += space_cnt;
                     }
-                    if (space_cnt && !(flags & _FLAG_MINUS))
-                    {
-                        if (str_put_n_chars (handle, space_cnt, ' '))
-                        {
+                    if (space_cnt && !(flags & _FLAG_MINUS)) {
+                        if (str_put_n_chars(handle, space_cnt, ' ')) {
                             FSerrno = CE_WRITE_ERROR;
                             return EOF;
                         }
                         space_cnt = 0;
                     }
-                    c = va_arg (ap, int);
-                    if (FSputc (c, handle) == EOF)
-                    {
+                    c = va_arg(ap, int);
+                    if (FSputc(c, handle) == EOF) {
                         FSerrno = CE_WRITE_ERROR;
                         return EOF;
                     }
                     ++count;
-                    if (str_put_n_chars (handle, space_cnt, ' '))
-                    {
+                    if (str_put_n_chars(handle, space_cnt, ' ')) {
                         FSerrno = CE_WRITE_ERROR;
                         return EOF;
                     }
@@ -13040,10 +12959,10 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                 case 'S':
 #ifdef __18CXX
                     if (size == _FMT_SHRTLONG)
-                        romstring = va_arg (ap, rom far char *);
+                        romstring = va_arg(ap, rom far char *);
                     else
-                        romstring = (far rom char*)va_arg (ap, rom near char *);
-                    n = strlenpgm (romstring);
+                        romstring = (far rom char*) va_arg(ap, rom near char *);
+                    n = strlenpgm(romstring);
                     /* Normalize the width based on the length of the actual
                         string and the precision. */
                     if (have_precision && precision < (unsigned char) n)
@@ -13061,20 +12980,16 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                         width = precision;
                     /* if right justified, we print the spaces before the
                         string */
-                    if (!(flags & _FLAG_MINUS))
-                    {
-                        if (str_put_n_chars (handle, space_cnt, ' '))
-                        {
+                    if (!(flags & _FLAG_MINUS)) {
+                        if (str_put_n_chars(handle, space_cnt, ' ')) {
                             FSerrno = CE_WRITE_ERROR;
                             return EOF;
                         }
                         space_cnt = 0;
                     }
                     cval = 0;
-                    for (c = *romstring; c && cval < width; c = *++romstring)
-                    {
-                        if (FSputc (c, handle) == EOF)
-                        {
+                    for (c = *romstring; c && cval < width; c = *++romstring) {
+                        if (FSputc(c, handle) == EOF) {
                             FSerrno = CE_WRITE_ERROR;
                             return EOF;
                         }
@@ -13084,16 +12999,15 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                     /* If there are spaces left, it's left justified.
                         Either way, calling the function unconditionally
                         is smaller code. */
-                    if (str_put_n_chars (handle, space_cnt, ' '))
-                    {
+                    if (str_put_n_chars(handle, space_cnt, ' ')) {
                         FSerrno = CE_WRITE_ERROR;
                         return EOF;
                     }
                     break;
 #endif
                 case 's':
-                    ramstring = va_arg (ap, char *);
-                    n = strlen (ramstring);
+                    ramstring = va_arg(ap, char *);
+                    n = strlen(ramstring);
                     /* Normalize the width based on the length of the actual
                         string and the precision. */
                     if (have_precision && precision < (unsigned char) n)
@@ -13110,20 +13024,16 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                     if (have_precision && precision < width)
                         width = precision;
                     /* if right justified, we print the spaces before the string */
-                    if (!(flags & _FLAG_MINUS))
-                    {
-                        if (str_put_n_chars (handle, space_cnt, ' '))
-                        {
+                    if (!(flags & _FLAG_MINUS)) {
+                        if (str_put_n_chars(handle, space_cnt, ' ')) {
                             FSerrno = CE_WRITE_ERROR;
                             return EOF;
                         }
                         space_cnt = 0;
                     }
                     cval = 0;
-                    for (c = *ramstring; c && cval < width; c = *++ramstring)
-                    {
-                        if (FSputc (c, handle) == EOF)
-                        {
+                    for (c = *ramstring; c && cval < width; c = *++ramstring) {
+                        if (FSputc(c, handle) == EOF) {
                             FSerrno = CE_WRITE_ERROR;
                             return EOF;
                         }
@@ -13133,8 +13043,7 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                     /* If there are spaces left, it's left justified.
                         Either way, calling the function unconditionally
                         is smaller code. */
-                    if (str_put_n_chars (handle, space_cnt, ' '))
-                    {
+                    if (str_put_n_chars(handle, space_cnt, ' ')) {
                         FSerrno = CE_WRITE_ERROR;
                         return EOF;
                     }
@@ -13142,7 +13051,7 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                 case 'd':
                 case 'i':
                     flags |= _FLAG_SIGNED;
-                /* fall through */
+                    /* fall through */
                 case 'o':
                 case 'u':
                 case 'x':
@@ -13155,29 +13064,25 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                         latter. By jumping over the additional size specifier
                         checks here we get the best code size since we can
                         limit the size checks in the remaining code. */
-                    if (size == _FMT_LONG)
-                    {
+                    if (size == _FMT_LONG) {
                         if (flags & _FLAG_SIGNED)
-                            larg = va_arg (ap, long int);
+                            larg = va_arg(ap, long int);
                         else
-                            larg = va_arg (ap, unsigned long int);
+                            larg = va_arg(ap, unsigned long int);
                         goto _do_integer_conversion;
-                    }
-                    else if (size == _FMT_BYTE)
-                    {
+                    } else if (size == _FMT_BYTE) {
                         if (flags & _FLAG_SIGNED)
-                            larg = (signed char) va_arg (ap, int);
+                            larg = (signed char) va_arg(ap, int);
                         else
-                            larg = (unsigned char) va_arg (ap, unsigned int);
+                            larg = (unsigned char) va_arg(ap, unsigned int);
                         goto _do_integer_conversion;
                     }
 #ifndef __18CXX
-                    else if (size == _FMT_LONGLONG)
-                    {
+                    else if (size == _FMT_LONGLONG) {
                         if (flags & _FLAG_SIGNED)
-                            larg = (signed long long)va_arg (ap, long long);
+                            larg = (signed long long) va_arg(ap, long long);
                         else
-                            larg = (unsigned long long) va_arg (ap, unsigned long long);
+                            larg = (unsigned long long) va_arg(ap, unsigned long long);
                         goto _do_integer_conversion;
                     }
 #endif
@@ -13185,268 +13090,242 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                 case 'p':
                 case 'P':
 #ifdef __18CXX
-                    if (size == _FMT_SHRTLONG)
-                    {
+                    if (size == _FMT_SHRTLONG) {
                         if (flags & _FLAG_SIGNED)
-                            larg = va_arg (ap, short long int);
+                            larg = va_arg(ap, short long int);
                         else
-                            larg = va_arg (ap, unsigned short long int);
-                    }
+                            larg = va_arg(ap, unsigned short long int);
+                    } else
+#endif
+                        if (flags & _FLAG_SIGNED)
+                        larg = va_arg(ap, int);
                     else
-#endif
-                        if (flags & _FLAG_SIGNED)
-                            larg = va_arg (ap, int);
-                        else
-                            larg = va_arg (ap, unsigned int);
-                    _do_integer_conversion:
-                        /* default precision is 1 */
-                        if (!have_precision)
-                            precision = 1;
-                        {
-                            unsigned char digit_cnt = 0;
-                            unsigned char prefix_cnt = 0;
-                            unsigned char sign_char;
-                            /* A 32 bit number will require at most 32 digits in the
-                                string representation (binary format). */
+                        larg = va_arg(ap, unsigned int);
+_do_integer_conversion:
+                    /* default precision is 1 */
+                    if (!have_precision)
+                        precision = 1;
+                {
+                    unsigned char digit_cnt = 0;
+                    unsigned char prefix_cnt = 0;
+                    unsigned char sign_char;
+                    /* A 32 bit number will require at most 32 digits in the
+                        string representation (binary format). */
 #ifdef __18CXX
-                            char buf[33];
-                            /* Start storing digits least-significant first */
-                            char *q = &buf[31];
-                            /* null terminate the string */
-                            buf[32] = '\0';
+                    char buf[33];
+                    /* Start storing digits least-significant first */
+                    char *q = &buf[31];
+                    /* null terminate the string */
+                    buf[32] = '\0';
 #else
-                            char buf[65];
-                            char *q = &buf[63];
-                            buf[64] = '\0';
+                    char buf[65];
+                    char *q = &buf[63];
+                    buf[64] = '\0';
 #endif
-                            space_cnt = 0;
-                            size = 10;
+                    space_cnt = 0;
+                    size = 10;
 
-                            switch (c)
-                            {
-                                case 'b':
-                                case 'B':
-                                    size = 2;
+                    switch (c) {
+                        case 'b':
+                        case 'B':
+                            size = 2;
 #ifndef __18CXX
-                                    size2 = 1;
+                            size2 = 1;
 #endif
-                                    break;
-                                case 'o':
-                                    size = 8;
+                            break;
+                        case 'o':
+                            size = 8;
 #ifndef __18CXX
-                                    size2 = 3;
+                            size2 = 3;
 #endif
-                                    break;
-                                case 'p':
-                                case 'P':
-                                    /* from here on out, treat 'p' conversions just
-                                        like 'x' conversions. */
-                                    c += 'x' - 'p';
-                                /* fall through */
-                                case 'x':
-                                case 'X':
-                                    size = 16;
+                            break;
+                        case 'p':
+                        case 'P':
+                            /* from here on out, treat 'p' conversions just
+                                like 'x' conversions. */
+                            c += 'x' - 'p';
+                            /* fall through */
+                        case 'x':
+                        case 'X':
+                            size = 16;
 #ifndef __18CXX
-                                    size2 = 4;
+                            size2 = 4;
 #endif
-                                    break;
-                            }// switch (c)
+                            break;
+                    }// switch (c)
 
-                            /* if it's an unsigned conversion, we should ignore the
-                                ' ' and '+' flags */
-                            if (!(flags & _FLAG_SIGNED))
-                                flags &= ~(_FLAG_PLUS | _FLAG_SPACE);
+                    /* if it's an unsigned conversion, we should ignore the
+                        ' ' and '+' flags */
+                    if (!(flags & _FLAG_SIGNED))
+                        flags &= ~(_FLAG_PLUS | _FLAG_SPACE);
 
-                            /* if it's a negative value, we need to negate the
-                                unsigned version before we convert to text. Using
-                                unsigned for this allows us to (ab)use the 2's
-                                complement system to avoid overflow and be able to
-                                adequately handle LONG_MIN.
+                    /* if it's a negative value, we need to negate the
+                        unsigned version before we convert to text. Using
+                        unsigned for this allows us to (ab)use the 2's
+                        complement system to avoid overflow and be able to
+                        adequately handle LONG_MIN.
 
-                                We'll figure out what sign character to print, if
-                                any, here as well. */
+                        We'll figure out what sign character to print, if
+                        any, here as well. */
 #ifdef __18CXX
-                            if (flags & _FLAG_SIGNED && ((long) larg < 0))
-                            {
-                                larg = -(long) larg;
+                    if (flags & _FLAG_SIGNED && ((long) larg < 0)) {
+                        larg = -(long) larg;
 #else
-                            if (flags & _FLAG_SIGNED && ((long long) larg < 0))
-                            {
-                                larg = -(long long) larg;
+                    if (flags & _FLAG_SIGNED && ((long long) larg < 0)) {
+                        larg = -(long long) larg;
 #endif
-                                sign_char = '-';
-                                ++digit_cnt;
-                            }
-                            else if (flags & _FLAG_PLUS)
-                            {
+                        sign_char = '-';
+                        ++digit_cnt;
+                    } else if (flags & _FLAG_PLUS) {
                         sign_char = '+';
                         ++digit_cnt;
-                     }
-                      else if (flags & _FLAG_SPACE)
-                      {
-                                sign_char = ' ';
-                                ++digit_cnt;
-                            }
-                            else
-                                sign_char = '\0';
-                            /* get the digits for the actual number. If the
-                                precision is zero and the value is zero, the result
-                                is no characters. */
-                            if (precision || larg)
-                            {
-                                do
-                                {
+                    } else if (flags & _FLAG_SPACE) {
+                        sign_char = ' ';
+                        ++digit_cnt;
+                    } else
+                        sign_char = '\0';
+                    /* get the digits for the actual number. If the
+                        precision is zero and the value is zero, the result
+                        is no characters. */
+                    if (precision || larg) {
+                        do {
 #ifdef __18CXX
-                                    cval = s_digits[larg % size];
-                                    if ((c == 'X') && (cval >= 'a'))
-                                        cval -= 'a' - 'A';
-                                    larg /= size;
+                            cval = s_digits[larg % size];
+                            if ((c == 'X') && (cval >= 'a'))
+                                cval -= 'a' - 'A';
+                            larg /= size;
 #else
-                                    // larg is congruent mod size2 to its lower 16 bits
-                                    // for size2 = 2^n, 0 <= n <= 4
-                                    if (size2 != 0)
-                                        cval = s_digits[(unsigned int) larg % size];
-                                    else
-                                        cval = s_digits[larg % size];
-                                    if ((c == 'X') && (cval >= 'a'))
-                                        cval -= 'a' - 'A';
-                                    if (size2 != 0)
-                                        larg = larg >> size2;
-                                    else
-                                        larg /= size;
+                            // larg is congruent mod size2 to its lower 16 bits
+                            // for size2 = 2^n, 0 <= n <= 4
+                            if (size2 != 0)
+                                cval = s_digits[(unsigned int) larg % size];
+                            else
+                                cval = s_digits[larg % size];
+                            if ((c == 'X') && (cval >= 'a'))
+                                cval -= 'a' - 'A';
+                            if (size2 != 0)
+                                larg = larg >> size2;
+                            else
+                                larg /= size;
 #endif
-                                    *q-- = cval;
-                                    ++digit_cnt;
-                                } while (larg);
-                                /* if the '#' flag was specified and we're dealing
-                                    with an 'o', 'b', 'B', 'x', or 'X' conversion,
-                                    we need a bit more. */
-                                if (flags & _FLAG_OCTO)
-                                {
-                                    if (c == 'o')
-                                    {
-                                        /* per the standard, for octal, the '#' flag
-                                            makes the precision be at least one more
-                                            than the number of digits in the number */
-                                        if (precision <= digit_cnt)
-                                            precision = digit_cnt + 1;
-                                    }
-                                    else if ((c == 'x') || (c == 'X') || (c == 'b') || (c == 'B'))
-                                        prefix_cnt = 2;
-                                }
-                            }
-                            else
-                                digit_cnt = 0;
-
-                            /* The leading zero count depends on whether the '0'
-                                flag was specified or not. If it was not, then the
-                                count is the difference between the specified
-                                precision and the number of digits (including the
-                                sign character, if any) to be printed; otherwise,
-                                it's as if the precision were equal to the max of
-                                the specified precision and the field width. If a
-                                precision was specified, the '0' flag is ignored,
-                                however. */
-                            if ((flags & _FLAG_ZERO) && (width > precision)
-                                && !have_precision)
-                                precision = width;
-                            /* for the rest of the processing, precision contains
-                                the leading zero count for the conversion. */
-                            if (precision > digit_cnt)
-                                precision -= digit_cnt;
-                            else
-                                precision = 0;
-                            /* the space count is the difference between the field
-                                width and the digit count plus the leading zero
-                                count. If the width is less than the digit count
-                                plus the leading zero count, the space count is
-                                zero. */
-                            if (width > precision + digit_cnt + prefix_cnt)
-                                space_cnt =   width - precision - digit_cnt - prefix_cnt;
-
-                            /* for output, we check the justification, if it's
-                                right justified and the space count is positive, we
-                                emit the space characters first. */
-                            if (!(flags & _FLAG_MINUS) && space_cnt)
-                            {
-                                if (str_put_n_chars (handle, space_cnt, ' '))
-                                {
-                                    FSerrno = CE_WRITE_ERROR;
-                                    return EOF;
-                                }
-                                count += space_cnt;
-                                space_cnt = 0;
-                            }
-                            /* if we have a sign character to print, that comes
-                                next */
-                            if (sign_char)
-                                if (FSputc (sign_char, handle) == EOF)
-                                {
-                                    FSerrno = CE_WRITE_ERROR;
-                                    return EOF;
-                                }
-                            /* if we have a prefix (0b, 0B, 0x or 0X), that's next */
-                            if (prefix_cnt)
-                            {
-                                if (FSputc ('0', handle) == EOF)
-                                {
-                                    FSerrno = CE_WRITE_ERROR;
-                                    return EOF;
-                                }
-                                if (FSputc (c, handle) == EOF)
-                                {
-                                    FSerrno = CE_WRITE_ERROR;
-                                    return EOF;
-                                }
-                            }
-                            /* if we have leading zeros, they follow. the prefix, if any
-                                is included in the number of digits when determining how
-                                many leading zeroes are needed. */
-//                            if (precision > prefix_cnt)
-  //                              precision -= prefix_cnt;
-                            if (str_put_n_chars (handle, precision, '0'))
-                            {
-                                FSerrno = CE_WRITE_ERROR;
-                                return EOF;
-                            }
-                            /* print the actual number */
-                            for (cval = *++q; cval; cval = *++q)
-                                if (FSputc (cval, handle) == EOF)
-                                {
-                                    FSerrno = CE_WRITE_ERROR;
-                                    return EOF;
-                                }
-                            /* if there are any spaces left, they go to right-pad
-                                the field */
-                            if (str_put_n_chars (handle, space_cnt, ' '))
-                            {
-                                FSerrno = CE_WRITE_ERROR;
-                                return EOF;
-                            }
-
-                            count += precision + digit_cnt + space_cnt + prefix_cnt;
+                            *q-- = cval;
+                            ++digit_cnt;
+                        } while (larg);
+                        /* if the '#' flag was specified and we're dealing
+                            with an 'o', 'b', 'B', 'x', or 'X' conversion,
+                            we need a bit more. */
+                        if (flags & _FLAG_OCTO) {
+                            if (c == 'o') {
+                                /* per the standard, for octal, the '#' flag
+                                    makes the precision be at least one more
+                                    than the number of digits in the number */
+                                if (precision <= digit_cnt)
+                                    precision = digit_cnt + 1;
+                            } else if ((c == 'x') || (c == 'X') || (c == 'b') || (c == 'B'))
+                                prefix_cnt = 2;
                         }
-                        break;
+                    } else
+                        digit_cnt = 0;
+
+                    /* The leading zero count depends on whether the '0'
+                        flag was specified or not. If it was not, then the
+                        count is the difference between the specified
+                        precision and the number of digits (including the
+                        sign character, if any) to be printed; otherwise,
+                        it's as if the precision were equal to the max of
+                        the specified precision and the field width. If a
+                        precision was specified, the '0' flag is ignored,
+                        however. */
+                    if ((flags & _FLAG_ZERO) && (width > precision)
+                            && !have_precision)
+                        precision = width;
+                    /* for the rest of the processing, precision contains
+                        the leading zero count for the conversion. */
+                    if (precision > digit_cnt)
+                        precision -= digit_cnt;
+                    else
+                        precision = 0;
+                    /* the space count is the difference between the field
+                        width and the digit count plus the leading zero
+                        count. If the width is less than the digit count
+                        plus the leading zero count, the space count is
+                        zero. */
+                    if (width > precision + digit_cnt + prefix_cnt)
+                        space_cnt = width - precision - digit_cnt - prefix_cnt;
+
+                    /* for output, we check the justification, if it's
+                        right justified and the space count is positive, we
+                        emit the space characters first. */
+                    if (!(flags & _FLAG_MINUS) && space_cnt) {
+                        if (str_put_n_chars(handle, space_cnt, ' ')) {
+                            FSerrno = CE_WRITE_ERROR;
+                            return EOF;
+                        }
+                        count += space_cnt;
+                        space_cnt = 0;
+                    }
+                    /* if we have a sign character to print, that comes
+                        next */
+                    if (sign_char)
+                        if (FSputc(sign_char, handle) == EOF) {
+                            FSerrno = CE_WRITE_ERROR;
+                            return EOF;
+                        }
+                    /* if we have a prefix (0b, 0B, 0x or 0X), that's next */
+                    if (prefix_cnt) {
+                        if (FSputc('0', handle) == EOF) {
+                            FSerrno = CE_WRITE_ERROR;
+                            return EOF;
+                        }
+                        if (FSputc(c, handle) == EOF) {
+                            FSerrno = CE_WRITE_ERROR;
+                            return EOF;
+                        }
+                    }
+                    /* if we have leading zeros, they follow. the prefix, if any
+                        is included in the number of digits when determining how
+                        many leading zeroes are needed. */
+                    //                            if (precision > prefix_cnt)
+                    //                              precision -= prefix_cnt;
+                    if (str_put_n_chars(handle, precision, '0')) {
+                        FSerrno = CE_WRITE_ERROR;
+                        return EOF;
+                    }
+                    /* print the actual number */
+                    for (cval = *++q; cval; cval = *++q)
+                        if (FSputc(cval, handle) == EOF) {
+                            FSerrno = CE_WRITE_ERROR;
+                            return EOF;
+                        }
+                    /* if there are any spaces left, they go to right-pad
+                        the field */
+                    if (str_put_n_chars(handle, space_cnt, ' ')) {
+                        FSerrno = CE_WRITE_ERROR;
+                        return EOF;
+                    }
+
+                    count += precision + digit_cnt + space_cnt + prefix_cnt;
+                }
+                    break;
                 case 'n':
-                    switch (size)
-                    {
+                    switch (size) {
                         case _FMT_LONG:
-                            *(long *) va_arg (ap, long *) = count;
+                            *(long *) va_arg(ap, long *) = count;
                             break;
 #ifdef __18CXX
                         case _FMT_SHRTLONG:
-                            *(short long *) va_arg (ap, short long *) = count;
+                            *(short long *) va_arg(ap, short long *) = count;
                             break;
 #else
                         case _FMT_LONGLONG:
-                            *(long long *) va_arg (ap, long long *) = count;
+                            *(long long *) va_arg(ap, long long *) = count;
                             break;
 #endif
                         case _FMT_BYTE:
-                            *(signed char *) va_arg (ap, signed char *) = count;
+                            *(signed char *) va_arg(ap, signed char *) = count;
                             break;
                         default:
-                            *(int *) va_arg (ap, int *) = count;
+                            *(int *) va_arg(ap, int *) = count;
                             break;
                     }
                     break;
@@ -13454,11 +13333,8 @@ int FSvfprintf (FSFILE *handle, const char * formatString, va_list ap)
                     /* undefined behaviour. we do nothing */
                     break;
             }
-        }
-        else
-        {
-            if (FSputc (c, handle) == EOF)
-            {
+        } else {
+            if (FSputc(c, handle) == EOF) {
                 FSerrno = CE_WRITE_ERROR;
                 return EOF;
             }
