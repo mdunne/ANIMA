@@ -4274,8 +4274,8 @@ BYTE FILEallocate_multiple_clusters( FILEOBJ fo, DWORD NumSectors)
     c = fo->ccls;
     first_cluster=c;
     curcls=dsk->SecPerClus;
-    printf("First Cluster: %d\r\n",c);
-    printf("cur Size: %d\r\n",fo->size);
+    //printf("First Cluster: %d\r\n",c);
+   // printf("cur Size: %d\r\n",fo->size);
     while(!IsTransmitEmpty());
     // find the next empty cluster
     //c = FATfindEmptyCluster(fo);
@@ -4283,7 +4283,7 @@ BYTE FILEallocate_multiple_clusters( FILEOBJ fo, DWORD NumSectors)
         //return CE_DISK_FULL;
 
     num_clusters=NumSectors/curcls;
-    printf("NumSectors: %d\r\nnum Clusters to take: %d\r\nSectors Per Cluster: %d\r\n",NumSectors,num_clusters,curcls);
+    //printf("NumSectors: %d\r\nnum Clusters to take: %d\r\nSectors Per Cluster: %d\r\n",NumSectors,num_clusters,curcls);
     while(!IsTransmitEmpty());
     // mark the clusters as taken, and last in chain, assume there are no used clusters afterwards
             // should not be an issue if card is not written to via the os as the MDD system does not do load bearing
@@ -4294,7 +4294,6 @@ BYTE FILEallocate_multiple_clusters( FILEOBJ fo, DWORD NumSectors)
         fo->size=curcls*dsk->sectorSize;
     }
     for (cluster_count = 0; cluster_count < num_clusters; cluster_count++) {
-        printf("Allocating cluster #%d\r\n",cluster_count);
         c = FATfindEmptyCluster(fo);
         if (c == 0) // "0" is just an indication as Disk full in the fn "FATfindEmptyCluster()"
             return CE_DISK_FULL;

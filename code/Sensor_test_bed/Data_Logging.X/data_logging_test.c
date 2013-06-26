@@ -40,6 +40,8 @@ union d_test {
     unsigned char multi_d [2][3];
 } d_test;
 
+//#define SECTORS_TO_WRITE
+
 int main(void) {
 #if defined(SUPPORT_LFN)
     char count = 80;
@@ -55,7 +57,7 @@ int main(void) {
     INTEnableSystemMultiVectoredInt();
     TIMERS_Init();
     printf("Starting the Data Logging Test compiled at %s on %s\r\n", __TIME__, __DATE__);
-    int count;
+    int count,curtime,totaltimes;
 
     //while (!MDD_MediaDetect());
     //printf("Media Detected\r\n");
@@ -103,9 +105,10 @@ int main(void) {
     }
     test_array[0] = 30;
     printf("Starting to write a lot of data\r\n");
-    for (count = 0; count < 3000; count++) {
+    for (count = 0; count < 30000; count++) {
         printf(".");
         DataLogging_Log(test_array);
+
     }
     printf("Test Complete\r\n");
     while (1);

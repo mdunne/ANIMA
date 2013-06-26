@@ -123,5 +123,6 @@ char ClearTimerExpired(unsigned char Num);
  * @date 2011.11.15  */
 unsigned int GetTime(void);
 
+unsigned int GetTicksPerSecond(void);
 
 #endif

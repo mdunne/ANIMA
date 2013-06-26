@@ -35,6 +35,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC32MX320F128H</targetDevice>
         <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>C32</languageToolchain>
         <languageToolchainVersion>2.02</languageToolchainVersion>

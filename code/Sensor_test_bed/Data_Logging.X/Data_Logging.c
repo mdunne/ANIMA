@@ -30,7 +30,7 @@ MEDIA_INFORMATION *mediaInformation;
 #define ENTRIES_IN_DIRECTORY (((BYTES_USED_FOR_DIRECTORY)/(ENTRY_SIZE_IN_BYTES))-1)
 #define MAX_ENTRY (ENTRIES_IN_DIRECTORY-1)
 #define CARD_IDENTITY 0xDEAD
-#define CHUNK_IN_SECTORS 256
+#define CHUNK_IN_SECTORS 1024
 //#define DATA_SIZE (MEDIA_SECTOR_SIZE - 2)
 
 typedef struct {
@@ -157,7 +157,11 @@ char DataLogging_Init() {
     while (!IsTransmitEmpty());
 #endif
     //while(1);
+    int curtime=GetTime();
     FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
+#ifdef DEBUG_VERBOSE
+    printf("Time to allocate %d was %d milliseconds\r\n",CHUNK_IN_SECTORS,GetTime()-curtime);
+#endif
     //while (1);
 
 }
@@ -195,7 +199,9 @@ char DataLogging_Log(unsigned char *Sector_block) {
 #ifdef DEBUG_VERBOSE
         printf("Card allocated more sectors\r\n");
 #endif
+        int curtime=GetTime();
         FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
+        printf("Time to allocate %d was %d milliseconds\r\n",CHUNK_IN_SECTORS,GetTime()-curtime);
         ChunkCount = 0;
     }
     //printf("ChunkCount: %d\tCurSectorCount: %d\r\n",ChunkCount,CurSectorCount);

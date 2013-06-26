@@ -12,11 +12,24 @@
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
- //#define TIMERS_TEST
- 
+//#define TIMERS_TEST
+
 #define F_CPU 80000000L
 #define F_PB F_CPU/2
 #define TIMER_FREQUENCY 1000
+/*******************************************************************************
+ * VERY IMPORTANT INFORMATION REGARDING TIMESCALES
+ * if timer frequency is set too high the processor can no longer respond fast enough
+ * if needed timing at that scale enable the #define below
+ * you will no longer have the other timers, only the free running timer which will
+ * at once per 1.6microseconds and a max time of 1.9 hours
+ *
+ * ******************************************************************************/
+//#define HIGH_SPEED_TIMING
+#ifdef HIGH_SPEED_TIMING
+#undef TIMER_FREQUENCY
+#define TIMER_FREQUENCY (F_PB/64)
+#endif
 //Change to alter number of used timers with a max of 32
 #define NUM_TIMERS 16
 
@@ -55,8 +68,14 @@ void TIMERS_Init(void) {
     TimerActiveFlags = 0;
     TimerEventFlags = 0;
     FreeRunningTimer = 0;
+#ifdef HIGH_SPEED_TIMING
+
+    OpenTimer1(T1_ON | T1_SOURCE_INT | T1_PS_1_64, 0xFFFF);
+    ConfigIntTimer1(T1_INT_ON | T1_INT_PRIOR_3);
+#else
     OpenTimer1(T1_ON | T1_SOURCE_INT | T1_PS_1_1, F_PB / TIMER_FREQUENCY);
     ConfigIntTimer1(T1_INT_ON | T1_INT_PRIOR_3);
+#endif
 
     mT1IntEnable(1);
 }
@@ -289,7 +308,34 @@ char ClearTimerExpired(unsigned char Num) {
      Max Dunne, 2012.01.08
  ****************************************************************************/
 unsigned int GetTime(void) {
+#ifdef HIGH_SPEED_TIMING
+    return TMR1 + FreeRunningTimer * 0xFFFF;
+#else
     return FreeRunningTimer;
+#endif
+}
+
+/****************************************************************************
+ Function
+    GetTicksPerSecond
+
+ Parameters
+     None.
+
+ Returns
+     the number of ticks for a second
+
+ Description
+    returns the number of ticks per second. Can be used to have the same timing
+    regardless of the time base of the timers.
+ Notes
+    this assumes time base is kept in a possible range
+
+ Author
+     Max Dunne, 2013.06.25
+ ****************************************************************************/
+unsigned int GetTicksPerSecond(void) {
+    return TIMER_FREQUENCY;
 }
 
 /****************************************************************************
@@ -320,6 +366,7 @@ unsigned int GetTime(void) {
 void __ISR(_TIMER_1_VECTOR, ipl3) Timer1IntHandler(void) {
     mT1ClearIntFlag();
     FreeRunningTimer++;
+#ifndef HIGH_SPEED_TIMING
     char CurTimer = 0;
     if (TimerActiveFlags != 0) {
         for (CurTimer = 0; CurTimer < NUM_TIMERS; CurTimer++) {
@@ -331,6 +378,7 @@ void __ISR(_TIMER_1_VECTOR, ipl3) Timer1IntHandler(void) {
             }
         }
     }
+#endif
 }
 
 
@@ -338,11 +386,11 @@ void __ISR(_TIMER_1_VECTOR, ipl3) Timer1IntHandler(void) {
 
 #ifdef TIMERS_TEST
 
-    #include <xc.h>
-    #include "serial.h"
-    #include "timers.h"
-    #include <GenericTypeDefs.h>
-    #define TIMERS_IN_TEST NUM_TIMERS
+#include <xc.h>
+#include "serial.h"
+#include "timers.h"
+#include <GenericTypeDefs.h>
+#define TIMERS_IN_TEST NUM_TIMERS
 //#include <plib.h>
 
 int main(void) {
@@ -352,9 +400,20 @@ int main(void) {
     INTEnableSystemMultiVectoredInt();
 
     printf("\r\nUno Timers Test Harness\r\n");
-    printf("Setting each timer for one second longer than the last and waiting for all to expire.  There are %d available timers\r\n", TIMERS_IN_TEST);
+    printf("Setting each timer for one second longer than the last and waiting for all to expire.  There are %d available timers with a time base of %g seconds\r\n", TIMERS_IN_TEST, 1 / (float) GetTicksPerSecond());
+#ifdef HIGH_SPEED_TIMING
+    printf("In high speed mode, will print out current time every second\r\n");
+    while (1) {
+        if ((GetTime() % GetTicksPerSecond()) == 0) {
+            printf("%f\r\n", (float) GetTime() / (float) GetTicksPerSecond());
+            while ((GetTime() % GetTicksPerSecond()) == 0);
+        }
+        //        printf("%u\r\n",GetTime());
+        //        while(!IsTransmitEmpty());
+    }
+#endif
     for (i = 0; i <= TIMERS_IN_TEST; i++) {
-        InitTimer(i, (i + 1)*1000); //for second scale
+        InitTimer(i, (i + 1) * GetTicksPerSecond()); //for second scale
     }
     while (IsTimerActive(TIMERS_IN_TEST - 1) == TIMER_ACTIVE) {
         for (i = 0; i <= TIMERS_IN_TEST; i++) {
@@ -366,18 +425,18 @@ int main(void) {
     }
     printf("All timers have ended\r\n");
     printf("Setting and starting 1st timer to 2 seconds using alternative method. \r\n");
-    SetTimer(0, 2000);
+    SetTimer(0, 2 * GetTicksPerSecond());
     StartTimer(0);
     while (IsTimerExpired(0) != TIMER_EXPIRED);
     printf("2 seconds should have elapsed\r\n");
     printf("Starting 1st timer for 8 seconds but also starting 2nd timer for 4 second\r\n");
-    InitTimer(0, 8000);
-    InitTimer(1, 4000);
+    InitTimer(0, 8 * GetTicksPerSecond());
+    InitTimer(1, 4 * GetTicksPerSecond());
     while (IsTimerExpired(1) != TIMER_EXPIRED);
     printf("4 seconds have passed and now stopping 1st timer\r\n");
     StopTimer(0);
     printf("Waiting 6 seconds to verifiy that 1st timer has indeed stopped\r\n");
-    InitTimer(1, 3000);
+    InitTimer(1, 3 * GetTicksPerSecond());
     i = 0;
     while (IsTimerActive(1) == TIMER_ACTIVE) {
         if (IsTimerExpired(0) == TIMER_EXPIRED) {

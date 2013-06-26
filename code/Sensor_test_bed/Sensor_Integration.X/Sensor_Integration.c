@@ -16,7 +16,7 @@
 #include "Data_Logging.h"
 #include "I2C_Driver.h"
 
-//#define DEBUG_VERBOSE
+#define DEBUG_VERBOSE
 
 //#define BMA180_PRESENT
 
@@ -109,11 +109,11 @@ void Sensor_Integration_Init() {
     //printf("Waiting %d seconds to allow all devices to start up completly\r\n", STARTUP_DELAY / 1000);
 
    // printf("If you press 'a' during this time period the card will dump all data and hold\r\nif you press 'b' it will only dump the latest");
-   // InitTimer(0, STARTUP_DELAY);
+    InitTimer(0, STARTUP_DELAY);
    // while (!IsTimerExpired(0));
     DataLogging_Init();
-    Sensor_Integration_DataDumpWholeCard();
-    while(1);
+    //Sensor_Integration_DataDumpWholeCard();
+    //while(1);
     char inChar = 0;
     while (!IsTimerExpired(0)) {
         if (!IsReceiveEmpty()) {
