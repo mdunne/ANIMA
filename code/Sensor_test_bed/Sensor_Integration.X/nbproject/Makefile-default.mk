@@ -44,12 +44,18 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 # Distribution Directory
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
+# Source Files Quoted if spaced
+SOURCEFILES_QUOTED_IF_SPACED=Sensor_Integration_Test.c Sensor_Integration.c ../118_Libraries/src/serial.c ../I2C_Driver.X/I2C_Driver.c ../Freescale_Accel.X/freescale_accel.c ../118_Libraries/src/timers.c ../LED.X/LED.c ../Bosch_Accel.X/bosch_accel.c ../freescale_Mag.X/freescale_mag.c ../Honeywell_Mag.X/honeywell_mag.c ../ST_Compass.X/st_compass.c ../GPS.X/gps.c ../Data_Logging.X/Data_Logging.c "../../../../../../../Microchip Solutions v2012-04-03/Microchip/MDD File System/SD-SPI.c" ../Data_Logging.X/FSIO.c
+
 # Object Files Quoted if spaced
 OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Sensor_Integration_Test.o ${OBJECTDIR}/Sensor_Integration.o ${OBJECTDIR}/_ext/1436657880/serial.o ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o ${OBJECTDIR}/_ext/2092746018/freescale_accel.o ${OBJECTDIR}/_ext/1436657880/timers.o ${OBJECTDIR}/_ext/2141726714/LED.o ${OBJECTDIR}/_ext/967873263/bosch_accel.o ${OBJECTDIR}/_ext/1595363603/freescale_mag.o ${OBJECTDIR}/_ext/749370040/honeywell_mag.o ${OBJECTDIR}/_ext/1451742739/st_compass.o ${OBJECTDIR}/_ext/2146002203/gps.o ${OBJECTDIR}/_ext/2142338205/Data_Logging.o ${OBJECTDIR}/_ext/1537580865/SD-SPI.o ${OBJECTDIR}/_ext/2142338205/FSIO.o
 POSSIBLE_DEPFILES=${OBJECTDIR}/Sensor_Integration_Test.o.d ${OBJECTDIR}/Sensor_Integration.o.d ${OBJECTDIR}/_ext/1436657880/serial.o.d ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o.d ${OBJECTDIR}/_ext/2092746018/freescale_accel.o.d ${OBJECTDIR}/_ext/1436657880/timers.o.d ${OBJECTDIR}/_ext/2141726714/LED.o.d ${OBJECTDIR}/_ext/967873263/bosch_accel.o.d ${OBJECTDIR}/_ext/1595363603/freescale_mag.o.d ${OBJECTDIR}/_ext/749370040/honeywell_mag.o.d ${OBJECTDIR}/_ext/1451742739/st_compass.o.d ${OBJECTDIR}/_ext/2146002203/gps.o.d ${OBJECTDIR}/_ext/2142338205/Data_Logging.o.d ${OBJECTDIR}/_ext/1537580865/SD-SPI.o.d ${OBJECTDIR}/_ext/2142338205/FSIO.o.d
 
 # Object Files
 OBJECTFILES=${OBJECTDIR}/Sensor_Integration_Test.o ${OBJECTDIR}/Sensor_Integration.o ${OBJECTDIR}/_ext/1436657880/serial.o ${OBJECTDIR}/_ext/1602749850/I2C_Driver.o ${OBJECTDIR}/_ext/2092746018/freescale_accel.o ${OBJECTDIR}/_ext/1436657880/timers.o ${OBJECTDIR}/_ext/2141726714/LED.o ${OBJECTDIR}/_ext/967873263/bosch_accel.o ${OBJECTDIR}/_ext/1595363603/freescale_mag.o ${OBJECTDIR}/_ext/749370040/honeywell_mag.o ${OBJECTDIR}/_ext/1451742739/st_compass.o ${OBJECTDIR}/_ext/2146002203/gps.o ${OBJECTDIR}/_ext/2142338205/Data_Logging.o ${OBJECTDIR}/_ext/1537580865/SD-SPI.o ${OBJECTDIR}/_ext/2142338205/FSIO.o
+
+# Source Files
+SOURCEFILES=Sensor_Integration_Test.c Sensor_Integration.c ../118_Libraries/src/serial.c ../I2C_Driver.X/I2C_Driver.c ../Freescale_Accel.X/freescale_accel.c ../118_Libraries/src/timers.c ../LED.X/LED.c ../Bosch_Accel.X/bosch_accel.c ../freescale_Mag.X/freescale_mag.c ../Honeywell_Mag.X/honeywell_mag.c ../ST_Compass.X/st_compass.c ../GPS.X/gps.c ../Data_Logging.X/Data_Logging.c ../../../../../../../Microchip Solutions v2012-04-03/Microchip/MDD File System/SD-SPI.c ../Data_Logging.X/FSIO.c
 
 
 CFLAGS=

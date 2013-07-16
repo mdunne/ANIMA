@@ -88,11 +88,14 @@ void SERIAL_Init(void) {
     UARTSetDataRate(UART1, F_PB, 115200);
     UARTSetFifoMode(UART1, UART_INTERRUPT_ON_RX_NOT_EMPTY | UART_INTERRUPT_ON_RX_NOT_EMPTY);
 
-    mU1SetIntPriority(4); //set the interrupt priority
+    INTSetVectorPriority(INT_UART_1_VECTOR,INT_PRIORITY_LEVEL_4); //set the interrupt priority
+    //mU1SetIntPriority(4); 
 
     UARTEnable(UART1, UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
-    mU1RXIntEnable(1);
-    mU1TXIntEnable(1);
+    INTEnable(INT_U1RX,INT_ENABLED);
+    INTEnable(INT_U1TX,INT_ENABLED);
+    //mU1RXIntEnable(1);
+    //mU1TXIntEnable(1);
 }
 
 /****************************************************************************
@@ -294,12 +297,12 @@ char IsTransmitEmpty(void) {
  Max Dunne, 2011.11.10
  ****************************************************************************/
 void __ISR(_UART1_VECTOR, ipl4) IntUart1Handler(void) {
-    if (mU1RXGetIntFlag()) {
-        mU1RXClearIntFlag();
+    if (INTGetFlag(INT_U1RX)) {
+        INTClearFlag(INT_U1RX);
         writeBack(receiveBuffer, (unsigned char) U1RXREG);
     }
-    if (mU1TXGetIntFlag()) {
-        mU1TXClearIntFlag();
+    if (INTGetFlag(INT_U1TX)) {
+        INTClearFlag(INT_U1TX);
         if (!(getLength(transmitBuffer) == 0)) {
             U1TXREG = readFront(transmitBuffer);
         }

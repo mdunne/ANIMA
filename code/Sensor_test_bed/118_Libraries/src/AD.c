@@ -191,7 +191,7 @@ void AD_End(void) {
 
 
 
-#define AD_TEST
+//#define AD_TEST
 #ifdef AD_TEST
 //pragmas are to set up the clock the same as it will be when using the ds30, once ds30 is up they should not be invoked
 #pragma config FPLLIDIV 	= DIV_2		//PLL Input Divider

@@ -71,13 +71,16 @@ void TIMERS_Init(void) {
 #ifdef HIGH_SPEED_TIMING
 
     OpenTimer1(T1_ON | T1_SOURCE_INT | T1_PS_1_64, 0xFFFF);
-    ConfigIntTimer1(T1_INT_ON | T1_INT_PRIOR_3);
+    //ConfigIntTimer1(T1_INT_ON | T1_INT_PRIOR_3);
+    INTSetVectorPriority(INT_TIMER_1_VECTOR,INT_PRIORITY_LEVEL_3);
 #else
     OpenTimer1(T1_ON | T1_SOURCE_INT | T1_PS_1_1, F_PB / TIMER_FREQUENCY);
-    ConfigIntTimer1(T1_INT_ON | T1_INT_PRIOR_3);
+    //ConfigIntTimer1(T1_INT_ON | T1_INT_PRIOR_3);
+    INTSetVectorPriority(INT_TIMER_1_VECTOR,INT_PRIORITY_LEVEL_3);
 #endif
 
-    mT1IntEnable(1);
+    INTEnable(INT_TIMER_1_VECTOR,INT_ENABLED);
+    //mT1IntEnable(1);
 }
 
 /****************************************************************************
@@ -364,7 +367,7 @@ unsigned int GetTicksPerSecond(void) {
  ****************************************************************************/
 
 void __ISR(_TIMER_1_VECTOR, ipl3) Timer1IntHandler(void) {
-    mT1ClearIntFlag();
+    INTClearFlag(INT_TIMER_1_VECTOR);
     FreeRunningTimer++;
 #ifndef HIGH_SPEED_TIMING
     char CurTimer = 0;
