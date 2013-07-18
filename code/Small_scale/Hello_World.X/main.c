@@ -14,6 +14,7 @@
 #include "timers.h"
 #include <plib.h>
 #include <peripheral/int.h>
+#include <peripheral/adc10.h>
 
 //#pragma config FRCDIV = 0
 //#pragma config FPLLIDIV 	= DIV_2		//PLL Input Divider
@@ -78,41 +79,48 @@ int main(void) {
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
     CFGCONbits.IOLOCK = 0;
-    SYSKEY=0;
+    SYSKEY = 0;
     //while (1) {
-//        SYSKEY = 0;
-//        SYSKEY = 0xAA996655;
-//        SYSKEY = 0x556699AA;
-//        CFGCONbits.IOLOCK = 0;
-//        LATBbits.LATB7 = CFGCONbits.IOLOCK;
-//        SYSKEY=0;
+    //        SYSKEY = 0;
+    //        SYSKEY = 0xAA996655;
+    //        SYSKEY = 0x556699AA;
+    //        CFGCONbits.IOLOCK = 0;
+    //        LATBbits.LATB7 = CFGCONbits.IOLOCK;
+    //        SYSKEY=0;
     //}
-    LATBbits.LATB7 = CFGCONbits.IOLOCK;
+    //LATBbits.LATB7 = CFGCONbits.IOLOCK;
     TRISBbits.TRISB8 = 0;
+    TRISBbits.TRISB9 = 0;
     //TRISBbits.RB9=0;
     PORTBbits.RB8 = 1;
-    TRISCbits.TRISC5 = 0;
-    LATCbits.LATC5 = 0;
-    
+    //TRISCbits.TRISC5 = 1;
+    LATBbits.LATB8 =1;
     //INTEnableSystemMultiVectoredInt();
     INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
     INTEnableInterrupts();
+
+
     SERIAL_Init();
     //LATBbits.LATB7 = 1;
     TIMERS_Init();
 
     //while (1) {
-       // LATCbits.LATC3 ^= 1;
+    // LATCbits.LATC3 ^= 1;
     //}
 
 
     printf("Hello World\r\n");
     while (1) {
-        LATCbits.LATC5 ^= 1;
-        LATBbits.LATB8^=1;
-        InitTimer(0, 250);
-        printf("TOP\r\na");
-        while (IsTimerActive(0));
+        if (!IsTimerActive(0)) {
+            // LATCbits.LATC5 ^= 1;
+            LATBbits.LATB9 ^= 1;
+            InitTimer(0, 100);
+            printf("TOP:\r\n");
+        }
+        if (!IsReceiveEmpty()) {
+            //LATBbits.LATB8 ^= 1;
+            printf("%c", GetChar());
+        }
     }
 
     while (1);

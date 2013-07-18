@@ -15,6 +15,8 @@
 //#include <stdlib.h>
 
 
+
+
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
@@ -91,16 +93,17 @@ void SERIAL_Init(void) {
     UARTSetFifoMode(UART1, UART_INTERRUPT_ON_RX_NOT_EMPTY | UART_INTERRUPT_ON_TX_DONE);
 
     INTSetVectorPriority(INT_UART_1_VECTOR, INT_PRIORITY_LEVEL_4); //set the interrupt priority
-    unsigned int dma_status;
-    unsigned int int_status;
-    //DEVCFG1bits.FCKSM = 0;
-    //mSYSTEMUnlock(int_status, dma_status);
-    //CFGCONbits.IOLOCK=0;
+
     RPC5R = 1;
-    //U1RXRbits.U1RXR = 0b111;
-    //mSYSTEMLock(int_status, dma_status);
+    TRISCbits.TRISC3=1;
+    PORTSetPinsDigitalIn(IOPORT_C,BIT_3);
+    U1RXRbits.U1RXR = 0b111;
+    
     UARTEnable(UART1, UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
-    //INTEnable(INT_U1RX, INT_ENABLED);
+    INTEnable(INT_U1RX, INT_ENABLED);
+    printf("U1RXR: %X\r\n",U1RXR);
+    //while(1);
+    //INTSetFlag(INT_U1RX);
     //INTEnable(INT_U1TX, INT_ENABLED);
     //PutChar('z');
 }
@@ -310,19 +313,21 @@ char IsTransmitEmpty(void) {
  ****************************************************************************/
 void __ISR(_UART1_VECTOR, ipl4) IntUart1Handler(void) {
     if (INTGetFlag(INT_U1RX)) {
-        
+        LATBbits.LATB8 ^= 1;
         writeBack(receiveBuffer, (unsigned char) U1RXREG);
         INTClearFlag(INT_U1RX);
     }
     if (INTGetFlag(INT_U1TX)) {
-        //LATCbits.LATC3 ^= 1;
-        LATBbits.LATB7 = INTGetFlag(INT_U1TX);
+        
+        
         //INTClearFlag(INT_U1TX);
         //IFS1bits.U1TXIF=0;
         //INTSTATbits.
-        //LATBbits.LATB7=INTGetFlag(INT_U1TX);
+        
         //Nop();
         //LATBbits.LATB7=0;
+        //LATBbits.LATB8=PORTCbits.RC3;
+        //LATCbits.LATC3^=1;
         if (!(getLength(transmitBuffer) == 0)) {
             U1TXREG = readFront(transmitBuffer);
         } else {
