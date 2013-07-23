@@ -26,11 +26,16 @@ void BOARD_Init() {
     //mSYSTEMUnlock(int_status, dma_status);
     //DEVCFG1bits.FCKSM = 0;
     //DEVCFG2bits.FPLLIDIV=1;
-
+    SYSKEY = 0;
+    SYSKEY = 0xAA996655;
+    SYSKEY = 0x556699AA;
+    CFGCONbits.IOLOCK = 0;
+    SYSKEY = 0;
     SYSTEMConfig(SYSTEM_CLOCK, SYS_CFG_ALL);
     //OSCConfig(OSC_FRC_PLL, OSC_PLL_MULT_20, OSC_PLL_POST_1, OSC_FRC_POST_1);
     //OSCCONbits.NOSC=0x1;
     OSCSetPBDIV(OSC_PB_DIV_1);
+
     //mSYSTEMLock(int_status, dma_status);
     // AD1PCFG = 0xffff;
     //SERIAL_Init();

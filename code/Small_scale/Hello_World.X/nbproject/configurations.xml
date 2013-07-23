@@ -7,6 +7,7 @@
       <itemPath>../118_Libraries/include/BOARD.h</itemPath>
       <itemPath>../118_Libraries/include/serial.h</itemPath>
       <itemPath>../118_Libraries/include/timers.h</itemPath>
+      <itemPath>../LED.X/LED.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -19,6 +20,7 @@
       <itemPath>../118_Libraries/src/BOARD.c</itemPath>
       <itemPath>../118_Libraries/src/serial.c</itemPath>
       <itemPath>../118_Libraries/src/timers.c</itemPath>
+      <itemPath>../LED.X/LED.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -26,6 +28,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../LED.X</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">
@@ -65,7 +70,8 @@
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
-        <property key="extra-include-directories" value="..\118_Libraries\include"/>
+        <property key="extra-include-directories"
+                  value="..\118_Libraries\include;..\LED.X"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
@@ -145,6 +151,7 @@
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="UART1" value="true"/>
         <property key="UART2" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>

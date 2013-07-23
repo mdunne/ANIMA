@@ -10,6 +10,7 @@
 #include "serial.h"
 #include <peripheral/uart.h>
 
+#include <peripheral/pps.h>
 #include <plib.h>
 #include <sys/attribs.h>
 //#include <stdlib.h>
@@ -94,15 +95,14 @@ void SERIAL_Init(void) {
 
     INTSetVectorPriority(INT_UART_1_VECTOR, INT_PRIORITY_LEVEL_4); //set the interrupt priority
 
-    RPC5R = 1;
-    TRISCbits.TRISC3=1;
+    //RPC5R = 1;
+    PPSOutput(1,RPC5,U1TX);
     PORTSetPinsDigitalIn(IOPORT_C,BIT_3);
-    U1RXRbits.U1RXR = 0b111;
+    //U1RXRbits.U1RXR = 0b111;
+    PPSInput(3,U1RX,RPC3);
     
     UARTEnable(UART1, UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
     INTEnable(INT_U1RX, INT_ENABLED);
-    printf("U1RXR: %X\r\n",U1RXR);
-    //while(1);
     //INTSetFlag(INT_U1RX);
     //INTEnable(INT_U1TX, INT_ENABLED);
     //PutChar('z');

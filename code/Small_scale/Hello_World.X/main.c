@@ -14,7 +14,7 @@
 #include "timers.h"
 #include <plib.h>
 #include <peripheral/int.h>
-#include <peripheral/adc10.h>
+#include <LED.h>
 
 //#pragma config FRCDIV = 0
 //#pragma config FPLLIDIV 	= DIV_2		//PLL Input Divider
@@ -67,55 +67,29 @@ int main(void) {
     //    OSCConfig(OSC_FRC_PLL, OSC_PLL_MULT_20, OSC_PLL_POST_1, OSC_PB_DIV_1);
 
 
-    //OSCCONbits.NOSC=001;
-    //OSCCONbits.OSWEN=1;
-    // while (OSCCON & 1);
-    TRISBbits.TRISB5 = 0;
-    PORTBbits.RB5 = 1;
-    TRISBbits.TRISB7 = 0;
-    //BOARD_Init();
-    //DEVCFG1bits.FCKSM = 0;
-    SYSKEY = 0;
-    SYSKEY = 0xAA996655;
-    SYSKEY = 0x556699AA;
-    CFGCONbits.IOLOCK = 0;
-    SYSKEY = 0;
-    //while (1) {
-    //        SYSKEY = 0;
-    //        SYSKEY = 0xAA996655;
-    //        SYSKEY = 0x556699AA;
-    //        CFGCONbits.IOLOCK = 0;
-    //        LATBbits.LATB7 = CFGCONbits.IOLOCK;
-    //        SYSKEY=0;
-    //}
-    //LATBbits.LATB7 = CFGCONbits.IOLOCK;
-    TRISBbits.TRISB8 = 0;
-    TRISBbits.TRISB9 = 0;
-    //TRISBbits.RB9=0;
-    PORTBbits.RB8 = 1;
-    //TRISCbits.TRISC5 = 1;
-    LATBbits.LATB8 =1;
-    //INTEnableSystemMultiVectoredInt();
     INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
     INTEnableInterrupts();
 
-
+    LED_Init(LED_BANK1);
     SERIAL_Init();
     //LATBbits.LATB7 = 1;
     TIMERS_Init();
-
+    unsigned char count=0;
     //while (1) {
     // LATCbits.LATC3 ^= 1;
     //}
 
-
+    
     printf("Hello World\r\n");
     while (1) {
         if (!IsTimerActive(0)) {
             // LATCbits.LATC5 ^= 1;
-            LATBbits.LATB9 ^= 1;
-            InitTimer(0, 100);
-            printf("TOP:\r\n");
+            //LATBbits.LATB9 ^= 1;
+            InitTimer(0, 500);
+            printf("TOP: %X\r\n",count);
+            LED_SetBank(LED_BANK1,count);
+            count++;
+            
         }
         if (!IsReceiveEmpty()) {
             //LATBbits.LATB8 ^= 1;
