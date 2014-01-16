@@ -91,16 +91,16 @@ void SERIAL_Init(void) {
 
     UARTConfigure(UART1, 0x00);
     UARTSetDataRate(UART1, F_PB, 115200);
-    UARTSetFifoMode(UART1, UART_INTERRUPT_ON_RX_NOT_EMPTY | UART_INTERRUPT_ON_TX_DONE);
+    UARTSetFifoMode(UART1, UART_INTERRUPT_ON_RX_NOT_EMPTY | UART_INTERRUPT_ON_TX_BUFFER_EMPTY);
 
     INTSetVectorPriority(INT_UART_1_VECTOR, INT_PRIORITY_LEVEL_4); //set the interrupt priority
 
     //RPC5R = 1;
-    PPSOutput(1,RPC5,U1TX);
-    PORTSetPinsDigitalIn(IOPORT_C,BIT_3);
+    PPSOutput(1, RPC5, U1TX);
+    PORTSetPinsDigitalIn(IOPORT_C, BIT_3);
     //U1RXRbits.U1RXR = 0b111;
-    PPSInput(3,U1RX,RPC3);
-    
+    PPSInput(3, U1RX, RPC3);
+
     UARTEnable(UART1, UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
     INTEnable(INT_U1RX, INT_ENABLED);
     //INTSetFlag(INT_U1RX);
@@ -133,13 +133,17 @@ void PutChar(char ch) {
     if (getLength(transmitBuffer) != QUEUESIZE) {
         writeBack(transmitBuffer, ch);
 
-        if (U1STAbits.TRMT) {
-            INTEnable(INT_U1TX, INT_ENABLED);
-            INTSetFlag(INT_U1TX);
-        } else if (!INTGetEnable(INT_U1TX)) {
+        if (!INTGetEnable(INT_U1TX)) {
             INTEnable(INT_U1TX, INT_ENABLED);
             //INTSetFlag(INT_U1TX);
         }
+        //        if (U1STAbits.TRMT) {
+        //            INTEnable(INT_U1TX, INT_ENABLED);
+        //            INTSetFlag(INT_U1TX);
+        //        } else if (!INTGetEnable(INT_U1TX)) {
+        //            INTEnable(INT_U1TX, INT_ENABLED);
+        //            //INTSetFlag(INT_U1TX);
+        //        }
     }
 }
 
@@ -312,31 +316,38 @@ char IsTransmitEmpty(void) {
  Max Dunne, 2011.11.10
  ****************************************************************************/
 void __ISR(_UART1_VECTOR, ipl4) IntUart1Handler(void) {
+    static int transmitcount = 0;
+    static int clearcount = 0;
+    static int stallcount = 0;
     if (INTGetFlag(INT_U1RX)) {
         LATBbits.LATB8 ^= 1;
         writeBack(receiveBuffer, (unsigned char) U1RXREG);
         INTClearFlag(INT_U1RX);
     }
     if (INTGetFlag(INT_U1TX)) {
-        
-        
         //INTClearFlag(INT_U1TX);
         //IFS1bits.U1TXIF=0;
         //INTSTATbits.
-        
+
         //Nop();
         //LATBbits.LATB7=0;
         //LATBbits.LATB8=PORTCbits.RC3;
         //LATCbits.LATC3^=1;
         if (!(getLength(transmitBuffer) == 0)) {
+            transmitcount++;
             U1TXREG = readFront(transmitBuffer);
-        } else {
-            INTEnable(INT_U1TX, 0);
             INTClearFlag(INT_U1TX);
+            stallcount = 0;
+        } else {
+            clearcount++;
+            //INTEnable(INT_U1TX, 0);
+            stallcount++;
             Nop();
-
         }
-
+        if (stallcount > 1) {
+            INTEnable(INT_U1TX, INT_DISABLED);
+            INTClearFlag(INT_U1TX);
+        }
     }
 
 }

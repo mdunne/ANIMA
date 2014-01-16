@@ -2,10 +2,10 @@
 
 
 
-#include <p32xxxx.h>
-#include "stdio.h"
-#include "serial.h"
-#include "freescale_accel.h"
+#include <xc.h>
+#include <stdio.h>
+#include <serial.h>
+#include <freescale_accel.h>
 
 int main(void) {
 

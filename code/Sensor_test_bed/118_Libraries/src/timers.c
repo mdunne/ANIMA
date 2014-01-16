@@ -7,7 +7,8 @@
 
 #include <p32xxxx.h>
 #include <peripheral/timer.h>
-#include "timers.h"
+#include <peripheral/int.h>
+#include <timers.h>
 #include <GenericTypeDefs.h>
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *

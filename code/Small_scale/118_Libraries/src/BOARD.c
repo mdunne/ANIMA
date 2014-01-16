@@ -6,13 +6,14 @@
  */
 
 #include <BOARD.h>
-
+#include <xc.h>
 //#include <serial.h>
 #include <plib.h>
 #include <peripheral/osc.h>
 #include <peripheral/lock.h>
+#include <LED.h>
+#include <peripheral/ports.h>
 
-#include <xc.h>
 
 //#pragma config FPLLIDIV = DIV_2
 //#pragma config FCKSM = CSECMD
@@ -38,13 +39,34 @@ void BOARD_Init() {
 
     //mSYSTEMLock(int_status, dma_status);
     // AD1PCFG = 0xffff;
-    //SERIAL_Init();
-    //INTEnableSystemMultiVectoredInt();
+
+    INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
+    INTEnableInterrupts();
+    SERIAL_Init();
+
     //printf("This code compiled at %s on %s\r\n", __TIME__, __DATE__);
 }
 
 unsigned int BOARD_GetPBClock() {
     return PB_CLOCK;
+}
+
+//oddball function to blink LEDs and print something to the screen to determine if processor is stalled or not
+
+void BOARD_BlinkStall() {
+    LED_Init(LED_BANK1);
+    int count = 0;
+    while (1) {
+        if (!IsTimerActive(0)) {
+            // LATCbits.LATC5 ^= 1;
+            //LATBbits.LATB9 ^= 1;
+            InitTimer(0, 500);
+            printf("TOP: %X\r\n", count);
+            LED_SetBank(LED_BANK1, count);
+            count++;
+
+        }
+    }
 }
 
 

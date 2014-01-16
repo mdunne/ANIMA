@@ -10,6 +10,7 @@
 #include "serial.h"
 #include <peripheral/uart.h>
 #include <plib.h>
+#include <peripheral/int.h>
 #include <sys/attribs.h>
 //#include <stdlib.h>
 

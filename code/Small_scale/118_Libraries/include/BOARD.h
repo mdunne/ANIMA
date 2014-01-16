@@ -27,7 +27,7 @@
 void BOARD_Init();
 
 unsigned int BOARD_GetPBClock();
-
+void BOARD_blinkStall();
 
 #endif	/* BOARD_H */
 

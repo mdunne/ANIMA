@@ -124,7 +124,7 @@ short I2C_ReadInt(char I2Caddress, char DeviceRegister) {
 
 }
 
-void I2C_ReadMultiple(char I2Caddress, char DeviceRegister, char *OutArray, char NumBytes) {
+void I2C_ReadMultiple(char I2Caddress, char DeviceRegister, unsigned char *OutArray, char NumBytes) {
     int Data = 0;
     I2C1CONbits.SEN = 1;
     //printf("Sending start condition\r\n");

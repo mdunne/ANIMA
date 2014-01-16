@@ -1,11 +1,13 @@
 
-#include <p32xxxx.h>
+#include <xc.h>
 #include "I2C_Driver.h"
 #include <GenericTypeDefs.h>
 #include "stdio.h"
 #include <plib.h>
 #include <peripheral/i2c.h>
 #include <LED.h>
+#include "BOARD.h"
+#include "serial.h"
 
 #define BIG_ENDIAN
 
@@ -24,8 +26,12 @@
 #define ACCEL_LAT LATAbits.LATA2
 #define MAG_LAT LATAbits.LATA3
 
+#define ACCEL_PORT IOPORT_A,BIT_2
+#define MAG_PORT IOPORT_A,BIT_3
+
 #define I2CPOWER_TRIS TRISCbits.TRISC0
 #define I2CPOWER_LAT LATCbits.LATC0
+#define I2CPOWER_PORT IOPORT_C,BIT_0
 
 /*******************************************************************************
  * PRIVATE VARIABLES                                                           *
@@ -41,22 +47,29 @@ int I2C_Init(unsigned int Rate) {
         //Real_Rate = I2CSetFrequency(USED_I2C, F_PB, Rate);
         ACCEL_TRIS = 0;
         MAG_TRIS = 0;
+        PORTSetPinsDigitalOut(ACCEL_PORT);
+        PORTSetPinsDigitalOut(MAG_PORT);
+        ANSELBbits.ANSB2=0;
+        ANSELBbits.ANSB3=0;
         ACCEL_LAT = 1;
         MAG_LAT = 1;
         if ((MAG_LAT == 1) && (ACCEL_LAT == 1)) {
+            printf("Power to the I2C lines was made\r\n");
             I2CPOWER_TRIS = 0;
+            PORTSetPinsDigitalOut(I2CPOWER_PORT);
             I2CPOWER_LAT = 1;
         } else {
             printf("Sensors not powered, stalling here\r\n");
             while (1);
         }
-
+        
         I2C2BRG = (F_PB / (2 * Rate)) - 2;
         //printf("I2C2BRG: %d\r\n",I2C2BRG);
         Real_Rate = (F_PB) / ((I2C2BRG + 2)*2);
         //printf("I2C baud rate: %X\r\n",I2C2BRG);
         //I2CEnable(USED_I2C, TRUE);
         I2C2CONbits.ON = 1;
+        //while(1);
         I2C_Inited = TRUE;
         //printf("Configuration Register: %X\r\n",I2C2CON);
     }
@@ -224,7 +237,7 @@ unsigned char I2C_WriteReg(char I2Caddress, char DeviceRegister, char data) {
     I2C2TRN = (I2Caddress << 1);
     while (I2C2STATbits.TRSTAT != 0);
     if (I2C2STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK upon addressing");
+        printf("Device address %X Responded with NACK in %s in regards to Register %X\r\n",I2Caddress,__FUNCTION__,DeviceRegister);
         while (1);
     }
 
@@ -312,15 +325,29 @@ unsigned char I2C_ReadReg(char I2Caddress, char DeviceRegister) {
     //        while(1);
     //    }
     //    Command_Result=I2CReceiverEnable(USED_I2C,TRUE);
+    //while(1);
     I2C2CONbits.SEN = 1;
-
+    
+    printf("I2C address, %X\r\n",I2Caddress);
+   // while(1);
+    while(!IsTransmitEmpty());
     while (I2C2CONbits.SEN == 1);
-    //printf("start condition sent\r\n");
+    
+    printf("start condition sent\r\n");
+    while(1);
+    //while(!IsTransmitEmpty());
     I2C2TRN = I2Caddress << 1;
-    while (I2C2STATbits.TRSTAT != 0);
-
+    while (I2C2STATbits.TRSTAT != 0)
+    {
+        if(IsTransmitEmpty())
+        {
+            printf("I2C: %d\r\n",I2C2STATbits.TRSTAT);
+            //I2C2TRN = I2Caddress << 1;
+        }
+    }
+    printf("Address transmitted\r\n");
     if (I2C2STATbits.ACKSTAT == 1) {
-        printf("Device Responded with NACK1");
+        printf("Device address %X Responded with NACK at Read of Register %X",I2Caddress,DeviceRegister);
         while (1);
     }
 

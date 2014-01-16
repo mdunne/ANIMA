@@ -7734,6 +7734,31 @@ package type P</description>
 <text x="-6.4" y="2.9" size="1.27" layer="25" ratio="15">&gt;NAME</text>
 <text x="-3.1" y="-3.7" size="1.27" layer="27" ratio="15">&gt;VALUE</text>
 </package>
+<package name="PAD.02X.02">
+<smd name="P$1" x="0" y="0" dx="0.508" dy="0.508" layer="1"/>
+</package>
+<package name="PAD.03X.03">
+<smd name="P$1" x="0" y="0" dx="0.762" dy="0.762" layer="1" roundness="100" cream="no"/>
+</package>
+<package name="PAD.03X.05">
+<smd name="P$1" x="0" y="0" dx="1.27" dy="1.27" layer="1" roundness="100" cream="no"/>
+</package>
+<package name="SOT-23B">
+<description>The SOT-23B package is defined by Microchip at http://www.microchip.com/stellent/groups/techpub_sg/documents/packagingspec/en012702.pdf. It's used by their TC1047/A temperature sensor.</description>
+<wire x1="0.6858" y1="0.508" x2="0.6858" y2="-0.508" width="0.127" layer="21"/>
+<wire x1="0.6858" y1="1.524" x2="-0.6858" y2="1.524" width="0.127" layer="21"/>
+<wire x1="-0.6858" y1="1.524" x2="-0.6858" y2="0.508" width="0.127" layer="21"/>
+<wire x1="-0.6858" y1="-0.508" x2="-0.6858" y2="-1.524" width="0.127" layer="21"/>
+<wire x1="-0.6858" y1="-1.524" x2="0.6858" y2="-1.524" width="0.127" layer="21"/>
+<wire x1="0.6858" y1="1.524" x2="0.6858" y2="-1.524" width="0.127" layer="51"/>
+<wire x1="0.6858" y1="1.524" x2="-0.6858" y2="1.524" width="0.127" layer="51"/>
+<wire x1="-0.6858" y1="1.524" x2="-0.6858" y2="-1.524" width="0.127" layer="51"/>
+<wire x1="-0.6858" y1="-1.524" x2="0.6858" y2="-1.524" width="0.127" layer="51"/>
+<smd name="P$3" x="-0.9652" y="0" dx="1.27" dy="0.635" layer="1"/>
+<smd name="P$1" x="0.9652" y="-0.9652" dx="1.27" dy="0.635" layer="1"/>
+<smd name="P$2" x="0.9652" y="0.9652" dx="1.27" dy="0.635" layer="1"/>
+<text x="-1.27" y="1.905" size="1.27" layer="21">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="LETTER_L">
@@ -9315,6 +9340,24 @@ package type P</description>
 <pin name="G" x="-7.62" y="0" visible="off" length="short" direction="pas"/>
 <pin name="D" x="0" y="5.08" visible="off" length="short" direction="pas" rot="R270"/>
 <pin name="S" x="0" y="-5.08" visible="off" length="short" direction="pas" rot="R90"/>
+</symbol>
+<symbol name="TEST-POINT">
+<wire x1="2.54" y1="0" x2="0" y2="0" width="0.1524" layer="94"/>
+<wire x1="3.302" y1="0.762" x2="3.302" y2="-0.762" width="0.1524" layer="94" curve="180"/>
+<text x="-2.54" y="2.54" size="1.778" layer="95">&gt;Name</text>
+<text x="-2.54" y="-2.54" size="1.778" layer="96">&gt;Value</text>
+<pin name="1" x="0" y="0" visible="off" length="point" rot="R180"/>
+</symbol>
+<symbol name="TC1047">
+<wire x1="10.16" y1="-5.08" x2="10.16" y2="15.24" width="0.254" layer="94"/>
+<wire x1="10.16" y1="15.24" x2="-10.16" y2="15.24" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="15.24" x2="-10.16" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="-5.08" x2="10.16" y2="-5.08" width="0.254" layer="94"/>
+<text x="-8.89" y="-3.81" size="1.27" layer="94">&gt;VALUE</text>
+<text x="-10.16" y="16.51" size="1.27" layer="94">&gt;NAME</text>
+<pin name="VCC" x="0" y="20.32" visible="pin" length="middle" direction="pwr" rot="R270"/>
+<pin name="TEMP" x="15.24" y="5.08" visible="pin" length="middle" direction="out" rot="R180"/>
+<pin name="GND" x="0" y="-10.16" visible="pin" length="middle" direction="sup" rot="R90"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -12775,6 +12818,56 @@ Various common sizes : AA, AAA, 20mm coin cell and 12mm coin cell.&lt;br&gt;
 <connect gate="G$1" pin="D" pad="3"/>
 <connect gate="G$1" pin="G" pad="1"/>
 <connect gate="G$1" pin="S" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="TEST-POINT" prefix="TP">
+<description>Bare copper test points for troubleshooting or ICT</description>
+<gates>
+<gate name="G$1" symbol="TEST-POINT" x="0" y="0"/>
+</gates>
+<devices>
+<device name="2" package="PAD.02X.02">
+<connects>
+<connect gate="G$1" pin="1" pad="P$1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="3" package="PAD.03X.03">
+<connects>
+<connect gate="G$1" pin="1" pad="P$1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="3X5" package="PAD.03X.05">
+<connects>
+<connect gate="G$1" pin="1" pad="P$1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="TC1047" prefix="U">
+<description>The TC1047 is a linear output temperature sensor whose output voltage is directly proportional to measured temperature. The TC1047 can accurately measure temperature from -40C to +125C. For the TC1047, the output voltage range is typically 100mV at -40C, 500mV at 0C, 750mV at +25C, and 1.75V at +125C. A 10mV/¢XC voltage slope allows for the wide temperature range. The TC1047 is packaged in space saving 3-Pin SOT-23B packages, making them ideal for space critical applications.</description>
+<gates>
+<gate name="G$1" symbol="TC1047" x="0" y="-5.08"/>
+</gates>
+<devices>
+<device name="" package="SOT-23B">
+<connects>
+<connect gate="G$1" pin="GND" pad="P$3"/>
+<connect gate="G$1" pin="TEMP" pad="P$2"/>
+<connect gate="G$1" pin="VCC" pad="P$1"/>
 </connects>
 <technologies>
 <technology name=""/>

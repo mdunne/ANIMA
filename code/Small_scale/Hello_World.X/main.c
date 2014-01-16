@@ -67,11 +67,11 @@ int main(void) {
     //    OSCConfig(OSC_FRC_PLL, OSC_PLL_MULT_20, OSC_PLL_POST_1, OSC_PB_DIV_1);
 
 
-    INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
-    INTEnableInterrupts();
 
     LED_Init(LED_BANK1);
-    SERIAL_Init();
+    LED_SetBank(LED_BANK1,~2);
+    //while(1);
+    //SERIAL_Init();
     //LATBbits.LATB7 = 1;
     TIMERS_Init();
     unsigned char count=0;
