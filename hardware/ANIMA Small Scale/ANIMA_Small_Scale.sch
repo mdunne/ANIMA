@@ -4650,7 +4650,10 @@ These are standard reverse protection diodes and small signal diodes. SMA packag
 </instance>
 <instance part="C19" gate="G$1" x="43.18" y="170.18"/>
 <instance part="C20" gate="G$1" x="50.8" y="170.18"/>
-<instance part="Q2" gate="G$1" x="119.38" y="172.72" rot="R90"/>
+<instance part="Q2" gate="G$1" x="119.38" y="172.72" smashed="yes" rot="R90">
+<attribute name="NAME" x="116.84" y="177.8" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="139.7" y="182.88" size="1.778" layer="96" rot="R180"/>
+</instance>
 <instance part="R9" gate="G$1" x="106.68" y="160.02" rot="R180"/>
 <instance part="R13" gate="G$1" x="111.76" y="165.1" rot="R180"/>
 <instance part="Q3" gate="G$1" x="109.22" y="96.52" smashed="yes" rot="MR180">
@@ -5199,7 +5202,7 @@ These are standard reverse protection diodes and small signal diodes. SMA packag
 <junction x="129.54" y="172.72"/>
 <wire x1="139.7" y1="172.72" x2="139.7" y2="177.8" width="0.1524" layer="91"/>
 <junction x="139.7" y="172.72"/>
-<label x="137.16" y="177.8" size="1.778" layer="95"/>
+<label x="139.7" y="177.8" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="MMA8451_INT2" class="0">

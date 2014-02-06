@@ -33,6 +33,9 @@ void BOARD_Init() {
     CFGCONbits.IOLOCK = 0;
     SYSKEY = 0;
     SYSTEMConfig(SYSTEM_CLOCK, SYS_CFG_ALL);
+    ANSELA=0;
+    ANSELB=0;
+    ANSELC=0;
     //OSCConfig(OSC_FRC_PLL, OSC_PLL_MULT_20, OSC_PLL_POST_1, OSC_FRC_POST_1);
     //OSCCONbits.NOSC=0x1;
     OSCSetPBDIV(OSC_PB_DIV_1);

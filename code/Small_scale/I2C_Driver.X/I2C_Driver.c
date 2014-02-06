@@ -16,6 +16,9 @@
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
+
+#define NONSTALLMODE
+
 #define F_CPU 80000000L
 #define F_PB F_CPU/2
 #define USED_I2C I2C2
@@ -49,8 +52,8 @@ int I2C_Init(unsigned int Rate) {
         MAG_TRIS = 0;
         PORTSetPinsDigitalOut(ACCEL_PORT);
         PORTSetPinsDigitalOut(MAG_PORT);
-        ANSELBbits.ANSB2=0;
-        ANSELBbits.ANSB3=0;
+        ANSELBbits.ANSB2 = 0;
+        ANSELBbits.ANSB3 = 0;
         ACCEL_LAT = 1;
         MAG_LAT = 1;
         if ((MAG_LAT == 1) && (ACCEL_LAT == 1)) {
@@ -62,7 +65,7 @@ int I2C_Init(unsigned int Rate) {
             printf("Sensors not powered, stalling here\r\n");
             while (1);
         }
-        
+
         I2C2BRG = (F_PB / (2 * Rate)) - 2;
         //printf("I2C2BRG: %d\r\n",I2C2BRG);
         Real_Rate = (F_PB) / ((I2C2BRG + 2)*2);
@@ -232,12 +235,18 @@ unsigned char I2C_WriteReg(char I2Caddress, char DeviceRegister, char data) {
     //        //printf("About to send address\r\n");
     //        Command_Result = I2CSendByte(USED_I2C, (I2Caddress << 1) | I2C_WRITE);
     //    }
+
     I2C2CONbits.SEN = 1;
+    //printf("sending start condition\r\n");
     while (I2C2CONbits.SEN == 1);
     I2C2TRN = (I2Caddress << 1);
     while (I2C2STATbits.TRSTAT != 0);
     if (I2C2STATbits.ACKSTAT == 1) {
-        printf("Device address %X Responded with NACK in %s in regards to Register %X\r\n",I2Caddress,__FUNCTION__,DeviceRegister);
+        printf("Device address %X Responded with NACK in %s in regards to Register %X\r\n", I2Caddress, __FUNCTION__, DeviceRegister);
+#ifdef NONSTALLMODE
+        while (!IsTransmitEmpty());
+        return -1;
+#endif
         while (1);
     }
 
@@ -245,12 +254,19 @@ unsigned char I2C_WriteReg(char I2Caddress, char DeviceRegister, char data) {
     while (I2C2STATbits.TRSTAT != 0);
     if (I2C2STATbits.ACKSTAT == 1) {
         printf("Device Responded with NACK upon address to wake");
+#ifdef NONSTALLMODE
+        return -1;
+#endif
         while (1);
     }
     I2C2TRN = data;
     while (I2C2STATbits.TRSTAT != 0);
     if (I2C2STATbits.ACKSTAT == 1) {
         printf("Device Responded with NACK upon changing to awake mode");
+#ifdef NONSTALLMODE
+        while (!IsTransmitEmpty());
+        return -1;
+#endif
         while (1);
     }
     I2C2CONbits.PEN = 1;
@@ -327,27 +343,26 @@ unsigned char I2C_ReadReg(char I2Caddress, char DeviceRegister) {
     //    Command_Result=I2CReceiverEnable(USED_I2C,TRUE);
     //while(1);
     I2C2CONbits.SEN = 1;
-    
-    printf("I2C address, %X\r\n",I2Caddress);
-   // while(1);
-    while(!IsTransmitEmpty());
+
+    //printf("I2C address, %X\r\n", I2Caddress);
+    // while(1);
+    while (!IsTransmitEmpty());
     while (I2C2CONbits.SEN == 1);
-    
-    printf("start condition sent\r\n");
-    while(1);
+
+    //printf("start condition sent\r\n");
+    //while(1);
     //while(!IsTransmitEmpty());
     I2C2TRN = I2Caddress << 1;
-    while (I2C2STATbits.TRSTAT != 0)
-    {
-        if(IsTransmitEmpty())
-        {
-            printf("I2C: %d\r\n",I2C2STATbits.TRSTAT);
+    while (I2C2STATbits.TRSTAT != 0) {
+        if (IsTransmitEmpty()) {
+            //printf("I2C: %d\r\n", I2C2STATbits.TRSTAT);
             //I2C2TRN = I2Caddress << 1;
         }
     }
-    printf("Address transmitted\r\n");
+    //printf("Address transmitted\r\n");
     if (I2C2STATbits.ACKSTAT == 1) {
-        printf("Device address %X Responded with NACK at Read of Register %X",I2Caddress,DeviceRegister);
+        printf("Device address %X Responded with NACK at Read of Register %X\r\n", I2Caddress, DeviceRegister);
+        return -1;
         while (1);
     }
 
