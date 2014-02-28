@@ -16,7 +16,7 @@ MEDIA_INFORMATION *mediaInformation;
 
 
 #define DEBUG_MESSAGE
-#define DEBUG_VERBOSE
+//#define DEBUG_VERBOSE
 
 #define SECTORS_USED_FOR_DIRECTORY 5
 
@@ -109,13 +109,11 @@ char DataLogging_Init() {
     //printf("total entries: %d",ENTRIES_IN_DIRECTORY);
     //printf("sizeof(Dir_Entry):%d",sizeof(char));
     printf("in function above pin declares\r\n");
-    InitTimer(0, 2000);
-    while (IsTimerActive(0));
-    TRISAbits.TRISA1=0;
-//    PORTSetPinsDigitalOut(IOPORT_A, BIT_1);
-    PPSInput(3,SDI2,RPC6);
-    PPSOutput(2,RPC8,SDO2);
-    TRISCbits.TRISC8=0;
+    TRISAbits.TRISA1 = 0;
+    //    PORTSetPinsDigitalOut(IOPORT_A, BIT_1);
+    PPSInput(3, SDI2, RPC6);
+    PPSOutput(2, RPC8, SDO2);
+    TRISCbits.TRISC8 = 0;
     LATAbits.LATA1 = 0;
     PORTSetPinsDigitalIn(IOPORT_B, BIT_4);
 
@@ -123,28 +121,28 @@ char DataLogging_Init() {
     //InitTimer(0,500);
     //while(1);
     //LED_SetBank(LED_BANK1, ~3);
-//    printf("in function above below\r\n");
-//    InitTimer(0, 2000);
-//    while (IsTimerActive(0));
+    //    printf("in function above below\r\n");
+    //    InitTimer(0, 2000);
+    //    while (IsTimerActive(0));
     //while (1);
-//    while (1) {
-//        if (IsTransmitEmpty()) {
-//            printf("%d\r\n", MDD_MediaDetect());
-//
-//        }
-//        if (IsTimerExpired(0)) {
-//            if (toggle) {
-//                LED_SetBank(LED_BANK1, ~0);
-//                toggle = FALSE;
-//            } else {
-//                LED_SetBank(LED_BANK1, ~(MDD_MediaDetect()+1));
-//                toggle = TRUE;
-//            }
-//            InitTimer(0, 500);
-//        }
-//    }
+    //    while (1) {
+    //        if (IsTransmitEmpty()) {
+    //            printf("%d\r\n", MDD_MediaDetect());
+    //
+    //        }
+    //        if (IsTimerExpired(0)) {
+    //            if (toggle) {
+    //                LED_SetBank(LED_BANK1, ~0);
+    //                toggle = FALSE;
+    //            } else {
+    //                LED_SetBank(LED_BANK1, ~(MDD_MediaDetect()+1));
+    //                toggle = TRUE;
+    //            }
+    //            InitTimer(0, 500);
+    //        }
+    //    }
     while (!MDD_MediaDetect());
-//    while (1);
+    //    while (1);
     MDD_SDSPI_InitIO();
     int count = 0;
     mediaInformation = MDD_MediaInitialize();
@@ -239,7 +237,9 @@ char DataLogging_Log(unsigned char *Sector_block) {
 #endif
         int curtime = GetTime();
         FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
+#ifdef DEBUG_VERBOSE
         printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
+#endif
         ChunkCount = 0;
     }
     //printf("ChunkCount: %d\tCurSectorCount: %d\r\n",ChunkCount,CurSectorCount);

@@ -83,6 +83,7 @@
         <property key="extra-include-directories"
                   value=".;..\118_Libraries\include;..\LED.X"/>
         <property key="generate-16-bit-code" value="false"/>
+        <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>
         <property key="make-warnings-into-errors" value="false"/>
         <property key="optimization-level" value=""/>
@@ -93,6 +94,7 @@
         <property key="strict-ansi" value="false"/>
         <property key="support-ansi" value="false"/>
         <property key="use-cci" value="false"/>
+        <property key="use-iar" value="false"/>
         <property key="use-indirect-calls" value="false"/>
       </C32>
       <C32-AS>
@@ -105,10 +107,9 @@
         <property key="false-conditionals" value="false"/>
         <property key="keep-locals" value="false"/>
         <property key="list-assembly" value="false"/>
-        <property key="list-file" value=""/>
-        <property key="list-section-info" value="false"/>
         <property key="list-source" value="false"/>
         <property key="list-symbols" value="false"/>
+        <property key="oXC32asm-list-to-file" value="false"/>
         <property key="omit-debug-dirs" value="false"/>
         <property key="omit-forms" value="false"/>
         <property key="preprocessor-macros" value=""/>
@@ -166,12 +167,16 @@
       </C32CPP>
       <C32Global>
         <property key="legacy-libc" value="false"/>
+        <property key="save-temps" value="false"/>
+        <property key="wpo-lto" value="false"/>
       </C32Global>
       <PICkit3PlatformTool>
         <property key="ADC 1" value="true"/>
         <property key="AutoSelectMemRanges" value="auto"/>
         <property key="CHANGE NOTICE" value="true"/>
         <property key="COMPARATOR" value="true"/>
+        <property key="CTMU" value="true"/>
+        <property key="DMA" value="true"/>
         <property key="Freeze All Other Peripherals" value="true"/>
         <property key="I2C1" value="true"/>
         <property key="I2C2" value="true"/>
@@ -188,6 +193,8 @@
         <property key="OUTPUT COMPARE 5" value="true"/>
         <property key="PARALLEL MASTER/SLAVE PORT" value="true"/>
         <property key="REAL TIME CLOCK" value="true"/>
+        <property key="SPI/I2S 1" value="true"/>
+        <property key="SPI/I2S 2" value="true"/>
         <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
         <property key="TIMER1" value="true"/>
         <property key="TIMER2" value="true"/>
@@ -199,9 +206,10 @@
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="UART1" value="true"/>
         <property key="UART2" value="true"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
+        <property key="memories.bootflash" value="true"/>
+        <property key="memories.configurationmemory" value="true"/>
         <property key="memories.eeprom" value="false"/>
         <property key="memories.flashdata" value="true"/>
         <property key="memories.id" value="false"/>
@@ -217,6 +225,7 @@
         <property key="programoptions.preserveprogramrange.end" value="0x1d0001ff"/>
         <property key="programoptions.preserveprogramrange.start" value="0x1d000000"/>
         <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.testmodeentrymethod" value="VPPFirst"/>
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>

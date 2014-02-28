@@ -5,7 +5,7 @@
  * Created on November 22, 2011, 8:57 AM
  */
 
-#include <p32xxxx.h>
+#include <xc.h>
 #include "AD.h"
 
 #include <peripheral/adc10.h>
@@ -17,27 +17,25 @@
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
-#define NUM_AD_PINS 13
+#define NUM_AD_PINS 10
 #define NUM_AD_PINS_UNO 16
 
 
 /*******************************************************************************
  * PRIVATE VARIABLES                                                            *
  ******************************************************************************/
-static unsigned int AD1PCFG_MASKS[NUM_AD_PINS] = {ENABLE_AN2_ANA, ENABLE_AN3_ANA,
+static unsigned int AD1PCFG_MASKS[NUM_AD_PINS] = {ENABLE_AN0_ANA, ENABLE_AN11_ANA,
     ENABLE_AN4_ANA, ENABLE_AN5_ANA, ENABLE_AN8_ANA, ENABLE_AN9_ANA,
-    ENABLE_AN11_ANA, ENABLE_AN10_ANA, ENABLE_AN13_ANA, ENABLE_AN12_ANA,
-    ENABLE_AN15_ANA, ENABLE_AN14_ANA, ENABLE_AN1_ANA};
+    ENABLE_AN11_ANA, ENABLE_AN10_ANA, ENABLE_AN12_ANA,
+    ENABLE_AN1_ANA};
 
-static unsigned int AD1CSSL_MASKS[NUM_AD_PINS] = {SKIP_SCAN_AN2, SKIP_SCAN_AN3,
+static unsigned int AD1CSSL_MASKS[NUM_AD_PINS] = {SKIP_SCAN_AN0, SKIP_SCAN_AN11,
     SKIP_SCAN_AN4, SKIP_SCAN_AN5, SKIP_SCAN_AN8, SKIP_SCAN_AN9,
-    SKIP_SCAN_AN11, SKIP_SCAN_AN10, SKIP_SCAN_AN13, SKIP_SCAN_AN12,
-    SKIP_SCAN_AN15, SKIP_SCAN_AN14, SKIP_SCAN_AN1};
+    SKIP_SCAN_AN11, SKIP_SCAN_AN10, SKIP_SCAN_AN12,
+    SKIP_SCAN_AN1};
 
-static unsigned int AD1PCFG_POS[NUM_AD_PINS] = {_AD1PCFG_PCFG2_POSITION, _AD1PCFG_PCFG3_POSITION,
-    _AD1PCFG_PCFG4_POSITION, _AD1PCFG_PCFG5_POSITION, _AD1PCFG_PCFG8_POSITION, _AD1PCFG_PCFG9_POSITION,
-    _AD1PCFG_PCFG11_POSITION, _AD1PCFG_PCFG10_POSITION, _AD1PCFG_PCFG13_POSITION, _AD1PCFG_PCFG12_POSITION,
-    _AD1PCFG_PCFG15_POSITION, _AD1PCFG_PCFG14_POSITION, _AD1PCFG_PCFG1_POSITION};
+static unsigned int AD1PCFG_POS[NUM_AD_PINS] = {_ANSELA_ANSA0_POSITION, _ANSELB_ANSB13_POSITION, _ANSELB_ANSB0_POSITION, _ANSELB_ANSB1_POSITION,
+    _ANSELB_ANSB2_POSITION, _ANSELB_ANSB3_POSITION, _ANSELC_ANSC0_POSITION, _ANSELC_ANSC1_POSITION, _ANSELC_ANSC2_POSITION};
 
 static unsigned int UsedPins;
 static unsigned int PinCount;
@@ -47,6 +45,7 @@ static int PortMapping[NUM_AD_PINS];
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                           *
  ******************************************************************************/
+
 /****************************************************************************
  Function
      AD_Init
@@ -104,8 +103,6 @@ unsigned char AD_Init(unsigned int Pins) {
     return SUCCESS;
 }
 
-
-
 /****************************************************************************
  Function
     ADCIntHandler
@@ -127,11 +124,11 @@ unsigned char AD_Init(unsigned int Pins) {
 void __ISR(_ADC_VECTOR, ipl1) ADCIntHandler(void) {
     mAD1ClearIntFlag();
     unsigned char CurPin = 0;
-    for (CurPin = 0; CurPin <= PinCount; CurPin++) {
+    for (CurPin = 0; CurPin < PinCount; CurPin++) {
+
         ADValues[CurPin] = ReadADC10(CurPin);
     }
 }
-
 
 /****************************************************************************
  Function
@@ -186,12 +183,12 @@ void AD_End(void) {
     UsedPins = 0;
     PinCount = 0;
     CloseADC10();
-    AD1PCFG = 0xFF;
+    ANSELA = 0xff;
 }
 
 
 
-#define AD_TEST
+//#define AD_TEST
 #ifdef AD_TEST
 //pragmas are to set up the clock the same as it will be when using the ds30, once ds30 is up they should not be invoked
 #pragma config FPLLIDIV 	= DIV_2		//PLL Input Divider
@@ -230,10 +227,10 @@ int main(void) {
     INTEnableSystemMultiVectoredInt();
     mJTAGPortEnable(0);
     printf("\r\nUno A/D Test Harness\r\nThis will initialize all A/D pins and read them %d times", TIMES_TO_READ);
-    printf("Value of pcfg before test: %X",AD1PCFG);
+    printf("Value of pcfg before test: %X", AD1PCFG);
 
 
-    AD_Init(AD_PORTV3 | AD_PORTV4 | AD_PORTV5 | AD_PORTV6 | AD_PORTV7 | AD_PORTV8 | AD_PORTW3 | AD_PORTW4 | AD_PORTW5 | AD_PORTW6 | AD_PORTW7 | AD_PORTW8 | BAT_VOLTAGE);
+    AD_Init(AD_RA0 | AD_PORTV4 | AD_PORTV5 | AD_PORTV6 | AD_PORTV7 | AD_PORTV8 | AD_PORTW3 | AD_PORTW4 | AD_PORTW5 | AD_PORTW6 | AD_PORTW7 | AD_PORTW8 | BAT_VOLTAGE);
     char numtoread = 13;
     unsigned char cur = 0;
     while (readcount <= TIMES_TO_READ) {
@@ -248,7 +245,7 @@ int main(void) {
     }
     printf("Done Reading Them\r\n");
     AD_End();
-    printf("Value of pcfg after test: %X",AD1PCFG);
+    printf("Value of pcfg after test: %X", AD1PCFG);
     return 0;
 }
 #endif

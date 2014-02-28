@@ -27,8 +27,15 @@
 #define ERROR -1
 #endif
 
-#define AD_PORTV3 (1<<0)
-#define AD_PORTV4 (1<<1)
+
+#define AD_ANIMA_Init() AD_Init(AD_RA0|AD_RB13)
+#define AD_TempRead() ReadADPin(AD_RA0)
+#define AD_BatRead() ReadADPin(AD_RB13)
+
+// replacing the maps as required for the small scale
+
+#define AD_RA0 (1<<0)
+#define AD_RB13 (1<<1)
 #define AD_PORTV5 (1<<2)
 #define AD_PORTV6 (1<<3)
 

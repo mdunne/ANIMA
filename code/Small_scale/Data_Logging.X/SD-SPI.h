@@ -548,6 +548,7 @@ BYTE MDD_SDSPI_SectorRead(DWORD sector_addr, BYTE* buffer);
 BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero);
 BYTE MDD_SDSPI_AsyncReadTasks(ASYNC_IO*);
 BYTE MDD_SDSPI_AsyncWriteTasks(ASYNC_IO*);
+BYTE MDD_SDSPI_AsyncWriteTasks_ANIMA(ASYNC_IO*);
 BYTE MDD_SDSPI_WriteProtectState(void);
 BYTE MDD_SDSPI_ShutdownMedia(void);
 

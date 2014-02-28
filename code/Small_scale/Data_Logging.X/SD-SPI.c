@@ -1619,6 +1619,276 @@ BYTE MDD_SDSPI_AsyncWriteTasks(ASYNC_IO* info)
 } 
 
 
+
+BYTE MDD_SDSPI_AsyncWriteTasks_ANIMA(ASYNC_IO* info)
+{
+    static BYTE data_byte;
+    static WORD blockCounter;
+    static DWORD WriteTimeout;
+    static BYTE command;
+    DWORD preEraseBlockCount;
+    MMC_RESPONSE response;
+
+
+    //Check what state we are in, to decide what to do.
+    switch(info->bStateVariable)
+    {
+        case ASYNC_WRITE_COMPLETE:
+            return ASYNC_WRITE_COMPLETE;
+        case ASYNC_WRITE_QUEUED:
+            //Initiate the write sequence.
+            blockCounter = MEDIA_BLOCK_SIZE;    //Initialize counter.  Will be used later for block boundary tracking.
+
+            //Copy input structure into a statically allocated global instance
+            //of the structure, for faster local access of the parameters with
+            //smaller code size.
+            ioInfo = *info;
+
+            //Check if we are writing only a single block worth of data, or
+            //multiple blocks worth of data.
+            if(ioInfo.dwBytesRemaining <= MEDIA_BLOCK_SIZE)
+            {
+                command = WRITE_SINGLE_BLOCK;
+            }
+            else
+            {
+                //for now not supporting multi-block writes=========================================================================
+//                command = WRITE_MULTI_BLOCK;
+//
+//                //Compute the number of blocks that we are going to be writing in this multi-block write operation.
+//                preEraseBlockCount = (ioInfo.dwBytesRemaining >> 9); //Divide by 512 to get the number of blocks to write
+//                //Always need to erase at least one block.
+//                if(preEraseBlockCount == 0)
+//                {
+//                    preEraseBlockCount++;
+//                }
+//
+//                //Should send CMD55/ACMD23 to let the media know how many blocks it should
+//                //pre-erase.  This isn't essential, but it allows for faster multi-block
+//                //writes, and probably also reduces flash wear on the media.
+//                response = SendMMCCmd(APP_CMD, 0x00000000);    //Send CMD55
+//                if(response.r1._byte == 0x00)   //Check if successful.
+//                {
+//                    SendMMCCmd(SET_WR_BLK_ERASE_COUNT , preEraseBlockCount);    //Send ACMD23
+//                }
+            }
+
+            //The info->dwAddress parameter is the block address.
+            //For standard capacity SD cards, the card expects a complete byte address.
+            //To convert the block address into a byte address, we multiply by the block size (512).
+            //For SDHC (high capacity) cards, the card expects a block address already, so no
+            //address cconversion is needed
+            if (gSDMode == SD_MODE_NORMAL)
+            {
+                ioInfo.dwAddress <<= 9;   //<< 9 multiplies by 512
+            }
+
+            //Send the write single or write multi command, with the LBA or byte
+            //address (depeding upon SDHC or standard capacity card)
+            response = SendMMCCmd(command, ioInfo.dwAddress);
+
+            //See if it was accepted
+            if(response.r1._byte != 0x00)
+            {
+                //Perhaps the card isn't initialized or present.
+                info->bStateVariable = ASYNC_WRITE_ERROR;
+                return ASYNC_WRITE_ERROR;
+            }
+            else
+            {
+                //Card is ready to receive start token and data bytes.
+                info->bStateVariable = ASYNC_WRITE_TRANSMIT_PACKET;
+            }
+            return ASYNC_WRITE_SEND_PACKET;
+
+        case ASYNC_WRITE_TRANSMIT_PACKET:
+            //Check if we just finished programming a block, or we are starting
+            //for the first time.  In this case, we need to send the data start token.
+            if(blockCounter == MEDIA_BLOCK_SIZE)
+            {
+                //Send the correct data start token, based on the type of write we are doing
+                if(command == WRITE_MULTI_BLOCK)
+                {
+                    WriteSPIM(DATA_START_MULTI_BLOCK_TOKEN);
+                }
+                else
+                {
+                    //Else must be a single block write
+                    WriteSPIM(DATA_START_TOKEN);
+                }
+            }
+
+            //Update local copy of pointer and byte count.  Application firmware
+            //is alllowed to change these between calls to this handler function.
+            ioInfo.wNumBytes = info->wNumBytes;
+            ioInfo.pBuffer = info->pBuffer;
+
+            //Keep track of variables for loop/state exit conditions.
+            ioInfo.dwBytesRemaining -= ioInfo.wNumBytes;
+            blockCounter -= ioInfo.wNumBytes;
+
+            //Now send a packet of raw data bytes to the media, over SPI.
+            //This code directly impacts data thoroughput in a significant way.
+            //Special care should be used to make sure this code is speed optimized.
+        	#if defined __C30__ || defined __C32__
+            {
+                //PIC24/dsPIC/PIC32 architecture is efficient with pointers and
+                //local variables due to the large number of WREGs available.
+                //Therefore, this code gives good SPI bus utilization, provided
+                //the compiler optimization level is 's' or '3'.
+                BYTE* localPointer = ioInfo.pBuffer;
+                WORD localCounter = ioInfo.wNumBytes;
+                do
+                {
+                    SPIBUF = *localPointer++;
+                    localCounter--;
+                    while(!SPISTAT_RBF);
+                    data_byte = SPIBUF; //Dummy read to clear SPISTAT_RBF
+                }while(localCounter);
+            }
+            #elif defined __18CXX
+                PIC18_Optimized_SPI_Write_Packet();
+            #endif
+
+            //Check if we have finshed sending a 512 byte block.  If so,
+            //need to receive 16-bit CRC, and retrieve the data_response token
+            if(blockCounter == 0)
+            {
+                blockCounter = MEDIA_BLOCK_SIZE;    //Re-initialize counter
+
+                //Add code to compute CRC, if using CRC. By default, the media
+                //doesn't use CRC unless it is enabled manually during the card
+                //initialization sequence.
+                mSendCRC();  //Send 16-bit CRC for the data block just sent
+
+                //Read response token byte from media, mask out top three don't
+                //care bits, and check if there was an error
+                if((MDD_SDSPI_ReadMedia() & WRITE_RESPONSE_TOKEN_MASK) != DATA_ACCEPTED)
+                {
+                    //Something went wrong.  Try and terminate as gracefully as
+                    //possible, so as allow possible recovery.
+                    info->bStateVariable = ASYNC_WRITE_ABORT;
+                    return ASYNC_WRITE_BUSY;
+                }
+
+                //The media will now send busy token (0x00) bytes until
+                //it is internally ready again (after the block is successfully
+                //writen and the card is ready to accept a new block.
+                info->bStateVariable = ASYNC_WRITE_MEDIA_BUSY;
+                WriteTimeout = WRITE_TIMEOUT;       //Initialize timeout counter
+                return ASYNC_WRITE_BUSY;
+            }//if(blockCounter == 0)
+
+            //If we get to here, we haven't reached a block boundary yet.  Keep
+            //on requesting packets of data from the application.
+            return ASYNC_WRITE_SEND_PACKET;
+
+        case ASYNC_WRITE_MEDIA_BUSY:
+            if(WriteTimeout != 0)
+            {
+                WriteTimeout--;
+                mSend8ClkCycles();  //Dummy read to gobble up a byte (ex: to ensure we meet NBR timing parameter)
+                data_byte = MDD_SDSPI_ReadMedia();  //Poll the media.  Will return 0x00 if still busy.  Will return non-0x00 is ready for next data block.
+                if(data_byte != 0x00)
+                {
+                    //The media is done and is no longer busy.  Go ahead and
+                    //either send the next packet of data to the media, or the stop
+                    //token if we are finshed.
+                    if(ioInfo.dwBytesRemaining == 0)
+                    {
+                        WriteTimeout = WRITE_TIMEOUT;
+                        if(command == WRITE_MULTI_BLOCK)
+                        {
+                            //We finished sending all bytes of data.  Send the stop token byte.
+                            WriteSPIM(DATA_STOP_TRAN_TOKEN);
+                            //After sending the stop transmission token, we need to
+                            //gobble up one byte before checking for media busy (0x00).
+                            //This is to meet the NBR timing parameter.  During the NBR
+                            //interval the SD card may not respond with the busy signal, even
+                            //though it is internally busy.
+                            mSend8ClkCycles();
+
+                            //The media still needs to finish internally writing.
+                            info->bStateVariable = ASYNC_STOP_TOKEN_SENT_WAIT_BUSY;
+                            return ASYNC_WRITE_BUSY;
+                        }
+                        else
+                        {
+                            //In this case we were doing a single block write,
+                            //so no stop token is necessary.  In this case we are
+                            //now fully complete with the write operation.
+                            SD_CS = 1;          //De-select media
+                            mSend8ClkCycles();
+                            info->bStateVariable = ASYNC_WRITE_COMPLETE;
+                            return ASYNC_WRITE_COMPLETE;
+                        }
+
+                    }
+                    //Else we have more data to write in the multi-block write.
+                    info->bStateVariable = ASYNC_WRITE_TRANSMIT_PACKET;
+                    return ASYNC_WRITE_SEND_PACKET;
+                }
+                else
+                {
+                    //The media is still busy.
+                    return ASYNC_WRITE_BUSY;
+                }
+            }
+            else
+            {
+                //Timeout occurred.  Something went wrong.  The media should not
+                //have taken this long to finish the write.
+                info->bStateVariable = ASYNC_WRITE_ABORT;
+                return ASYNC_WRITE_BUSY;
+            }
+
+        case ASYNC_STOP_TOKEN_SENT_WAIT_BUSY:
+            //We already sent the stop transmit token for the multi-block write
+            //operation.  Now all we need to do, is keep waiting until the card
+            //signals it is no longer busy.  Card will keep sending 0x00 bytes
+            //until it is no longer busy.
+            if(WriteTimeout != 0)
+            {
+                WriteTimeout--;
+                data_byte = MDD_SDSPI_ReadMedia();
+                //Check if card is no longer busy.
+                if(data_byte != 0x00)
+                {
+                    //If we get to here, multi-block write operation is fully
+                    //complete now.
+
+                    //Should send CMD13 (SEND_STATUS) after a programming sequence,
+                    //to confirm if it was successful or not inside the media.
+
+                    //Prepare to receive the next command.
+                    SD_CS = 1;          //De-select media
+                    mSend8ClkCycles();  //NEC timing parameter clocking
+                    info->bStateVariable = ASYNC_WRITE_COMPLETE;
+                    return ASYNC_WRITE_COMPLETE;
+                }
+                //If we get to here, the media is still busy with the write.
+                return ASYNC_WRITE_BUSY;
+            }
+            //Timeout occurred.  Something went wrong.  Fall through to ASYNC_WRITE_ABORT.
+        case ASYNC_WRITE_ABORT:
+            //An error occurred, and we need to stop the write sequence so as to try and allow
+            //for recovery/re-attempt later.
+            SendMMCCmd(STOP_TRANSMISSION, 0x00000000);
+            SD_CS = 1;  //deselect media
+            mSend8ClkCycles();  //After raising CS pin, media may not tri-state data out for 1 bit time.
+            info->bStateVariable = ASYNC_WRITE_ERROR;
+            //Fall through to default case.
+        default:
+            //Used for ASYNC_WRITE_ERROR case.
+            return ASYNC_WRITE_ERROR;
+    }//switch(info->stateVariable)
+
+
+    //Should never execute to here.  All pathways should have a hit a return already.
+    info->bStateVariable = ASYNC_WRITE_ABORT;
+    return ASYNC_WRITE_BUSY;
+}
+
 #ifdef __18CXX   
 /*****************************************************************************
   Function:
@@ -1774,7 +2044,7 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
     //failure/timeout occurred).
     while(1)
     {
-        status = MDD_SDSPI_AsyncWriteTasks(&info);
+        status = MDD_SDSPI_AsyncWriteTasks_ANIMA(&info);
         if(status == ASYNC_WRITE_COMPLETE)
         {
             return TRUE;

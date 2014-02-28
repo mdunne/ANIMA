@@ -49,7 +49,7 @@ int main(void) {
     // Turn on the interrupts
     //INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
     
-    printf("ssStarting the Data Logging Test compiled at %s on %s\r\n", __TIME__, __DATE__);
+    printf("Starting the Data Logging Test compiled at %s on %s\r\n", __TIME__, __DATE__);
     TIMERS_Init();
     LED_Init(LED_BANK1);
     //LED_SetBank(LED_BANK1,0);
@@ -106,7 +106,7 @@ int main(void) {
     }
     test_array[0] = 30;
     printf("Starting to write a lot of data\r\n");
-    for (count = 0; count < 30000; count++) {
+    for (count = 0; count < 3000; count++) {
         printf(".");
         DataLogging_Log(test_array);
 
