@@ -240,6 +240,7 @@ char DataLogging_Log(unsigned char *Sector_block) {
 #ifdef DEBUG_VERBOSE
         printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
 #endif
+        
         ChunkCount = 0;
     }
     //printf("ChunkCount: %d\tCurSectorCount: %d\r\n",ChunkCount,CurSectorCount);

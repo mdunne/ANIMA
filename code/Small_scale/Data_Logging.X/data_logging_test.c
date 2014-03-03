@@ -24,6 +24,7 @@ char receiveBuffer[50];
 #ifdef __32MX320F128H__
 #warning hi all
 #endif
+
 union d_test {
 
     struct {
@@ -44,20 +45,20 @@ int main(void) {
     SearchRec rec;
     unsigned char attributes;
     unsigned char size = 0, i;
-    int count,curtime,totaltimes;
+    int count, curtime, totaltimes;
     BOARD_Init();
     // Turn on the interrupts
     //INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
-    
+
     printf("Starting the Data Logging Test compiled at %s on %s\r\n", __TIME__, __DATE__);
     TIMERS_Init();
     LED_Init(LED_BANK1);
     //LED_SetBank(LED_BANK1,0);
-    InitTimer(0,2000);
-    while(IsTimerActive(0));
-    
+    InitTimer(0, 2000);
+    while (IsTimerActive(0));
+
     //while(1);
-    
+
 
     //while (!MDD_MediaDetect());
     //printf("Media Detected\r\n");
@@ -88,7 +89,7 @@ int main(void) {
     //printf("supposedly I'm running this code now")
 
     // Create a file
-    
+
     DataLogging_Init();
     count = GetTime();
     printf("Data logging inited\r\n");
