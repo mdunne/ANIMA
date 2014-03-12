@@ -28,6 +28,8 @@ void BOARD_Init();
 
 unsigned int BOARD_GetPBClock();
 void BOARD_blinkStall();
+void Print32BitBinary(uint32_t PortReading);
+
 
 #endif	/* BOARD_H */
 

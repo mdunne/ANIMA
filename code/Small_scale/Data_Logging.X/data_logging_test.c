@@ -6,7 +6,7 @@
 #include "timers.h"
 #include "BOARD.h"
 #include "LED.h"
-
+#include <peripheral/dma.h>
 
 char sendBuffer[] = "This is test string 1";
 char send2[] = "2";
@@ -51,10 +51,13 @@ int main(void) {
     //INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
 
     printf("Starting the Data Logging Test compiled at %s on %s\r\n", __TIME__, __DATE__);
+    //printf("DMA max Size: %d\r\n",DmaGetMaxTxferSize());
+    //while(1);
     TIMERS_Init();
     LED_Init(LED_BANK1);
     //LED_SetBank(LED_BANK1,0);
     InitTimer(0, 2000);
+
     while (IsTimerActive(0));
 
     //while(1);
@@ -102,12 +105,12 @@ int main(void) {
     unsigned char test_array[510];
     unsigned char test_char;
     for (count = 0; count < 510; count++) {
-        test_char = count;
+        test_char = count/2;
         test_array[count] = test_char;
     }
     test_array[0] = 30;
     printf("Starting to write a lot of data\r\n");
-    for (count = 0; count < 3000; count++) {
+    for (count = 0; count < 30000; count++) {
         printf(".");
         DataLogging_Log(test_array);
 

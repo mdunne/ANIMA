@@ -73,6 +73,29 @@ void BOARD_BlinkStall() {
 }
 
 
+void Print32BitBinary(uint32_t PortReading)
+{
+    uint32_t curPin = 0;
+    int count=0;
+    for (curPin = 1 << 31; curPin > 0; curPin >>= 1) {
+        if(count==4)
+        {
+            PutChar(' ');
+            count=0;
+        }
+        count++;
+        if (curPin & PortReading) {
+            PutChar('1');
+
+        } else {
+            PutChar('0');
+        }
+
+    }
+}
+
+
+
 #ifdef BOARD_TEST
 
 int main(void) {

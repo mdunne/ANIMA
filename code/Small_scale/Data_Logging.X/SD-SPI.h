@@ -473,6 +473,12 @@ typedef enum
 #define SD_MODE_HC      1
 
 
+extern __inline__ unsigned int __attribute__((always_inline)) _VirtToPhys(const void* p)
+{
+	return (int)p<0?((int)p&0x1fffffffL):(unsigned int)((unsigned char*)p+0x40000000L);
+}
+
+
 //Definition for a structure used when calling either MDD_SDSPI_AsyncReadTasks() 
 //function, or the MDD_SDSPI_AsyncWriteTasks() function.
 typedef struct
@@ -513,6 +519,21 @@ typedef struct
 #define ASYNC_STOP_TOKEN_SENT_WAIT_BUSY 0x04
 #define ASYNC_WRITE_ABORT               0xFE
 #define ASYNC_WRITE_ERROR               0xFF
+
+//SendMMCCmd() return values
+#define MMC_TRANSACTION_IN_PROGRESS 0
+#define MMC_DATA_READY 1
+
+//WriteSpim() return Values
+#define WRITESPIM_IDLE 0
+#define WRITESPIM_BUSY 1
+#define WRITESPIM_COMPLETE
+
+//Optimized_SPI_Transfer return values
+#define OPTIMIZED_SPI_TRANSFER_ERROR 0
+#define OPTIMIZED_SPI_TRANSFER_SETUP 1
+#define OPTIMIZED_SPI_TRANSFER_INPROGRESS 2
+#define OPTIMIZED_SPI_TRANSFER_FINISHED 3
 
 
 //Constants
