@@ -108,7 +108,7 @@ char DataLogging_Init() {
 
     //printf("total entries: %d",ENTRIES_IN_DIRECTORY);
     //printf("sizeof(Dir_Entry):%d",sizeof(char));
-    printf("in function above pin declares\r\n");
+    //printf("in function above pin declares\r\n");
     TRISAbits.TRISA1 = 0;
     //    PORTSetPinsDigitalOut(IOPORT_A, BIT_1);
     PPSInput(3, SDI2, RPC6);
@@ -158,7 +158,9 @@ char DataLogging_Init() {
     char Searchresult;
     //search for the first file matching filepattern
     Searchresult = FindFirst(FILEPATTERN, ATTR_MASK, &rec);
+    #ifdef DEBUG_MESSAGE
     printf("%d\r\n", Searchresult);
+    #endif
     if (Searchresult == -1) {
         //we have no logs created so we can create the first one
 #ifdef DEBUG_MESSAGE
@@ -179,12 +181,16 @@ char DataLogging_Init() {
             if (filenum >= filecount) {
                 filecount = filenum + 1;
             }
+#ifdef DEBUG_MESSAGE
             printf("%d\t%s\r\n", filenum, rec.filename);
+#endif
             Searchresult = FindNext(&rec);
         }
     }
     curFileID = filecount;
+#ifdef DEBUG_MESSAGE
     sprintf(filename, "%03d.bin", filecount);
+#endif
     FilePointer = FSfopen(filename, "w");
     //we extract the first sector of the file
     CurSectorCount = Cluster2Sector(FilePointer->dsk, FilePointer->cluster) + FilePointer->sec;
@@ -350,3 +356,17 @@ int DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray
     return inSector.ID;
 }
 
+//utility function to retrieve the file object point
+//not used in normal usage
+FSFILE * DataLogging_GetFilePointer(void)
+{
+    return FilePointer;
+}
+
+
+//utility function to retrieve the current sector address
+//not used in normal usage
+DWORD DataLogging_GetSectorAddress(void)
+{
+    return CurSectorCount;
+}

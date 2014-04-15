@@ -57,6 +57,7 @@ int main(void) {
                 printf("\r\n");
                 gpsControlData.newData = 0;
             }
+            //PutChar('x');
         }
         if(IsTimerExpired(0))
         {

@@ -26,7 +26,8 @@ void DataLogging_DumpInterface();
 
 int DataLogging_NumEntries(void);
 int DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray);
-
+FSFILE * DataLogging_GetFilePointer(void);
+DWORD DataLogging_GetSectorAddress(void);
 
 
 #endif

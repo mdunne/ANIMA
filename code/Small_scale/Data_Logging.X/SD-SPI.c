@@ -2023,12 +2023,12 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
         callcount++;
         if(callcount%1000==0)
         {
-            printf("-");
+            //printf("-");
         }
         //printf("status: %d\r\n",status);
         if (status == ASYNC_WRITE_COMPLETE)
         {
-            printf("callcount: %d\r\n",callcount);
+            //printf("callcount: %d\r\n",callcount);
             //printf("duration: %d\r\n",GetTime()-counter);
             return TRUE;
         }

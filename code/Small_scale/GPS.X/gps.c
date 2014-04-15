@@ -133,18 +133,19 @@ void GPS_Init(void) {
     GPSEN_LAT = 1;
     printf("Pin States: %d\t%d\t%d\t%d\r\n", GPSPOWER_LAT, GPSPOWER_TRIS, GPSEN_LAT, GPSEN_TRIS);
     //mU2TXIntEnable(1);
-    //GPS_Configure();
+    GPS_Configure();
 }
 
 void GPS_Configure(void) {
     //send the string to always change the baud
+    
     printf("about to change the baud");
     //char *NMEA_String="$PMTK251,115200*1F\r\n\0";
-    GPS_PutString(MEDIATEK_CHANGE_BAUD);
+    //GPS_PutString(MEDIATEK_CHANGE_BAUD);
     while (!GPS_IsTransmitEmpty());
     //disable the uart and change baud and then re-enable
     UARTEnable(UART2, UART_DISABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
-    UARTSetDataRate(UART2, F_PB, 115200);
+    //UARTSetDataRate(UART2, F_PB, 115200);
     UARTEnable(UART2, UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_TX | UART_RX));
 #ifdef DEBUG_VERBOSE
     printf("UART at Higher BaudRate\r\n");
@@ -196,7 +197,7 @@ void GPS_PutChar(char ch) {
 void GPS_PutString(char *instring) {
     while (*instring != 0) {
         GPS_PutChar(*instring);
-        //PutChar(*instring);
+        PutChar(*instring);
         instring++;
     }
     //why oh why do i need to do this right now, don't care right now though
@@ -230,7 +231,7 @@ char GPS_GetChar(void) {
     } else {
         ch = GPSreadFront(GreceiveBuffer);
     }
-    //printf("%d",ch);
+    
     return ch;
 }
 
@@ -328,13 +329,14 @@ void __ISR(_UART2_VECTOR, ipl4) IntUart2Handler(void) {
     static int transmitcount = 0;
     static int clearcount = 0;
     static int stallcount = 0;
+    unsigned char curChar;
     if (INTGetFlag(INT_U2RX)) {
         
-        //curChar=U2RXREG;
-        GPSwriteBack(GreceiveBuffer, (unsigned char) U2RXREG);
+        curChar=U2RXREG;
+        GPSwriteBack(GreceiveBuffer, (unsigned char) curChar);
 
         gpsControlData.newDatatoParse = 1;
-        //PutChar(U2RXREG);
+        //PutChar(curChar);
         INTClearFlag(INT_U2RX);
 
     }

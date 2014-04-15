@@ -4367,6 +4367,10 @@ BYTE FILEallocate_multiple_clusters( FILEOBJ fo, DWORD NumSectors)
 } // allocate new cluster
 #endif
 
+
+
+
+
 /***********************************************
   Function:
     DWORD FATfindEmptyCluster(FILEOBJ fo)
