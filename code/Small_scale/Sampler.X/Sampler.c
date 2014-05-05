@@ -24,10 +24,9 @@
  * PRIVATE VARIABLES                                                           *
  ******************************************************************************/
 static unsigned int AccelTickCount = 0;
+
 static unsigned short SecondTickCount = 0;
-static unsigned short SecondTickSoftwareScaler = 0; //required variable as at high processor speeds you need a greater scaler  than hardware allows
-static unsigned short SlavedSecondTickCount = 0;
-static unsigned short SlavedSecondTickSoftwareScaler = 0;
+static unsigned short SecondTickSoftwareScaler = 0;  //required variable as at high processor speeds you need a greater scaler  than hardware allows
 //
 static float AccelFrequency = 0;
 
@@ -96,7 +95,7 @@ unsigned int Sampler_GetAccelCount(void) {
 }
 
 unsigned short Sampler_GetSecondCount(void) {
-    return SlavedSecondTickCount;
+    return SecondTickCount;
 }
 
 float Sampler_GetAccelFrequency(void) {
@@ -146,41 +145,10 @@ unsigned char Timer_SetSampleRate(unsigned char Timer, float TimerRate) {
             INTClearFlag(INT_T4);
             PreScalerIndex = Timer_DeterminePrescaler(ScaledTimerRate);
             TimerPeriod = (float) ((float) F_PB / (float) PossiblePreScalers[PreScalerIndex] / ScaledTimerRate);
-            SlavedSecondTickSoftwareScaler = (int) ScaledTimerRate;
+            SecondTickSoftwareScaler = (int) ScaledTimerRate;
             printf("Timer Period: %f  Prescale: %d  Index: %d\r\n", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex);
             OpenTimer4(T4_ON | T4_SOURCE_INT | ScalerValues[PreScalerIndex], (unsigned int) TimerPeriod);
             return SUCCESS;
-            break;
-        case SECOND_TIMER:
-            CloseTimer2();
-            INTClearFlag(INT_T2);
-            PreScalerIndex = Timer_DeterminePrescaler(TimerRate);
-            TimerPeriod = (float) ((float) F_PB / (float) PossiblePreScalers[PreScalerIndex] / TimerRate);
-
-            //additional check for software scaler as needed
-            // printf("calculated Frequency: %d\r\n", TimerPeriod);
-            if (TimerPeriod > MAX_TIMER_VALUE) {
-
-                //if so the math gets slightly weirder as a higher prescaler is actually more annoying
-                //what we want is one that divides the base clock into a round number for easier division
-                //the RTC probably should be used for the second counter instead
-
-
-                //Set the Initial Prescaler for 1:1
-                PreScalerIndex = 0;
-
-                //set the software scaler to a 1000 or millisecond scale
-                SecondTickSoftwareScaler = 1000;
-
-                TimerPeriod = (float) ((float) F_PB / (float) PossiblePreScalers[PreScalerIndex] / TimerRate / SecondTickSoftwareScaler);
-
-                //while (1);
-            }
-            //            printf("Timer Period: %f  Prescale: %d  Index: %d\r\n", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex);
-            OpenTimer2(T2_ON | T2_SOURCE_INT | ScalerValues[PreScalerIndex], TimerPeriod);
-            return SUCCESS;
-
-            break;
         default:
             return ERROR;
     }
@@ -213,30 +181,13 @@ unsigned int Timer_DeterminePrescaler(float TimerRate) {
  * flag to prevent further counting.
  * @author Max Dunne 2011.11.15 */
 void __ISR(_TIMER_4_VECTOR, ipl3) Timer4IntHandler(void) {
-    static unsigned short SlavedSecondTickSoftwareScalerCounter = 1;
+    static unsigned short SecondTickSoftwareScalerCounter = 1;
     static unsigned char Toggler = 1;
     INTClearFlag(INT_T4);
     if (Toggler % 2 == 0) {
         AccelTickCount++;
     }
     Toggler++;
-    if (SlavedSecondTickSoftwareScalerCounter < SlavedSecondTickSoftwareScaler) {
-        SlavedSecondTickSoftwareScalerCounter++;
-    } else {
-        SlavedSecondTickCount++;
-        SlavedSecondTickSoftwareScalerCounter = 1;
-    }
-}
-
-/**
- * @Function Timer2IntHandler(void)
- * @param None.
- * @return None.
- * @brief  
- * @author Max Dunne 2011.11.15 */
-void __ISR(_TIMER_2_VECTOR, ipl3) Timer2IntHandler(void) {
-    static unsigned short SecondTickSoftwareScalerCounter = 1;
-    INTClearFlag(INT_T2);
     if (SecondTickSoftwareScalerCounter < SecondTickSoftwareScaler) {
         SecondTickSoftwareScalerCounter++;
     } else {
