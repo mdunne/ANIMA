@@ -29,7 +29,13 @@ void main(void) {
     Sampler_Init();
     TIMERS_Init();
     printf("Welcome to the Sampler Test\r\n");
-
+    MagAccelSet_t Bob;
+    //printf("Size of MagAccelSet: %d %d",sizeof(MagAccelSet_t),sizeof(Bob));
+    
+    while(1)
+    {
+        Sampler_Sample();
+    }
     //------------------------------------------------------------------
     printf("Starting the timing test\r\n");
     printf("For the next 10 seconds you should see both Sampler timers increase at set rates\r\n");

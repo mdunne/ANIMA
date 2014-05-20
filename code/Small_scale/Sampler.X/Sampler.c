@@ -4,7 +4,15 @@
 #include "Sampler.h"
 #include "timers.h"
 #include <peripheral/timer.h>
+#include <inttypes.h>
 
+/*******************************************************************************
+ * PRIVATE VARIABLE TYPES
+ ******************************************************************************/
+typedef struct SensorSampleSettings_t {
+    uint16_t TicksBetweenSamples;
+    uint16_t NextSampleTime;
+} SensorSampleSettings_t;
 
 
 /*******************************************************************************
@@ -19,6 +27,10 @@
 
 #define F_PB (BOARD_GetPBClock()>>1)
 
+//use of these defines or same multiplier will result in desired 10:1 sample ratio
+#define DEFAULT_ACCEL_TICK_COUNT 1 
+#define DEFAULT_MAG_TICK_COUNT 10
+
 
 /*******************************************************************************
  * PRIVATE VARIABLES                                                           *
@@ -26,14 +38,21 @@
 static unsigned int AccelTickCount = 0;
 
 static unsigned short SecondTickCount = 0;
-static unsigned short SecondTickSoftwareScaler = 0;  //required variable as at high processor speeds you need a greater scaler  than hardware allows
+static unsigned short SecondTickSoftwareScaler = 0; //required variable as at high processor speeds you need a greater scaler  than hardware allows
 //
 static float AccelFrequency = 0;
 
 static const unsigned short PossiblePreScalers[] = {1, 2, 4, 8, 16, 32, 64, 256};
 static const unsigned int ScalerValues[] = {T4_PS_1_1, T4_PS_1_2, T4_PS_1_4, T4_PS_1_8, T4_PS_1_16, T4_PS_1_32, T4_PS_1_64, T4_PS_1_256};
 
-MagAccelSet CurMagAccelData;
+MagAccelSet_t CurMagAccelData;
+
+struct SensorRates {
+    SensorSampleSettings_t Accel;
+    SensorSampleSettings_t Mag;
+    SensorSampleSettings_t GPS;
+    SensorSampleSettings_t Temp;
+} SensorRates;
 
 /*******************************************************************************
  * PRIVATE FUNCTIONS PROTOTYPES                                                *
@@ -86,20 +105,92 @@ unsigned char Sampler_Init(void) {
 
     //set up both timers
     AccelFrequency = 12.5;
+    SensorRates.Accel.TicksBetweenSamples = DEFAULT_ACCEL_TICK_COUNT;
+    SensorRates.Accel.NextSampleTime = Sampler_GetAccelCount() + SensorRates.Accel.TicksBetweenSamples;
+    SensorRates.Mag.TicksBetweenSamples = DEFAULT_MAG_TICK_COUNT;
+    SensorRates.Mag.NextSampleTime = Sampler_GetAccelCount() + SensorRates.Mag.TicksBetweenSamples;
+
+
+    //these will slow down tremendously in short order but want a base point to start with
+    SensorRates.GPS.TicksBetweenSamples = 60;
+    SensorRates.GPS.NextSampleTime = Sampler_GetSecondCount() + SensorRates.GPS.TicksBetweenSamples;
+    SensorRates.Temp.TicksBetweenSamples = 30;
+    SensorRates.Temp.NextSampleTime = Sampler_GetSecondCount() + SensorRates.Temp.TicksBetweenSamples;
+
     Timer_Setup(ACCELMAG_TIMER, AccelFrequency);
     //Timer_Setup(SECOND_TIMER, 1);
 }
 
-unsigned int Sampler_GetAccelCount(void) {
+uint16_t Sampler_GetAccelCount(void) {
     return AccelTickCount;
 }
 
-unsigned short Sampler_GetSecondCount(void) {
+uint16_t Sampler_GetSecondCount(void) {
     return SecondTickCount;
 }
 
 float Sampler_GetAccelFrequency(void) {
     return AccelFrequency;
+}
+
+/**
+ * @Function Sampler_Sample
+ * @param None
+ * @return SUCCESS or ERROR
+ * @brief  handles the actual data collection, designed to be run in the main loop and called repetively
+ * @note  None.
+ * @author Max Dunne */
+unsigned char Sampler_Sample(void) {
+    static uint16_t CurrentTickCount = 0; //local variable to ensure that the calls occur on the same interrupt, only static to save heap thrashing
+    static uint8_t AccelSampleCounter = 0; //local variable to keep track of the sample count for accel to enforce 10:1
+    CurrentTickCount = Sampler_GetAccelCount();
+
+    //sample the accel
+    if (CurrentTickCount >= SensorRates.Accel.NextSampleTime) {
+        //we sample the data here, loading with timestamp instead for now
+        CurMagAccelData.AccelData[AccelSampleCounter].X = CurrentTickCount;
+        //printf("ACCEL Sample Taken at %d of sample number %d\r\n", CurrentTickCount, AccelSampleCounter);
+        SensorRates.Accel.NextSampleTime = CurrentTickCount + SensorRates.Accel.TicksBetweenSamples;
+        AccelSampleCounter++;
+    }
+    //sample the mag
+    if (CurrentTickCount >= SensorRates.Mag.NextSampleTime) {
+        //we sample the data here, loading with timestamp instead for now
+        CurMagAccelData.MagData.X = CurrentTickCount;
+        printf("MAG Sample Taken at %d\r\n", CurrentTickCount);
+        SensorRates.Mag.NextSampleTime = CurrentTickCount + SensorRates.Mag.TicksBetweenSamples;
+
+
+        //as this is the mag datapoint we also submit data at this point for the mag/accel
+        //as the encoder is not set up we will print the data for testing purposes
+        AccelSampleCounter = 0;
+        uint8_t incrementor = 0;
+        printf("ACCEL Data: ");
+        for (incrementor = 0; incrementor < 10; incrementor++) {
+            printf("%d   ", CurMagAccelData.AccelData[incrementor].X);
+        }
+        printf("   MAG: %d %d\r\n", CurMagAccelData.MagData.X,Sampler_GetSecondCount());
+
+    }
+//with slow scale sensors we now record the tick count for the slow timer
+    CurrentTickCount=Sampler_GetSecondCount();
+
+    //sample the GPS
+    if (CurrentTickCount >= SensorRates.GPS.NextSampleTime) {
+        //we sample the data here, loading with timestamp instead for now
+        
+        printf("GPS Sample Taken at %d\r\n", CurrentTickCount);
+        SensorRates.GPS.NextSampleTime = CurrentTickCount + SensorRates.GPS.TicksBetweenSamples;
+    }
+
+    //sample the Temp
+    if (CurrentTickCount >= SensorRates.Temp.NextSampleTime) {
+        //we sample the data here, loading with timestamp instead for now
+        
+        printf("TEMP Sample Taken at %d\r\n", CurrentTickCount);
+        SensorRates.Temp.NextSampleTime = CurrentTickCount + SensorRates.Temp.TicksBetweenSamples;
+    }
+
 }
 
 /*******************************************************************************
@@ -146,7 +237,7 @@ unsigned char Timer_SetSampleRate(unsigned char Timer, float TimerRate) {
             PreScalerIndex = Timer_DeterminePrescaler(ScaledTimerRate);
             TimerPeriod = (float) ((float) F_PB / (float) PossiblePreScalers[PreScalerIndex] / ScaledTimerRate);
             SecondTickSoftwareScaler = (int) ScaledTimerRate;
-            printf("Timer Period: %f  Prescale: %d  Index: %d\r\n", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex);
+            //printf("Timer Period: %f  Prescale: %d  Index: %d\r\n", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex);
             OpenTimer4(T4_ON | T4_SOURCE_INT | ScalerValues[PreScalerIndex], (unsigned int) TimerPeriod);
             return SUCCESS;
         default:

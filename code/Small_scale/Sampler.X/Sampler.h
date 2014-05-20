@@ -8,6 +8,8 @@
 #ifndef SAMPLER_H
 #define	SAMPLER_H
 
+#include <inttypes.h>
+
 /*******************************************************************************
  * PUBLIC VARIABLE TYPES
  ******************************************************************************/
@@ -20,16 +22,16 @@ typedef enum {
     RATE_800_HERTZ
 } Valid_AccelMagRates;
 
-typedef struct XYZPoint {
+typedef struct XYZPoint_t {
     short X;
     short Y;
     short Z;
-} XYZPoint;
+} XYZPoint_t;
 
-typedef struct MagAccelSet {
-    XYZPoint MagData;
-    XYZPoint AccelData[10];
-} MagAccelSet;
+typedef struct MagAccelSet_t {
+    XYZPoint_t AccelData[10];
+    XYZPoint_t MagData;
+} MagAccelSet_t;
 
 
 /*******************************************************************************
@@ -106,7 +108,7 @@ unsigned char Sampler_SetSensorSampleRate(unsigned char Sensor, unsigned char Ne
  * @brief  gets the count of the one second timer
  * @note  with current implementation overflow occurs every 18.2 hours
  * @author Max Dunne */
-unsigned short Sampler_GetSecondCount(void);
+uint16_t Sampler_GetSecondCount(void);
 
 /**
  * @Function Sampler_GetAccelCount(void)
@@ -114,7 +116,7 @@ unsigned short Sampler_GetSecondCount(void);
  * @brief  gets the tick count of the high speed timer
  * @note  this timer varies greatly in speed,
  * @author Max Dunne */
-unsigned int Sampler_GetAccelCount(void);
+uint16_t Sampler_GetAccelCount(void);
 
 /**
  * @Function Sampler_GetAccelRate(void)
