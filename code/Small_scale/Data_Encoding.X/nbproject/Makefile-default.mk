@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=Data_Encoding_Test.c ../118_Libraries/src/BOARD.c ../118_Libraries/src/serial.c ../118_Libraries/src/timers.c
+SOURCEFILES_QUOTED_IF_SPACED=Data_Encoding_Test.c ../118_Libraries/src/BOARD.c ../118_Libraries/src/serial.c ../118_Libraries/src/timers.c DataEncoding.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Data_Encoding_Test.o ${OBJECTDIR}/_ext/1436657880/BOARD.o ${OBJECTDIR}/_ext/1436657880/serial.o ${OBJECTDIR}/_ext/1436657880/timers.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/Data_Encoding_Test.o.d ${OBJECTDIR}/_ext/1436657880/BOARD.o.d ${OBJECTDIR}/_ext/1436657880/serial.o.d ${OBJECTDIR}/_ext/1436657880/timers.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Data_Encoding_Test.o ${OBJECTDIR}/_ext/1436657880/BOARD.o ${OBJECTDIR}/_ext/1436657880/serial.o ${OBJECTDIR}/_ext/1436657880/timers.o ${OBJECTDIR}/DataEncoding.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/Data_Encoding_Test.o.d ${OBJECTDIR}/_ext/1436657880/BOARD.o.d ${OBJECTDIR}/_ext/1436657880/serial.o.d ${OBJECTDIR}/_ext/1436657880/timers.o.d ${OBJECTDIR}/DataEncoding.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/Data_Encoding_Test.o ${OBJECTDIR}/_ext/1436657880/BOARD.o ${OBJECTDIR}/_ext/1436657880/serial.o ${OBJECTDIR}/_ext/1436657880/timers.o
+OBJECTFILES=${OBJECTDIR}/Data_Encoding_Test.o ${OBJECTDIR}/_ext/1436657880/BOARD.o ${OBJECTDIR}/_ext/1436657880/serial.o ${OBJECTDIR}/_ext/1436657880/timers.o ${OBJECTDIR}/DataEncoding.o
 
 # Source Files
-SOURCEFILES=Data_Encoding_Test.c ../118_Libraries/src/BOARD.c ../118_Libraries/src/serial.c ../118_Libraries/src/timers.c
+SOURCEFILES=Data_Encoding_Test.c ../118_Libraries/src/BOARD.c ../118_Libraries/src/serial.c ../118_Libraries/src/timers.c DataEncoding.c
 
 
 CFLAGS=
@@ -115,6 +115,12 @@ ${OBJECTDIR}/_ext/1436657880/timers.o: ../118_Libraries/src/timers.c  nbproject/
 	@${RM} ${OBJECTDIR}/_ext/1436657880/timers.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/timers.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../118_Libraries/include" -MMD -MF "${OBJECTDIR}/_ext/1436657880/timers.o.d" -o ${OBJECTDIR}/_ext/1436657880/timers.o ../118_Libraries/src/timers.c   
 	
+${OBJECTDIR}/DataEncoding.o: DataEncoding.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/DataEncoding.o.d 
+	@${RM} ${OBJECTDIR}/DataEncoding.o 
+	@${FIXDEPS} "${OBJECTDIR}/DataEncoding.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../118_Libraries/include" -MMD -MF "${OBJECTDIR}/DataEncoding.o.d" -o ${OBJECTDIR}/DataEncoding.o DataEncoding.c   
+	
 else
 ${OBJECTDIR}/Data_Encoding_Test.o: Data_Encoding_Test.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
@@ -139,6 +145,12 @@ ${OBJECTDIR}/_ext/1436657880/timers.o: ../118_Libraries/src/timers.c  nbproject/
 	@${RM} ${OBJECTDIR}/_ext/1436657880/timers.o.d 
 	@${RM} ${OBJECTDIR}/_ext/1436657880/timers.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/1436657880/timers.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../118_Libraries/include" -MMD -MF "${OBJECTDIR}/_ext/1436657880/timers.o.d" -o ${OBJECTDIR}/_ext/1436657880/timers.o ../118_Libraries/src/timers.c   
+	
+${OBJECTDIR}/DataEncoding.o: DataEncoding.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/DataEncoding.o.d 
+	@${RM} ${OBJECTDIR}/DataEncoding.o 
+	@${FIXDEPS} "${OBJECTDIR}/DataEncoding.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION) -I"../118_Libraries/include" -MMD -MF "${OBJECTDIR}/DataEncoding.o.d" -o ${OBJECTDIR}/DataEncoding.o DataEncoding.c   
 	
 endif
 

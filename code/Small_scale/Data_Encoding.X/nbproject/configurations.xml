@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>DataEncoding.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -16,6 +17,7 @@
       <itemPath>../118_Libraries/src/BOARD.c</itemPath>
       <itemPath>../118_Libraries/src/serial.c</itemPath>
       <itemPath>../118_Libraries/src/timers.c</itemPath>
+      <itemPath>DataEncoding.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
