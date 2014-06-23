@@ -9,6 +9,7 @@
 #include "timers.h"
 #include "serial.h"
 #include "LED.h"
+#include <inttypes.h>
 
 
 MEDIA_INFORMATION *mediaInformation;
@@ -34,21 +35,9 @@ MEDIA_INFORMATION *mediaInformation;
 #define CHUNK_IN_SECTORS 1024
 //#define DATA_SIZE (MEDIA_SECTOR_SIZE - 2)
 
-typedef struct {
-    unsigned short ID;
-    unsigned Start_Address : ADDRESS_SIZE_IN_BITS;
-    unsigned Stop_Address : ADDRESS_SIZE_IN_BITS;
-} Dir_Entry;
 
-static union Directory {
-    unsigned char Sector_Access[SECTORS_USED_FOR_DIRECTORY][MEDIA_SECTOR_SIZE];
 
-    struct {
-        unsigned short Card_Identifier;
-        unsigned int Last_Entry_Used;
-        Dir_Entry Entries[ENTRIES_IN_DIRECTORY];
-    };
-} Directory;
+
 
 typedef union {
     unsigned char Sector_Access[MEDIA_SECTOR_SIZE];
@@ -82,7 +71,6 @@ char DataLogging_Init() {
     //printf("Dir_Entry: %d\r\n ", sizeof (Dir_Entry));
     int ByteCount, SectorCount;
     SearchRec rec;
-    t_Sector curSector;
     unsigned char filenum = 1;
     char filename[7];
     unsigned char filecount = 0;
@@ -213,19 +201,19 @@ char DataLogging_Init() {
 
 char DataLogging_Log(unsigned char *Sector_block) {
     static unsigned int ChunkCount = 0;
-    t_Sector inSector;
+    uint8_t inSector[DATA_SIZE];
     unsigned char SPI_Status = FALSE;
     int ByteCount = 0;
     //inSector.Sector_Access=Sector_block;
     //this is copying the data currently as my head is blanking on the proper pointer math
     //fix this soon please
     for (ByteCount = 0; ByteCount < DATA_SIZE; ByteCount++) {
-        inSector.Data[ByteCount] = Sector_block[ByteCount];
+        inSector[ByteCount] = Sector_block[ByteCount];
     }
-    inSector.ID = curFileID;
+    
     //printf("ID value: %d",inSector.ID);
     while (SPI_Status == FALSE) {
-        SPI_Status = MDD_SDSPI_SectorWrite(CurSectorCount, inSector.Sector_Access, TRUE);
+        SPI_Status = MDD_SDSPI_SectorWrite(CurSectorCount, inSector, TRUE);
         if (SPI_Status == FALSE) {
 #ifdef DEBUG_MESSAGE
             printf("Card failed to write at one point\r\n");
@@ -257,104 +245,11 @@ char DataLogging_CloseLog(void) {
     FSfclose(FilePointer);
 }
 
-char DataLogging_ReadDirectory(void) {
-
-    int SectorCount = 0;
-    for (SectorCount = 0; SectorCount < SECTORS_USED_FOR_DIRECTORY; SectorCount++) {
-        MDD_SDSPI_SectorRead(SectorCount, Directory.Sector_Access[SectorCount]);
-    }
-}
-
-char DataLogging_WriteDirectory(void) {
-    return;
-    int SectorCount = 0;
-    int write_result = 0;
-    for (SectorCount = 0; SectorCount < SECTORS_USED_FOR_DIRECTORY; SectorCount++) {
-        write_result = MDD_SDSPI_SectorWrite(SectorCount, Directory.Sector_Access[SectorCount], TRUE);
-        if (write_result != TRUE) {
-            printf("writeback of directory failed");
-        }
-    }
-}
-
-
-//only writes back the sector of the currently used entry
-
-char DataLogging_UpdateEntryAddress(void) {
-    int write_result = 0;
-    write_result = MDD_SDSPI_SectorWrite(SectorforCurrentEntry, Directory.Sector_Access[SectorforCurrentEntry], TRUE);
-    if (write_result != TRUE) {
-        printf("writeback of directory failed");
-    }
-
-}
-
-void DataLogging_PrintDirectory(void) {
-    int EntryCount;
-    //printf("Sector: ");
-    printf("Directory ID: %d\t Last Entry: %d\r\n", Directory.Card_Identifier, Directory.Last_Entry_Used);
-    for (EntryCount = 0; EntryCount < ENTRIES_IN_DIRECTORY; EntryCount++) {
-        if (Directory.Entries[EntryCount].Start_Address != 0)
-            printf("Block ID: %u\t Start: %u Stop: %u\t Size: %u\r\n", Directory.Entries[EntryCount].ID, Directory.Entries[EntryCount].Start_Address, Directory.Entries[EntryCount].Stop_Address, Directory.Entries[EntryCount].Stop_Address - Directory.Entries[EntryCount].Start_Address);
-        while (!IsTransmitEmpty());
-
-
-    }
-}
 
 
 
-//interface to dump file from sd card
 
-void DataLogging_DumpInterface() {
-    //on st
-    WipeCard();
-}
 
-void WipeCard(void) {
-    //we read in the current directory
-    DataLogging_ReadDirectory();
-    //setting card_identifier to 0 forces a reset
-    Directory.Card_Identifier = 0;
-    DataLogging_WriteDirectory();
-    int EntryCount;
-    int SectorCount;
-    t_Sector blankSector;
-    //set very high such that the chances of it every be used are non-existant
-    blankSector.ID = -1;
-    //we now want to make sure there is no old data
-    for (EntryCount = 0; EntryCount <= Directory.Last_Entry_Used; EntryCount++) {
-        if (Directory.Entries[EntryCount].Start_Address != 0) {
-            for (SectorCount = Directory.Entries[EntryCount].Start_Address; SectorCount < Directory.Entries[EntryCount].Stop_Address; SectorCount += CHUNK_IN_SECTORS) {
-                MDD_SDSPI_SectorWrite(SectorCount, blankSector.Sector_Access, TRUE);
-            }
-        }
-    }
-}
-
-int DataLogging_NumEntries(void) {
-    return Directory.Last_Entry_Used + 1;
-}
-
-int DataLogging_GetEntrySize(int Entry) {
-    int size = 0;
-    size = Directory.Entries[Entry].Stop_Address - Directory.Entries[Entry].Start_Address;
-    return size;
-
-}
-
-int DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray) {
-    t_Sector inSector;
-    int ByteCount = 0;
-    int Address = Directory.Entries[Entry].Start_Address + Sector;
-    MDD_SDSPI_SectorRead(Address, inSector.Sector_Access);
-    for (ByteCount = 0; ByteCount < DATA_SIZE; ByteCount++) {
-        //printf("Byte: %d\r\n",inSector.Data[ByteCount]);
-        //while(!IsTransmitEmpty());
-        SectorArray[ByteCount] = inSector.Data[ByteCount];
-    }
-    return inSector.ID;
-}
 
 //utility function to retrieve the file object point
 //not used in normal usage

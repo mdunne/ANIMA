@@ -115,7 +115,7 @@ int main(void) {
     }
     test_array[0] = 30;
     printf("Starting to write a lot of data\r\n");
-    for (count = 0; count < 30000; count++) {
+    for (count = 0; count < 300; count++) {
         printf(".");
         DataLogging_Log(test_array);
 
