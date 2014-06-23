@@ -197,23 +197,16 @@ char DataLogging_Init() {
 }
 
 
-//we assume that this is 510 in size
-
-char DataLogging_Log(unsigned char *Sector_block) {
+//we assume that this is 512 in size
+//intermediary state where it uses the pointer instead of copying the array over
+//eventually this function will lose its arguments and simply communicate with the sd card as need
+char DataLogging_Log(unsigned char *AddressToWrite) {
     static unsigned int ChunkCount = 0;
-    uint8_t inSector[DATA_SIZE];
+    //uint8_t inSector[DATA_SIZE];
     unsigned char SPI_Status = FALSE;
     int ByteCount = 0;
-    //inSector.Sector_Access=Sector_block;
-    //this is copying the data currently as my head is blanking on the proper pointer math
-    //fix this soon please
-    for (ByteCount = 0; ByteCount < DATA_SIZE; ByteCount++) {
-        inSector[ByteCount] = Sector_block[ByteCount];
-    }
-    
-    //printf("ID value: %d",inSector.ID);
     while (SPI_Status == FALSE) {
-        SPI_Status = MDD_SDSPI_SectorWrite(CurSectorCount, inSector, TRUE);
+        SPI_Status = MDD_SDSPI_SectorWrite(CurSectorCount, AddressToWrite, TRUE);
         if (SPI_Status == FALSE) {
 #ifdef DEBUG_MESSAGE
             printf("Card failed to write at one point\r\n");
