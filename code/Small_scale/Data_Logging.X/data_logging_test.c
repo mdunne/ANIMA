@@ -101,23 +101,24 @@ int main(void) {
     DataLogging_Init();
     count = GetTime();
     printf("Data logging inited\r\n");
-    //while(1);
+//    while(1);
     //DataLogging_PrintDirectory();
     //printf("Total Entries: %d\r\n",DataLogging_NumEntries());
     //printf("Size of entry %d is: %d\r\n",DataLogging_NumEntries()/2,DataLogging_GetEntrySize(DataLogging_NumEntries()/2));
 
     //while(1);
-    unsigned char test_array[510];
+    unsigned char test_array[512];
     unsigned char test_char;
-    for (count = 0; count < 510; count++) {
-        test_char = count / 2;
+    for (count = 0; count < 512; count++) {
+        test_char = count % 60;
         test_array[count] = test_char;
     }
     test_array[0] = 30;
     printf("Starting to write a lot of data\r\n");
-    for (count = 0; count < 300; count++) {
+    for (count = 0; count < 2048; count++) {
         printf(".");
-        DataLogging_Log(test_array);
+        DataLogging_LoadSector(test_array);
+        while(!DataLogging_Log(test_array));
 
     }
     printf("Test Complete\r\n");
@@ -298,7 +299,7 @@ int main(void) {
 }
 
 void Generate_Fibonacci_Array(unsigned char In_array[]) {
-    static unsigned char counter=43;
+    static unsigned char counter = 43;
     int index;
     for (index = 0; index < TEST_ARRAY_SIZE; index++) {
         //        printf("%d   ",In_array[index]);
@@ -320,3 +321,4 @@ void Generate_Fibonacci_Array(unsigned char In_array[]) {
 
 
 #endif
+

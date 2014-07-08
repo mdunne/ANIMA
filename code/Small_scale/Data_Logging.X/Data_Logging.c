@@ -35,10 +35,6 @@ MEDIA_INFORMATION *mediaInformation;
 #define CHUNK_IN_SECTORS 1024
 //#define DATA_SIZE (MEDIA_SECTOR_SIZE - 2)
 
-
-
-
-
 typedef union {
     unsigned char Sector_Access[MEDIA_SECTOR_SIZE];
 
@@ -54,6 +50,7 @@ static int CurSector;
 static int SectorforCurrentEntry;
 static int CurDirectorySize;
 static short curFileID;
+static short IsWriteActive;
 
 static FSFILE * FilePointer;
 
@@ -146,9 +143,9 @@ char DataLogging_Init() {
     char Searchresult;
     //search for the first file matching filepattern
     Searchresult = FindFirst(FILEPATTERN, ATTR_MASK, &rec);
-    #ifdef DEBUG_MESSAGE
+#ifdef DEBUG_MESSAGE
     printf("%d\r\n", Searchresult);
-    #endif
+#endif
     if (Searchresult == -1) {
         //we have no logs created so we can create the first one
 #ifdef DEBUG_MESSAGE
@@ -196,42 +193,89 @@ char DataLogging_Init() {
 
 }
 
+char DataLogging_LoadSector(unsigned char *AddresstoWrite) {
+    static unsigned int ChunkCount = 0;
+    unsigned char SPI_Status = FALSE;
 
+    //due to the polling nature the chunking is handled before the write setup
+    //    ChunkCount++;
+    //    if (ChunkCount >= CHUNK_IN_SECTORS) {
+    //#ifdef DEBUG_VERBOSE
+    //        printf("Card allocated more sectors\r\n");
+    //#endif
+    //        //int curtime = GetTime();
+    //        FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
+    //#ifdef DEBUG_VERBOSE
+    //        printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
+    //#endif
+    //
+    //        ChunkCount = 0;
+    //    }
+
+    //set up the write
+    SPI_Status = MDD_SDSPI_SectorSetupWrite(CurSectorCount, AddresstoWrite, TRUE);
+    IsWriteActive = TRUE;
+
+    //call the first sector write to start the process
+    //SPI_Status = MDD_SDSPI_SectorWritePoll();
+    //    if (SPI_Status == FALSE) {
+    //#ifdef DEBUG_MESSAGE
+    //        printf("Card failed to write at one point\r\n");
+    //#endif
+    //        while (MDD_SDSPI_MediaInitialize() != MEDIA_NO_ERROR);
+    //    }
+
+
+}
 //we assume that this is 512 in size
 //intermediary state where it uses the pointer instead of copying the array over
 //eventually this function will lose its arguments and simply communicate with the sd card as need
+
 char DataLogging_Log(unsigned char *AddressToWrite) {
     static unsigned int ChunkCount = 0;
     //uint8_t inSector[DATA_SIZE];
-    unsigned char SPI_Status = FALSE;
-    int ByteCount = 0;
-    while (SPI_Status == FALSE) {
-        SPI_Status = MDD_SDSPI_SectorWrite(CurSectorCount, AddressToWrite, TRUE);
+    if (IsWriteActive) {
+        unsigned char SPI_Status = FALSE;
+        //DataLogging_LoadSector(AddressToWrite);
+        int ByteCount = 0;
+        //    while (MDD_SDSPI_GetTransactionStatus() != ASYNC_WRITE_COMPLETE) {
+        //printf("/");
+        SPI_Status = MDD_SDSPI_SectorWritePoll();
         if (SPI_Status == FALSE) {
 #ifdef DEBUG_MESSAGE
             printf("Card failed to write at one point\r\n");
 #endif
             while (MDD_SDSPI_MediaInitialize() != MEDIA_NO_ERROR);
         }
-    }
+        //    }
+        if (MDD_SDSPI_GetTransactionStatus() == ASYNC_WRITE_COMPLETE) {
+            CurSectorCount++;
+            ChunkCount++;
+            //printf("%d\r\n", ChunkCount);
 
-    CurSectorCount++;
-    ChunkCount++;
-    //printf("%d\r\n",ChunkCount);
-    if (ChunkCount >= CHUNK_IN_SECTORS) {
+            if (ChunkCount >= CHUNK_IN_SECTORS) {
 #ifdef DEBUG_VERBOSE
-        printf("Card allocated more sectors\r\n");
+                printf("Card allocated more sectors\r\n");
 #endif
-        int curtime = GetTime();
-        FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
+                int curtime = GetTime();
+                FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
 #ifdef DEBUG_VERBOSE
-        printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
+                printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
 #endif
-        
-        ChunkCount = 0;
+                //            printf("%d\t%d\r\n",ChunkCount,CurSectorCount);
+                //        InitTimer(0,1000);
+                //        while(IsTimerActive(0));
+                ChunkCount = 0;
+            }
+            //printf("ChunkCount: %d\tCurSectorCount: %d\r\n",ChunkCount,CurSectorCount);
+            IsWriteActive = FALSE;
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    } else {
+        return TRUE;
     }
-    //printf("ChunkCount: %d\tCurSectorCount: %d\r\n",ChunkCount,CurSectorCount);
-
 }
 
 char DataLogging_CloseLog(void) {
@@ -246,15 +290,15 @@ char DataLogging_CloseLog(void) {
 
 //utility function to retrieve the file object point
 //not used in normal usage
-FSFILE * DataLogging_GetFilePointer(void)
-{
+
+FSFILE * DataLogging_GetFilePointer(void) {
     return FilePointer;
 }
 
 
 //utility function to retrieve the current sector address
 //not used in normal usage
-DWORD DataLogging_GetSectorAddress(void)
-{
+
+DWORD DataLogging_GetSectorAddress(void) {
     return CurSectorCount;
 }

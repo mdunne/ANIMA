@@ -91,7 +91,8 @@ static MEDIA_INFORMATION mediaInformation;
 static ASYNC_IO ioInfo; //Declared global context, for fast/code efficient access
 static WORD blockCounter;
 
-
+static ASYNC_IO CurrentWriteinfo;  //current state of the sector write for polled operation
+static BYTE CurrentWriteStatus=ASYNC_WRITE_ERROR;
 const typMMC_CMD sdmmc_cmdtable[] =
 {
     // cmd                      crc     response
@@ -2040,6 +2041,135 @@ BYTE MDD_SDSPI_SectorWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZer
     printf("callcount: %d\r\n",callcount);
     return TRUE;
 }
+
+/*****************************************************************************
+  Function:
+    BYTE MDD_SDSPI_SectorWrite (DWORD sector_addr, BYTE * buffer, BYTE allowWriteToZero)
+  Summary:
+    Writes a sector of data to an SD card.
+  Conditions:
+    The MDD_SectorWrite function pointer must be pointing to this function.
+  Input:
+    sector_addr -      The address of the sector on the card.
+    buffer -           The buffer with the data to write.
+    allowWriteToZero -
+                     - TRUE -  Writes to the 0 sector (MBR) are allowed
+                     - FALSE - Any write to the 0 sector will fail.
+  Return Values:
+    TRUE -  The sector was written successfully.
+    FALSE - The sector could not be written.
+  Side Effects:
+    None.
+  Description:
+    The MDD_SDSPI_SectorWrite function writes one sector of data (512 bytes)
+    of data from the location pointed to by 'buffer' to the specified sector of
+    the SD card. It sets up the write and calls it for the first time, after this
+ * another function is supposed to handle
+  Remarks:
+    The card expects the address field in the command packet to be a byte address.
+    The sector_addr value is ocnverted to a byte address by shifting it left nine
+    times (multiplying by 512).
+ ***************************************************************************************/
+BYTE MDD_SDSPI_SectorSetupWrite(DWORD sector_addr, BYTE* buffer, BYTE allowWriteToZero)
+{
+    //static ASYNC_IO info;
+    static unsigned int callcount;
+    BYTE status;
+
+    if (allowWriteToZero == FALSE)
+    {
+        if (sector_addr == 0x00000000)
+        {
+            return FALSE;
+        }
+    }
+    if(CurrentWriteinfo.bStateVariable!=ASYNC_WRITE_COMPLETE)
+    {
+        return FALSE;
+    }
+    //Initialize structure so we write a single sector worth of data.
+    CurrentWriteinfo.wNumBytes = 512;
+    CurrentWriteinfo.dwBytesRemaining = 512;
+    CurrentWriteinfo.pBuffer = buffer;
+    CurrentWriteinfo.dwAddress = sector_addr;
+    CurrentWriteinfo.bStateVariable = ASYNC_WRITE_QUEUED;
+    CurrentWriteStatus=CurrentWriteinfo.bStateVariable;
+    return TRUE;
+    //Repeatedly call the write handler until the operation is complete (or a
+    //failure/timeout occurred).
+}
+
+/*****************************************************************************
+  Function:
+    BYTE MDD_SDSPI_SectorWrite (DWORD sector_addr, BYTE * buffer, BYTE allowWriteToZero)
+  Summary:
+    Writes a sector of data to an SD card.
+  Conditions:
+    The MDD_SectorWrite function pointer must be pointing to this function.
+  Input:
+    sector_addr -      The address of the sector on the card.
+    buffer -           The buffer with the data to write.
+    allowWriteToZero -
+                     - TRUE -  Writes to the 0 sector (MBR) are allowed
+                     - FALSE - Any write to the 0 sector will fail.
+  Return Values:
+    TRUE -  The sector was written successfully.
+    FALSE - The sector could not be written.
+  Side Effects:
+    None.
+  Description:
+    The MDD_SDSPI_SectorWrite function writes one sector of data (512 bytes)
+    of data from the location pointed to by 'buffer' to the specified sector of
+    the SD card. It sets up the write and calls it for the first time, after this
+ * another function is supposed to handle
+  Remarks:
+    The card expects the address field in the command packet to be a byte address.
+    The sector_addr value is ocnverted to a byte address by shifting it left nine
+    times (multiplying by 512).
+ ***************************************************************************************/
+BYTE MDD_SDSPI_SectorWritePoll(void) {
+    //static ASYNC_IO info;
+    static unsigned int callcount;
+   // BYTE status;
+
+    //    if (allowWriteToZero == FALSE)
+    //    {
+    //        if (sector_addr == 0x00000000)
+    //        {
+    //            return FALSE;
+    //        }
+    //    }
+    //
+    //    //Initialize structure so we write a single sector worth of data.
+    //    CurrentWriteinfo.wNumBytes = 512;
+    //    CurrentWriteinfo.dwBytesRemaining = 512;
+    //    CurrentWriteinfo.pBuffer = buffer;
+    //    CurrentWriteinfo.dwAddress = sector_addr;
+    //    CurrentWriteinfo.bStateVariable = ASYNC_WRITE_QUEUED;
+    CurrentWriteStatus = MDD_SDSPI_AsyncWriteTasks_ANIMA(&CurrentWriteinfo);
+    callcount++;
+//    if (callcount % 1000 == 0) {
+//        printf("-");
+//    }
+    //printf("status: %d\r\n",status);
+    if (CurrentWriteStatus == ASYNC_WRITE_COMPLETE) {
+        //printf("callcount: %d\r\n",callcount);
+        //printf("duration: %d\r\n",GetTime()-counter);
+        return TRUE;
+    } else if (CurrentWriteStatus == ASYNC_WRITE_ERROR) {
+        return FALSE;
+    }
+    else
+    {
+        return TRUE;//assume other states process is continuing
+    }
+}
+
+BYTE MDD_SDSPI_GetTransactionStatus()
+{
+    return CurrentWriteStatus;
+}
+
 
 /*******************************************************************************
   Function:

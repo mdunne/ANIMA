@@ -29,5 +29,7 @@ int DataLogging_GetEntrySector(int Entry, int Sector, unsigned char *SectorArray
 FSFILE * DataLogging_GetFilePointer(void);
 DWORD DataLogging_GetSectorAddress(void);
 
+char DataLogging_LoadSector(unsigned char *AddresstoWrite);
+
 
 #endif
