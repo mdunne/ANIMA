@@ -6,6 +6,7 @@
 #include "timers.h"
 #include "serial.h"
 #include "DataEncoding.h"
+#include "Data_Logging.h"
 #include <peripheral/dma.h>
 
 #pragma config FNOSC = FRCPLL
@@ -54,9 +55,10 @@ void main(void) {
     //DmaChnEnable(DMAChannel);
 
 #endif
-#define ENTRIESTOTEST 10
+#define ENTRIESTOTEST 300
     DataEncoding_Init();
-    unsigned int DataSize = 163;
+    DataLogging_Init();
+    unsigned int DataSize = 113;
     unsigned char TestArray[DataSize];
     unsigned int TestEntry;
     unsigned int iterator = 0;
@@ -66,6 +68,7 @@ void main(void) {
             TestArray[iterator] = iterator + TestEntry;
         }
         DataEncoding_SubmitData(TestArray);
+        while(!DataLogging_Log());
     }
     printf("test Complete\r\n");
     while (1);

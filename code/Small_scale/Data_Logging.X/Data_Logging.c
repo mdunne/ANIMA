@@ -8,7 +8,7 @@
 #include "SD-SPI.h"
 #include "timers.h"
 #include "serial.h"
-#include "LED.h"
+//#include "LED.h"
 #include <inttypes.h>
 
 
@@ -187,6 +187,7 @@ char DataLogging_Init() {
     int curtime = GetTime();
     FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
 #ifdef DEBUG_VERBOSE
+
     printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
 #endif
     //while (1);
@@ -231,7 +232,7 @@ char DataLogging_LoadSector(unsigned char *AddresstoWrite) {
 //intermediary state where it uses the pointer instead of copying the array over
 //eventually this function will lose its arguments and simply communicate with the sd card as need
 
-char DataLogging_Log(unsigned char *AddressToWrite) {
+char DataLogging_Log() {
     static unsigned int ChunkCount = 0;
     //uint8_t inSector[DATA_SIZE];
     if (IsWriteActive) {

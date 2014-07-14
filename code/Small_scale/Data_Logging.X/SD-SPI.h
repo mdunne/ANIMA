@@ -260,7 +260,7 @@ typedef union
         unsigned B7:1;
         unsigned CARD_IS_LOCKED:1;
         unsigned WP_ERASE_SKIP_LK_FAIL:1;
-        unsigned ERROR:1;
+        unsigned R2_ERROR:1;
         unsigned CC_ERROR:1;
         unsigned CARD_ECC_FAIL:1;
         unsigned WP_VIOLATION:1;

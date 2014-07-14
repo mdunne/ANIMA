@@ -17,7 +17,7 @@
 
 char DataLogging_Init();
 
-char DataLogging_Log(unsigned char*);
+char DataLogging_Log(void);
 
 char DataLogging_CloseLog(void);
 

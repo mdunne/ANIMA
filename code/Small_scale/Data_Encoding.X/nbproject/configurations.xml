@@ -5,6 +5,14 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>DataEncoding.h</itemPath>
+      <itemPath>../Data_Logging.X/Compiler.h</itemPath>
+      <itemPath>../Data_Logging.X/Data_Logging.h</itemPath>
+      <itemPath>../Data_Logging.X/FSDefs.h</itemPath>
+      <itemPath>../Data_Logging.X/FSIO.h</itemPath>
+      <itemPath>../Data_Logging.X/FSconfig.h</itemPath>
+      <itemPath>../Data_Logging.X/GenericTypeDefs.h</itemPath>
+      <itemPath>../Data_Logging.X/HardwareProfile.h</itemPath>
+      <itemPath>../Data_Logging.X/SD-SPI.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -18,6 +26,9 @@
       <itemPath>../118_Libraries/src/serial.c</itemPath>
       <itemPath>../118_Libraries/src/timers.c</itemPath>
       <itemPath>DataEncoding.c</itemPath>
+      <itemPath>../Data_Logging.X/Data_Logging.c</itemPath>
+      <itemPath>../Data_Logging.X/FSIO.c</itemPath>
+      <itemPath>../Data_Logging.X/SD-SPI.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -27,6 +38,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>../118_Libraries/src</Elem>
+    <Elem>../Data_Logging.X</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -67,7 +79,8 @@
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
-        <property key="extra-include-directories" value="..\118_Libraries\include"/>
+        <property key="extra-include-directories"
+                  value="..\118_Libraries\include;..\Data_Logging.X"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>

@@ -110,7 +110,7 @@ int main(void) {
     unsigned char test_array[512];
     unsigned char test_char;
     for (count = 0; count < 512; count++) {
-        test_char = count % 60;
+        test_char = count % 6;
         test_array[count] = test_char;
     }
     test_array[0] = 30;
@@ -118,8 +118,7 @@ int main(void) {
     for (count = 0; count < 2048; count++) {
         printf(".");
         DataLogging_LoadSector(test_array);
-        while(!DataLogging_Log(test_array));
-
+        while(!DataLogging_Log());
     }
     printf("Test Complete\r\n");
     while (1);
