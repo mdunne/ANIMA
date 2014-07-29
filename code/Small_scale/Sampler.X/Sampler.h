@@ -23,16 +23,29 @@ typedef enum {
 } Valid_AccelMagRates;
 
 typedef struct XYZPoint_t {
-    short X;
-    short Y;
-    short Z;
+    uint16_t X;
+    uint16_t Y;
+    uint16_t Z;
 } XYZPoint_t;
 
-typedef struct MagAccelSet_t {
-    XYZPoint_t AccelData[10];
-    XYZPoint_t MagData;
+typedef union MagAccelSet_t {
+
+    struct {
+        uint8_t PacketId;
+        XYZPoint_t AccelData[10];
+        XYZPoint_t MagData;
+    } DataAccess;
+    uint8_t BulkAccess[68];
 } MagAccelSet_t;
 
+typedef union UnionizedSet_t {
+
+    struct {
+        XYZPoint_t AccelData[10];
+        XYZPoint_t MagData;
+    } DataAccess;
+    uint8_t BulkAccess[66];
+} UnionizedSet_t;
 
 /*******************************************************************************
  * PUBLIC #DEFINES                                                             *

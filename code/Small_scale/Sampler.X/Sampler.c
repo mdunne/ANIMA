@@ -3,6 +3,7 @@
 #include "serial.h"
 #include "Sampler.h"
 #include "timers.h"
+#include "DataEncoding.h"
 #include <peripheral/timer.h>
 #include <inttypes.h>
 
@@ -45,7 +46,8 @@ static float AccelFrequency = 0;
 static const unsigned short PossiblePreScalers[] = {1, 2, 4, 8, 16, 32, 64, 256};
 static const unsigned int ScalerValues[] = {T4_PS_1_1, T4_PS_1_2, T4_PS_1_4, T4_PS_1_8, T4_PS_1_16, T4_PS_1_32, T4_PS_1_64, T4_PS_1_256};
 
-MagAccelSet_t CurMagAccelData;
+static MagAccelSet_t CurMagAccelData;
+static UnionizedSet_t UnionSetTest;
 
 struct SensorRates {
     SensorSampleSettings_t Accel;
@@ -102,7 +104,8 @@ unsigned int Timer_DeterminePrescaler(float TimerRate);
 unsigned char Sampler_Init(void) {
     //start by initializing the sensors for the first time
     //left blank as getting timers correct ranks higher for now
-
+//        printf("Size of bulk access: %d and size of internal data struct: %d\r\n",sizeof(CurMagAccelData.BulkAccess),sizeof(CurMagAccelData.DataAccess));
+//        while(1);
     //set up both timers
     AccelFrequency = 12.5;
     SensorRates.Accel.TicksBetweenSamples = DEFAULT_ACCEL_TICK_COUNT;
@@ -148,7 +151,9 @@ unsigned char Sampler_Sample(void) {
     //sample the accel
     if (CurrentTickCount >= SensorRates.Accel.NextSampleTime) {
         //we sample the data here, loading with timestamp instead for now
-        CurMagAccelData.AccelData[AccelSampleCounter].X = CurrentTickCount;
+        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].X = CurrentTickCount;
+        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Y = CurrentTickCount+1;
+        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Z = CurrentTickCount*-1;
         //printf("ACCEL Sample Taken at %d of sample number %d\r\n", CurrentTickCount, AccelSampleCounter);
         SensorRates.Accel.NextSampleTime = CurrentTickCount + SensorRates.Accel.TicksBetweenSamples;
         AccelSampleCounter++;
@@ -156,29 +161,33 @@ unsigned char Sampler_Sample(void) {
     //sample the mag
     if (CurrentTickCount >= SensorRates.Mag.NextSampleTime) {
         //we sample the data here, loading with timestamp instead for now
-        CurMagAccelData.MagData.X = CurrentTickCount;
+        CurMagAccelData.DataAccess.MagData.X = CurrentTickCount;
+        CurMagAccelData.DataAccess.MagData.Y = CurrentTickCount;
+        CurMagAccelData.DataAccess.MagData.Z = CurrentTickCount;
         printf("MAG Sample Taken at %d\r\n", CurrentTickCount);
         SensorRates.Mag.NextSampleTime = CurrentTickCount + SensorRates.Mag.TicksBetweenSamples;
 
 
         //as this is the mag datapoint we also submit data at this point for the mag/accel
         //as the encoder is not set up we will print the data for testing purposes
+        DataEncoding_SubmitData(CurMagAccelData.BulkAccess);
         AccelSampleCounter = 0;
         uint8_t incrementor = 0;
         printf("ACCEL Data: ");
-        for (incrementor = 0; incrementor < 10; incrementor++) {
-            printf("%d   ", CurMagAccelData.AccelData[incrementor].X);
+        for (incrementor = 0; incrementor < 66; incrementor++) {
+//            printf("%d   ", CurMagAccelData.DataAccess.AccelData[incrementor].X);
+//            printf("%d\t",CurMagAccelData.BulkAccess[incrementor]);
         }
-        printf("   MAG: %d %d\r\n", CurMagAccelData.MagData.X,Sampler_GetSecondCount());
+        printf("   MAG: %d %d\r\n", CurMagAccelData.DataAccess.MagData.X, Sampler_GetSecondCount());
 
     }
-//with slow scale sensors we now record the tick count for the slow timer
-    CurrentTickCount=Sampler_GetSecondCount();
+    //with slow scale sensors we now record the tick count for the slow timer
+    CurrentTickCount = Sampler_GetSecondCount();
 
     //sample the GPS
     if (CurrentTickCount >= SensorRates.GPS.NextSampleTime) {
         //we sample the data here, loading with timestamp instead for now
-        
+
         printf("GPS Sample Taken at %d\r\n", CurrentTickCount);
         SensorRates.GPS.NextSampleTime = CurrentTickCount + SensorRates.GPS.TicksBetweenSamples;
     }
@@ -186,7 +195,7 @@ unsigned char Sampler_Sample(void) {
     //sample the Temp
     if (CurrentTickCount >= SensorRates.Temp.NextSampleTime) {
         //we sample the data here, loading with timestamp instead for now
-        
+
         printf("TEMP Sample Taken at %d\r\n", CurrentTickCount);
         SensorRates.Temp.NextSampleTime = CurrentTickCount + SensorRates.Temp.TicksBetweenSamples;
     }

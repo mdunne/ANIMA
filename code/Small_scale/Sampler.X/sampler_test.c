@@ -13,6 +13,8 @@
 #include "Sampler.h"
 #include "timers.h"
 #include "serial.h"
+#include "Data_Logging.h"
+#include "DataEncoding.h"
 
 
 #pragma config FNOSC = FRCPLL
@@ -26,15 +28,19 @@
 
 void main(void) {
     BOARD_Init();
+    printf("Welcome to the Sampler Test\r\n");
+    DataLogging_Init();
+    DataEncoding_Init();
     Sampler_Init();
     TIMERS_Init();
-    printf("Welcome to the Sampler Test\r\n");
+    
     MagAccelSet_t Bob;
-    //printf("Size of MagAccelSet: %d %d",sizeof(MagAccelSet_t),sizeof(Bob));
+    printf("Size of MagAccelSet: %d %d",sizeof(MagAccelSet_t),sizeof(Bob));
     
     while(1)
     {
         Sampler_Sample();
+        DataLogging_Log();
     }
     //------------------------------------------------------------------
     printf("Starting the timing test\r\n");
