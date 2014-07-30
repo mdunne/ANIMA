@@ -7,9 +7,12 @@ from operator import xor
 from struct import unpack
 
 
-def CalcCRC16(Data,CRCPolynomial,CRCWidth,Seed=0):
+def CalcCRC(Data,CRCPolynomial,CRCWidth,Seed=65535):
 	#Need DataWidth
 	#print(Data.bin)
+	
+	#Convert CRCWidth to bits not bytes
+	CRCWidth=CRCWidth*8
 	DataWidth=len(Data)+CRCWidth
 	DataWidth=len(Data)
 	#pad the data with zeros the size of the CRC
@@ -36,9 +39,9 @@ def CalcCRC16(Data,CRCPolynomial,CRCWidth,Seed=0):
 		#print(RemovedBit)
 		
 		CRCOut=CRCOut[-CRCWidth:]
-		#print(CRCOut.bin)
+		# print(CRCOut.bin)
 		if(RemovedBit):
-			CRCOut=xor(CRCOut,CRCPolynomial)
+			CRCOut=CRCOut^CRCPolynomial
 		#extract the current set to be xor
 		# CurDataSection=Data[iterator:iterator+CRCWidth+1]
 		#FirstBit=CurDataSection[0]
@@ -56,7 +59,69 @@ def CalcCRC16(Data,CRCPolynomial,CRCWidth,Seed=0):
 	
 	return CRCOut.uint
 
+def GenerateCRCTable(InputChunkSize,CRCPolynomial,CRCWidth):
+	#print(CRCPolynomial,CRCWidth)
+	
+	ValuesToGenerate=2**(InputChunkSize*8)
+	TopBitMask=1<<(CRCWidth*8-1)
+	CRCMask=2**(CRCWidth*8)-1
+	# print(ValuesToGenerate)
+	CRCTable=[]
+	for dividend in range(ValuesToGenerate):
+		# print(dividend)
+		
+		ComputedCRC=1
+		inByte=dividend<<((CRCWidth-InputChunkSize)*8)
+		# print(inByte)
+		for i in range(0,8):
+			topBit=inByte&TopBitMask
+			# print(topBit)
+			if(topBit):
+				inByte=(inByte<<1)^CRCPolynomial
+			else:
+				inByte=inByte<<1
+				# print('hmm')
+			inByte=inByte&CRCMask
+		# TransformedDividend=BitArray(uint=dividend,length=InputChunkSize*8)+BitArray(uint=0,length=(CRCWidth-InputChunkSize)*8)
+		# #print(TransformedDividend)
+		# ComputedCRC=CalcCRC(TransformedDividend,CRCPolynomial,CRCWidth,0)
+		
+		CRCTable.append(inByte)
+		# print(ComputedCRC,inByte)
+	#print(ValuesToGenerate)
+	return	CRCTable
 
+
+def CalcCRCTable(Data,CRCPolynomial,CRCWidth,ChunkSize,Table,Seed=65535):
+	#print(CRCTable)
+	
+	#first need the data in a byte array not strings otherwise xor on 
+	#the python foo is not strong with this one
+	Data=[ord(byte) for byte in Data]
+	
+	#and generate some masks and shifts
+	# CRCWidth=log(CRCWidth)/log(2)  #log does not belong here, need to fix later
+	CRCTopShift=(CRCWidth-ChunkSize)*8
+	CRCTopMask=(2**(ChunkSize*8)-1)<<CRCTopShift
+	CRCMask=2**(CRCWidth*8)-1
+	
+	# print(CRCTopShift,CRCTopMask)	
+	#print(Data[0])
+	#print(Data[0]<<8)
+	
+	#Seed the CRC, this is just the crc value
+	# print(ord(Data))
+	CRC=Seed
+	for NewByte in Data:
+		TopByte=(CRC&CRCTopMask)>>CRCTopShift
+		CRC=((CRC<<CRCTopShift)|NewByte)&CRCMask
+		CRC=CRC^Table[TopByte]
+		# print(TopByte)
+	
+	# print(CRC)
+	return CRC
+	
+	
 testfilename="003.bin"
 
 HeaderValue=0xFB3B
@@ -64,27 +129,35 @@ FooterValue=0x5F86
 HeaderFooterStruct=struct.Struct('<H')
 CheckSumStruct=struct.Struct('<H')
 
-CRCPolynomial=0x48A1
-CRCWidth=16
+CRCPolynomial=0x8005
+CRCWidth=2  #in bytes
 CRCSeed=0xffff
 
 #we modify the polynomial and the width according to crc specs
 #CRCPolynomial=CRCPolynomial<<1+1
 #CRCWidth=CRCWidth+1
-CalcCRC16(BitArray('0x55565758595A5B5C5D5E5F606162636465666768'),0x8005,16,0)
+CRCTable=GenerateCRCTable(1,CRCPolynomial,CRCWidth)
+TestString='0123456789'
+RefCRC=CalcCRC(BitArray(bytes=TestString),CRCPolynomial,CRCWidth,0)
+TableCRC=CalcCRCTable(TestString,CRCPolynomial,CRCWidth,1,CRCTable)
+print(RefCRC,TableCRC)
+# exit()
 #print(HeaderValue)
 # print(xor(HeaderValue,FooterValue))
 #open the file and read until file is gone
 inFile=open(testfilename,"rb")
 curSector=inFile.read(512)
 ValidSectorCount=0
+usebitCRC=True
+FullStartTime=time.time()
+
 while curSector!='':
 
 	#check first for header and footer for verification of valid sector
 	inHeaderValue=HeaderFooterStruct.unpack(curSector[:2])
 	inFooterValue=HeaderFooterStruct.unpack(curSector[-2:])
 	if inHeaderValue[0]==HeaderValue and inFooterValue[0]==FooterValue:
-		print("Valid Sector Found")
+		# print("Valid Sector Found")
 		ValidSectorCount=ValidSectorCount+1
 		#extract checksum and calculate new checksum
 		inCheckSum=CheckSumStruct.unpack(curSector[-4:-2])[0]
@@ -94,21 +167,25 @@ while curSector!='':
 		# PacketBitArray=BitArray(int=unpack('b',curSector[4])[0],length=8)
 		#print(PacketBitArray)
 		FullDataPacket=(curSector[4:-4])
-		PacketBitArray=BitArray(bytes=FullDataPacket)
-		#print(PacketBitArray.hex)
-		#print(xor(BitArray(int=ord("a"),length=8),BitArray(int=ord("b"),length=8)))
 		TimeStart=time.time()
-		ComputedChecksum=CalcCRC16(PacketBitArray,0x8005,16,0)
+		if(usebitCRC):
+			# print(type(FullDataPacket))
+			PacketBitArray=BitArray(bytes=FullDataPacket)
+			#print(PacketBitArray.hex)
+			#print(xor(BitArray(int=ord("a"),length=8),BitArray(int=ord("b"),length=8)))
+			ComputedChecksum=CalcCRC(PacketBitArray,CRCPolynomial,CRCWidth,0)
+		else:
+			ComputedChecksum=CalcCRCTable(FullDataPacket,CRCPolynomial,CRCWidth,1,CRCTable)
 		TimeEnd=time.time()
 		TimeElapsed=TimeEnd-TimeStart
 		#print("asda")
 		
 		# print(ComputedChecksum, inCheckSum)
 		#if(Compute
-		if(ComputedChecksum==inCheckSum):
-			print("Sector #%d Verified in %f seconds " % (ValidSectorCount,TimeElapsed))
-		else:
-			print("ERROR==================================================================================================")
+		# if(ComputedChecksum==inCheckSum):
+			# print("Sector #%d Verified in %f seconds " % (ValidSectorCount,TimeElapsed))
+		# else:
+			# print("ERROR==================================================================================================")
 		# BitAr=BitArray(int=ord(curSector[0]),length=8)
 		
 		# print(FullDataPacket[-2])
@@ -116,44 +193,14 @@ while curSector!='':
 		
 		
 	curSector=inFile.read(512)
-	# break
-
+	#break
+	
+FullStopTime=time.time()
+FullElapsedTime=FullStopTime-FullStartTime
+print("Full time to verify was %f" % FullElapsedTime)
 print(ValidSectorCount)
 inFile.close()
-
-
-
-
-
 exit()
 
 
 
-# if len(sys.argv) < 3 :
-    # print("Please enter 3 arguments: the file number, a file to read from, and a file to write to.")
-    # exit()
-
-
-dataLine = struct.Struct('<h h h h h h f i ')
-ID = struct.Struct('<h')
-
-readFile = open(sys.argv[2], "rb") # open first file to read
-writeFile = open(sys.argv[3], "w") # open second file to write
-
-packedData = readFile.read(512)
-idNumber = ID.unpack(packedData[0:2])
-idCompare = int(sys.argv[1])
-writeFile.write("%AccelX\tAccelY\tAccelZ\tMagX\tMagY\tMagZ\tTemp\tTime\n".format())
-
-while idNumber[0] == idCompare: # main loop
-	for i in range(0,25):
-		line = packedData[4+20*i:24+20*i]
-		unpackedData = dataLine.unpack(line);
-		#print("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(unpackedData[0], unpackedData[1], unpackedData[2], unpackedData[3], unpackedData[4], unpackedData[5], unpackedData[6], unpackedData[7]))
-		print("{}".format(unpackedData[7]))
-		writeFile.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(unpackedData[0], unpackedData[1], unpackedData[2], unpackedData[3], unpackedData[4], unpackedData[5], unpackedData[6], unpackedData[7]))
-	packedData = readFile.read(512)
-	idNumber = ID.unpack(packedData[0:2])
-
-readFile.close()
-writeFile.close()
