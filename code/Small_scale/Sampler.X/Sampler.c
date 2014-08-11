@@ -107,6 +107,9 @@ unsigned char Sampler_Init(void) {
 //        printf("Size of bulk access: %d and size of internal data struct: %d\r\n",sizeof(CurMagAccelData.BulkAccess),sizeof(CurMagAccelData.DataAccess));
 //        while(1);
     //set up both timers
+    CurMagAccelData.DataAccess.PacketId=34;
+
+
     AccelFrequency = 12.5;
     SensorRates.Accel.TicksBetweenSamples = DEFAULT_ACCEL_TICK_COUNT;
     SensorRates.Accel.NextSampleTime = Sampler_GetAccelCount() + SensorRates.Accel.TicksBetweenSamples;

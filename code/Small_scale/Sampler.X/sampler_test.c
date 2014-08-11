@@ -29,16 +29,18 @@
 void main(void) {
     BOARD_Init();
     printf("Welcome to the Sampler Test\r\n");
+    MagAccelSet_t Bob;
+    printf("Size of MagAccelSet: %d %d", sizeof (MagAccelSet_t), sizeof (Bob));
+    //while(1);
     DataLogging_Init();
     DataEncoding_Init();
     Sampler_Init();
     TIMERS_Init();
+
     
-    MagAccelSet_t Bob;
-    printf("Size of MagAccelSet: %d %d",sizeof(MagAccelSet_t),sizeof(Bob));
-    
-    while(1)
-    {
+
+
+    while (1) {
         Sampler_Sample();
         DataLogging_Log();
     }

@@ -122,7 +122,7 @@ def CalcCRCTable(Data,CRCPolynomial,CRCWidth,ChunkSize,Table,Seed=65535):
 	return CRC
 	
 	
-testfilename="003.bin"
+testfilename="000.bin"
 
 HeaderValue=0xFB3B
 FooterValue=0x5F86
@@ -136,11 +136,15 @@ CRCSeed=0xffff
 #we modify the polynomial and the width according to crc specs
 #CRCPolynomial=CRCPolynomial<<1+1
 #CRCWidth=CRCWidth+1
+TimeStart=time.time()
 CRCTable=GenerateCRCTable(1,CRCPolynomial,CRCWidth)
+TimeEnd=time.time()
+TimeElapsed=TimeEnd-TimeStart
+# print(TimeElapsed)
 TestString='0123456789'
 RefCRC=CalcCRC(BitArray(bytes=TestString),CRCPolynomial,CRCWidth,0)
 TableCRC=CalcCRCTable(TestString,CRCPolynomial,CRCWidth,1,CRCTable)
-print(RefCRC,TableCRC)
+# print(RefCRC,TableCRC)
 # exit()
 #print(HeaderValue)
 # print(xor(HeaderValue,FooterValue))
@@ -148,9 +152,12 @@ print(RefCRC,TableCRC)
 inFile=open(testfilename,"rb")
 curSector=inFile.read(512)
 ValidSectorCount=0
-usebitCRC=True
+ValidPacketsFound=0
+usebitCRC=False
 FullStartTime=time.time()
-
+BytesToProcess=0
+FullDataPacket=''
+MagAccelStruct=struct.Struct('>H 33h') 
 while curSector!='':
 
 	#check first for header and footer for verification of valid sector
@@ -166,26 +173,53 @@ while curSector!='':
 		#removing header/timestamp from beginning and footer/checksum from the end
 		# PacketBitArray=BitArray(int=unpack('b',curSector[4])[0],length=8)
 		#print(PacketBitArray)
-		FullDataPacket=(curSector[4:-4])
+		IncomingDataPacket=(curSector[4:-4])
 		TimeStart=time.time()
-		if(usebitCRC):
-			# print(type(FullDataPacket))
-			PacketBitArray=BitArray(bytes=FullDataPacket)
-			#print(PacketBitArray.hex)
-			#print(xor(BitArray(int=ord("a"),length=8),BitArray(int=ord("b"),length=8)))
-			ComputedChecksum=CalcCRC(PacketBitArray,CRCPolynomial,CRCWidth,0)
-		else:
-			ComputedChecksum=CalcCRCTable(FullDataPacket,CRCPolynomial,CRCWidth,1,CRCTable)
+		ComputedChecksum=CalcCRCTable(IncomingDataPacket,CRCPolynomial,CRCWidth,1,CRCTable)
 		TimeEnd=time.time()
 		TimeElapsed=TimeEnd-TimeStart
 		#print("asda")
 		
 		# print(ComputedChecksum, inCheckSum)
 		#if(Compute
-		# if(ComputedChecksum==inCheckSum):
+		if(ComputedChecksum==inCheckSum):
 			# print("Sector #%d Verified in %f seconds " % (ValidSectorCount,TimeElapsed))
-		# else:
-			# print("ERROR==================================================================================================")
+			CurSectorByteCount=0
+			BytesToProcess=BytesToProcess+len(IncomingDataPacket)
+			FullDataPacket=FullDataPacket+IncomingDataPacket
+			ValidPacketsFound=0
+			# print(BytesToProcess)
+			# print([ord(byte) for byte in FullDataPacket])
+			while(True):
+				# print(len(FullDataPacket),ord(FullDataPacket[0]))
+				if(len(FullDataPacket)>=2):
+					FirstByte=ord(FullDataPacket[0])
+					# pic can't pack 8 bits in, need to upshift to 16 bits for id for now fudged as they are the wrong endedness
+					FirstByte=struct.Struct('H').unpack(FullDataPacket[0:2])[0]
+
+					print(FirstByte)
+					if(FirstByte==34):
+						print("Found a MagAccel Packet")
+						if(len(FullDataPacket)>=68):
+							MagAccelRawData=FullDataPacket[0:68]
+							MagAccelDataPacket=MagAccelStruct.unpack(MagAccelRawData)
+							ValidPacketsFound=ValidPacketsFound+1
+							# print(MagAccelDataPacket)
+							# print([byte.encode('hex') for byte in MagAccelRawData])
+							# print(len(MagAccelRawData))
+							FullDataPacket=FullDataPacket[68:]
+							# print(len(FullDataPacket))
+							# print(ValidSectorCount,ValidPacketsFound)
+						else:
+							break
+						# BytesToProcess=BytesToProcess-68
+					else:
+						break
+						print("found something invalid")
+				#break
+			
+		else:
+			print("ERROR==================================================================================================")
 		# BitAr=BitArray(int=ord(curSector[0]),length=8)
 		
 		# print(FullDataPacket[-2])
@@ -193,8 +227,9 @@ while curSector!='':
 		
 		
 	curSector=inFile.read(512)
-	#break
-	
+	if(ValidSectorCount>600):
+		break
+# print([ord(byte) for byte in FullDataPacket])
 FullStopTime=time.time()
 FullElapsedTime=FullStopTime-FullStartTime
 print("Full time to verify was %f" % FullElapsedTime)

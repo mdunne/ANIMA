@@ -31,7 +31,7 @@ typedef struct XYZPoint_t {
 typedef union MagAccelSet_t {
 
     struct {
-        uint8_t PacketId;
+        uint16_t PacketId;
         XYZPoint_t AccelData[10];
         XYZPoint_t MagData;
     } DataAccess;
