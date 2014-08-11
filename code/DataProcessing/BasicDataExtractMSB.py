@@ -2,62 +2,10 @@ import sys
 import struct
 import binascii
 import time
-from bitstring import BitArray
+
 from operator import xor
 from struct import unpack
 
-
-def CalcCRC(Data,CRCPolynomial,CRCWidth,Seed=65535):
-	#Need DataWidth
-	#print(Data.bin)
-	
-	#Convert CRCWidth to bits not bytes
-	CRCWidth=CRCWidth*8
-	DataWidth=len(Data)+CRCWidth
-	DataWidth=len(Data)
-	#pad the data with zeros the size of the CRC
-	# Data=Data+BitArray(int=0,length=CRCWidth)
-	Data=Data
-	
-	#convert polynomial and shift the polynomial,add one to match form
-	CRCPolynomial=BitArray(uint=CRCPolynomial,length=CRCWidth)
-	# CRCPolynomial=BitArray(uint=CRCPolynomial,length=CRCWidth)+BitArray("0b1")
-	
-	#print(Data)
-	#print(Data[-0])
-	#print(Data.bin)
-	#print(CRCPolynomial.bin)
-	CRCOut=BitArray(uint=65535,length=CRCWidth)
-	for iterator in range(0,DataWidth):
-		#print(iterator)
-		NewBit=Data[iterator]
-		if(NewBit):
-			CRCOut=CRCOut+BitArray("0b1")
-		else:
-			CRCOut=CRCOut+BitArray("0b0")
-		RemovedBit=CRCOut[0]
-		#print(RemovedBit)
-		
-		CRCOut=CRCOut[-CRCWidth:]
-		# print(CRCOut.bin)
-		if(RemovedBit):
-			CRCOut=CRCOut^CRCPolynomial
-		#extract the current set to be xor
-		# CurDataSection=Data[iterator:iterator+CRCWidth+1]
-		#FirstBit=CurDataSection[0]
-		#we only perform crc on sections starting with 1
-		# if FirstBit:
-			# Data[iterator:iterator+CRCWidth+1]=xor(CurDataSection,CRCPolynomial)
-			#print(CurDataSection.bin)
-		#print(Data.bin)
-	# print(CRCWidth)
-	# print(Seed)
-	
-	#print(CRCOut.hex)
-	#print(Data[-16:].bin)
-	#print(Data.hex)
-	
-	return CRCOut.uint
 
 def GenerateCRCTable(InputChunkSize,CRCPolynomial,CRCWidth):
 	#print(CRCPolynomial,CRCWidth)
@@ -142,9 +90,7 @@ TimeEnd=time.time()
 TimeElapsed=TimeEnd-TimeStart
 # print(TimeElapsed)
 TestString='0123456789'
-RefCRC=CalcCRC(BitArray(bytes=TestString),CRCPolynomial,CRCWidth,0)
-TableCRC=CalcCRCTable(TestString,CRCPolynomial,CRCWidth,1,CRCTable)
-# print(RefCRC,TableCRC)
+
 # exit()
 #print(HeaderValue)
 # print(xor(HeaderValue,FooterValue))
@@ -197,7 +143,7 @@ while curSector!='':
 					# pic can't pack 8 bits in, need to upshift to 16 bits for id for now fudged as they are the wrong endedness
 					FirstByte=struct.Struct('H').unpack(FullDataPacket[0:2])[0]
 
-					print(FirstByte)
+					# print(ValidSectorCount,len(FullDataPacket))
 					if(FirstByte==34):
 						print("Found a MagAccel Packet")
 						if(len(FullDataPacket)>=68):
@@ -216,6 +162,8 @@ while curSector!='':
 					else:
 						break
 						print("found something invalid")
+				else:
+					break
 				#break
 			
 		else:
@@ -227,7 +175,7 @@ while curSector!='':
 		
 		
 	curSector=inFile.read(512)
-	if(ValidSectorCount>600):
+	if(ValidSectorCount>30):
 		break
 # print([ord(byte) for byte in FullDataPacket])
 FullStopTime=time.time()
