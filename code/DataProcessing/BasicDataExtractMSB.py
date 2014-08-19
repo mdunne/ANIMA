@@ -2,6 +2,8 @@ import sys
 import struct
 import binascii
 import time
+import ConfigParser
+
 
 from operator import xor
 from struct import unpack
@@ -69,14 +71,53 @@ def CalcCRCTable(Data,CRCPolynomial,CRCWidth,ChunkSize,Table,Seed=65535):
 	# print(CRC)
 	return CRC
 	
+
+def WriteNewPacketConfiguration(PacketID,StringName,StructString,StructLength,CommentString,ConfigFileName="PacketIDs.cfg"):
+	#build a new config object and read in the current config file
+	config=ConfigParser.ConfigParser()
+	config.read(ConfigFileName)
+	SectionName=str(PacketID)
+	#attempt to add the section, if already exist we only update the values given
+	try:
+		config.add_section(SectionName)
+	except:
+		print('Updating Entry instead of adding a new one, be careful')
+		pass
+	config.set(SectionName,'stringname',StringName)
+	config.set(SectionName,'structstring',StructString)
+	config.set(SectionName,'structlength',str(StructLength))
+	config.set(SectionName,'commentstring',CommentString)
+	with open(ConfigFileName, 'wb') as configfile:
+		config.write(configfile)
+	return
+
+#builds a dictionary of dictionaries of required packet information for parsing
+def BuildPacketDictionary(ConfigFileName):
+	PacketConfigs=ConfigParser.ConfigParser()
+	PacketConfigs.read(ConfigFileName)
+	PacketDict=dict()
+	for Section in PacketConfigs.sections():
+		MainDictKey=int(Section)
+		CurDict=dict()
+		CurDict['stringname']=PacketConfigs.get(Section,'stringname')
+		
+		#uniquely here we first store the string and then build the struct for unpacking and store that as well
+		CurDict['structstring']=PacketConfigs.get(Section,'structstring')
+		CurDict['unpackstruct']=struct.Struct(CurDict['structstring'])
+		CurDict['structlength']=PacketConfigs.getint(Section,'structlength')
+		CurDict['commentstring']=PacketConfigs.get(Section,'commentstring')
+		PacketDict[MainDictKey]=CurDict
+	return PacketDict
 	
+
 testfilename="000.bin"
 
 HeaderValue=0xFB3B
 FooterValue=0x5F86
 HeaderFooterStruct=struct.Struct('<H')
 CheckSumStruct=struct.Struct('<H')
-
+TimeStampStruct=struct.Struct('<H')
+ConfigFileName='PacketIDs.cfg'
 CRCPolynomial=0x8005
 CRCWidth=2  #in bytes
 CRCSeed=0xffff
@@ -90,20 +131,36 @@ TimeEnd=time.time()
 TimeElapsed=TimeEnd-TimeStart
 # print(TimeElapsed)
 TestString='0123456789'
-
+CurTimeStamp=-1
 # exit()
 #print(HeaderValue)
-# print(xor(HeaderValue,FooterValue))
 #open the file and read until file is gone
-inFile=open(testfilename,"rb")
-curSector=inFile.read(512)
+inFileHandler=open(testfilename,"rb")
+
+OutFileName='parsed_'+testfilename
+OutFileHandler=open(OutFileName,"w")
+
+
+curSector=inFileHandler.read(512)
 ValidSectorCount=0
 ValidPacketsFound=0
 usebitCRC=False
 FullStartTime=time.time()
 BytesToProcess=0
 FullDataPacket=''
-MagAccelStruct=struct.Struct('>H 33h') 
+MagAccelStruct=struct.Struct('<H 33h')
+
+# WriteNewPacketConfiguration(34,'Mag_Accel_Packet','<H 33h',68,'this is the line for the top of the file',ConfigFileName)
+PacketDict=BuildPacketDictionary(ConfigFileName)
+
+for key in PacketDict:
+	CurEntry=PacketDict[key]
+	curEntryKey=key
+	for key in CurEntry:
+		print(curEntryKey,key,CurEntry[key])
+# print(PacketConfigs.get('34','stringname'))
+
+# exit()
 while curSector!='':
 
 	#check first for header and footer for verification of valid sector
@@ -129,6 +186,13 @@ while curSector!='':
 		# print(ComputedChecksum, inCheckSum)
 		#if(Compute
 		if(ComputedChecksum==inCheckSum):
+		
+			# we need to find the new time stamp but not update the value
+			PossTimeStamp=TimeStampStruct.unpack(curSector[2:4])[0]
+			
+			#the first timestamp needs to be set regardless of packet state
+			if(CurTimeStamp==-1):
+				CurTimeStamp=PossTimeStamp
 			# print("Sector #%d Verified in %f seconds " % (ValidSectorCount,TimeElapsed))
 			CurSectorByteCount=0
 			BytesToProcess=BytesToProcess+len(IncomingDataPacket)
@@ -144,16 +208,37 @@ while curSector!='':
 					FirstByte=struct.Struct('H').unpack(FullDataPacket[0:2])[0]
 
 					# print(ValidSectorCount,len(FullDataPacket))
-					if(FirstByte==34):
-						print("Found a MagAccel Packet")
-						if(len(FullDataPacket)>=68):
-							MagAccelRawData=FullDataPacket[0:68]
-							MagAccelDataPacket=MagAccelStruct.unpack(MagAccelRawData)
+					
+					#we first test to see if the next byte is a known packet ID
+					if(FirstByte in PacketDict):
+						# print("Found a MagAccel Packet")
+						PacketLength=PacketDict[FirstByte]['structlength']
+						#we then make sure we have a full packet if not we need to wait for the next sector
+						if(len(FullDataPacket)>=PacketLength):
+						
+							#extract and unpack the packet
+							CurRawData=FullDataPacket[0:PacketLength]
+							CurDataPacket=PacketDict[FirstByte]['unpackstruct'].unpack(CurRawData)
 							ValidPacketsFound=ValidPacketsFound+1
-							# print(MagAccelDataPacket)
-							# print([byte.encode('hex') for byte in MagAccelRawData])
-							# print(len(MagAccelRawData))
-							FullDataPacket=FullDataPacket[68:]
+							
+							#prepend the time stamp for the outfile and format the string
+							OutTuple=(CurTimeStamp,)+CurDataPacket
+							# print(OutTuple)
+							OutString="\t".join(str(i) for i in OutTuple)
+							# print(OutString)
+							#add it to the log file
+							OutFileHandler.write(OutString+'\n')
+							# we can now update the timestamp as this packet is done
+							CurTimeStamp=PossTimeStamp
+							
+							
+							# print(CurDataPacket)
+							# print([byte.encode('hex') for byte in CurRawData])
+							# print(len(CurRawData))
+							
+							
+							#remove the processed packet from the fullDataPacket
+							FullDataPacket=FullDataPacket[PacketLength:]
 							# print(len(FullDataPacket))
 							# print(ValidSectorCount,ValidPacketsFound)
 						else:
@@ -174,15 +259,16 @@ while curSector!='':
 		#print(inCheckSum[0])
 		
 		
-	curSector=inFile.read(512)
-	if(ValidSectorCount>30):
+	curSector=inFileHandler.read(512)
+	if(ValidSectorCount>4):
 		break
 # print([ord(byte) for byte in FullDataPacket])
 FullStopTime=time.time()
 FullElapsedTime=FullStopTime-FullStartTime
 print("Full time to verify was %f" % FullElapsedTime)
 print(ValidSectorCount)
-inFile.close()
+inFileHandler.close()
+OutFileHandler.close()
 exit()
 
 
