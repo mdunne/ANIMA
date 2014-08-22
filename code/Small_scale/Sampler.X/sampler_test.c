@@ -26,18 +26,39 @@
 #pragma config FSOSCEN = OFF
 #pragma config OSCIOFNC = OFF
 
+union
+{
+    float testFloat;
+    char testChar[4];
+} testUnion;
 void main(void) {
     BOARD_Init();
     printf("Welcome to the Sampler Test\r\n");
     MagAccelSet_t Bob;
-    printf("Size of MagAccelSet: %d %d", sizeof (MagAccelSet_t), sizeof (Bob));
-    //while(1);
+    printf("Size of MagAccelSet: %d %d\r\n", sizeof (MagAccelSet_t), sizeof (Bob));
+    GPSSet_t is;
+    printf("Size of GPSSet: %d %d\r\n", sizeof (GPSSet_t), sizeof (is));
+        TempSet_t not;
+    printf("Size of GPSSet: %d %d\r\n", sizeof (TempSet_t), sizeof (not));
+//    while(1);
+//    testUnion.testFloat=37.000370;
+//    printf("The Float is %f\r\n",testUnion.testFloat);
+//    printf("The Hex of it is ");
+//    int i;
+//    for(i=0;i<4;i++)
+//    {
+//        printf("%02X\t",testUnion.testChar[i]);
+//    }
+//    while (1);
+    TIMERS_Init();
+    SetTimer(0,1000);
+    while(IsTimerActive(0));
     DataLogging_Init();
     DataEncoding_Init();
     Sampler_Init();
-    TIMERS_Init();
-
     
+
+
 
 
     while (1) {

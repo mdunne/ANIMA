@@ -130,7 +130,7 @@ typedef struct tGpsData {
     unsigned short millisec;
     float lat;
     float lon;
-    float height;
+    float altitude;
     tUnsignedShortToChar cog;
     tUnsignedShortToChar sog;
     tUnsignedShortToChar hdop;

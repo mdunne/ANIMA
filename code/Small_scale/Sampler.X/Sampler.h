@@ -29,7 +29,6 @@ typedef struct XYZPoint_t {
 } XYZPoint_t;
 
 typedef union MagAccelSet_t {
-
     struct {
         uint16_t PacketId;
         XYZPoint_t AccelData[10];
@@ -46,6 +45,42 @@ typedef union UnionizedSet_t {
     } DataAccess;
     uint8_t BulkAccess[66];
 } UnionizedSet_t;
+
+typedef union GPSSet_t {
+
+    struct {
+        uint16_t PacketID;
+
+        struct {
+            uint8_t Year;
+            uint8_t Month;
+            uint8_t Day;
+            uint8_t Hour;
+            uint8_t Min;
+            uint8_t Sec;
+        } Time;
+
+        struct {
+            float Lat;
+            float Lon;
+            float Alt;
+            uint8_t Fix;
+            uint8_t NumOfSats;
+            uint8_t HDOP;
+            uint8_t VDOP;
+        } Location;
+    } DataAccess;
+    uint8_t BulkAccess[24];
+} GPSSet_t;
+
+
+typedef union TempSet_t {
+    struct {
+        uint16_t PacketId;
+        uint16_t Temp;
+    } DataAccess;
+    uint8_t BulkAccess[4];
+} TempSet_t;
 
 /*******************************************************************************
  * PUBLIC #DEFINES                                                             *

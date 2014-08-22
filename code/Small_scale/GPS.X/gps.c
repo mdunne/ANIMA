@@ -937,7 +937,7 @@ void parseGGA(char* stream) {
     // xxx.xxx
     myTokenizer(NULL, ',', token);
     if (strlen(token) > 0) {
-        gpsControlData.height = atof(token);
+        gpsControlData.altitude = atof(token);
     }
 
     // turn the flag on of new data

@@ -3,7 +3,7 @@ import struct
 import binascii
 import time
 import ConfigParser
-
+import os
 
 from operator import xor
 from struct import unpack
@@ -72,7 +72,7 @@ def CalcCRCTable(Data,CRCPolynomial,CRCWidth,ChunkSize,Table,Seed=65535):
 	return CRC
 	
 
-def WriteNewPacketConfiguration(PacketID,StringName,StructString,StructLength,CommentString,ConfigFileName="PacketIDs.cfg"):
+def WriteNewPacketConfiguration(PacketID,StringName,StructString,CommentString,ConfigFileName="PacketIDs.cfg"):
 	#build a new config object and read in the current config file
 	config=ConfigParser.ConfigParser()
 	config.read(ConfigFileName)
@@ -85,7 +85,9 @@ def WriteNewPacketConfiguration(PacketID,StringName,StructString,StructLength,Co
 		pass
 	config.set(SectionName,'stringname',StringName)
 	config.set(SectionName,'structstring',StructString)
-	config.set(SectionName,'structlength',str(StructLength))
+	
+	StructLength=struct.Struct(StructString).size
+	config.set(SectionName,'structlength',StructLength)
 	config.set(SectionName,'commentstring',CommentString)
 	with open(ConfigFileName, 'wb') as configfile:
 		config.write(configfile)
@@ -109,9 +111,8 @@ def BuildPacketDictionary(ConfigFileName):
 		PacketDict[MainDictKey]=CurDict
 	return PacketDict
 	
-
-testfilename="000.bin"
-
+#constants along with the commonly used Structs
+#while duplication of structs these could change
 HeaderValue=0xFB3B
 FooterValue=0x5F86
 HeaderFooterStruct=struct.Struct('<H')
@@ -121,25 +122,29 @@ ConfigFileName='PacketIDs.cfg'
 CRCPolynomial=0x8005
 CRCWidth=2  #in bytes
 CRCSeed=0xffff
+CommentMarker='%'
 
-#we modify the polynomial and the width according to crc specs
-#CRCPolynomial=CRCPolynomial<<1+1
-#CRCWidth=CRCWidth+1
-TimeStart=time.time()
+
+testfilename="009.bin"
+#uncomment for normal usage and comment testline
+InFileName=testfilename
+# InFileName=sys.argv[2]
+
+#need to generate table for quick CRC calculation, should probably store in file if table grows much larger
 CRCTable=GenerateCRCTable(1,CRCPolynomial,CRCWidth)
-TimeEnd=time.time()
-TimeElapsed=TimeEnd-TimeStart
-# print(TimeElapsed)
-TestString='0123456789'
+
 CurTimeStamp=-1
 # exit()
-#print(HeaderValue)
-#open the file and read until file is gone
-inFileHandler=open(testfilename,"rb")
 
-OutFileName='parsed_'+testfilename
+inFileHandler=open(InFileName,"rb")
+
+
+TrimmedFileName,FileExt=os.path.splitext(InFileName)
+print(TrimmedFileName,FileExt)
+#exit()
+OutFileName=TrimmedFileName+'_parsed.txt'
 OutFileHandler=open(OutFileName,"w")
-
+# OutFileHandler.seek(0)
 
 curSector=inFileHandler.read(512)
 ValidSectorCount=0
@@ -150,8 +155,29 @@ BytesToProcess=0
 FullDataPacket=''
 MagAccelStruct=struct.Struct('<H 33h')
 
-# WriteNewPacketConfiguration(34,'Mag_Accel_Packet','<H 33h',68,'this is the line for the top of the file',ConfigFileName)
+#MagAccelTemplate
+# WriteNewPacketConfiguration(42,'Mag_Accel_Packet','<H 33h','this is the line for the top of the file',ConfigFileName)
+#GPSTemplate
+# WriteNewPacketConfiguration(42,'GPS_Packet','<H 6B 3f 4B','this is the comment line',ConfigFileName)
+#TempTemplate
+# WriteNewPacketConfiguration(62,'Temp_Packet','<H h','SectorTimeStamp PacketID Temp',ConfigFileName)
+
 PacketDict=BuildPacketDictionary(ConfigFileName)
+
+#we need to build the comment block on the top of the file
+#first line is a filler for a date to be filled later
+
+OutFileHandler.write(CommentMarker + 'File ID: 20')
+IDSeekPos=OutFileHandler.tell()
+IDTempString='{0: <81}'.format('')
+FirstGPSFound=False
+
+OutFileHandler.write(IDTempString+'\n')
+OutFileHandler.write(CommentMarker+'Lines after this one are packet definitions\n')
+
+for key in PacketDict:
+	CommentLine=PacketDict[key]['commentstring']
+	OutFileHandler.write(CommentMarker+CommentLine+'\n')
 
 for key in PacketDict:
 	CurEntry=PacketDict[key]
@@ -159,7 +185,7 @@ for key in PacketDict:
 	for key in CurEntry:
 		print(curEntryKey,key,CurEntry[key])
 # print(PacketConfigs.get('34','stringname'))
-
+ValidPacketsFound=0
 # exit()
 while curSector!='':
 
@@ -197,7 +223,7 @@ while curSector!='':
 			CurSectorByteCount=0
 			BytesToProcess=BytesToProcess+len(IncomingDataPacket)
 			FullDataPacket=FullDataPacket+IncomingDataPacket
-			ValidPacketsFound=0
+			
 			# print(BytesToProcess)
 			# print([ord(byte) for byte in FullDataPacket])
 			while(True):
@@ -221,6 +247,14 @@ while curSector!='':
 							CurDataPacket=PacketDict[FirstByte]['unpackstruct'].unpack(CurRawData)
 							ValidPacketsFound=ValidPacketsFound+1
 							
+							#we do a special check for a gps packet as we need it for the top of the file
+							if(PacketDict[FirstByte]['stringname']=='GPS_Packet' and not FirstGPSFound):
+								# print('first check worked')
+								FirstGPSFound=True
+								GPSPacketForID=CurDataPacket
+							
+							# print([ord(byte) for byte in CurRawData])
+							# print([format(ord(byte),'02x') for byte in CurRawData])
 							#prepend the time stamp for the outfile and format the string
 							OutTuple=(CurTimeStamp,)+CurDataPacket
 							# print(OutTuple)
@@ -245,8 +279,9 @@ while curSector!='':
 							break
 						# BytesToProcess=BytesToProcess-68
 					else:
-						break
 						print("found something invalid")
+						break
+						
 				else:
 					break
 				#break
@@ -260,14 +295,22 @@ while curSector!='':
 		
 		
 	curSector=inFileHandler.read(512)
-	if(ValidSectorCount>4):
+	if(ValidSectorCount>4000):
 		break
 # print([ord(byte) for byte in FullDataPacket])
 FullStopTime=time.time()
 FullElapsedTime=FullStopTime-FullStartTime
 print("Full time to verify was %f" % FullElapsedTime)
-print(ValidSectorCount)
+print(ValidSectorCount*512,ValidPacketsFound)
 inFileHandler.close()
+
+
+#we now modify the file to include the ID
+OutFileHandler.seek(IDSeekPos)
+OutString=[format(i,'02') for i in GPSPacketForID[1:7]]+['{: f} '.format(i) for i in GPSPacketForID[7:9]]
+print(OutString)
+OutFileHandler.write("".join(OutString))
+
 OutFileHandler.close()
 exit()
 
