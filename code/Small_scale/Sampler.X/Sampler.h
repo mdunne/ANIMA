@@ -22,13 +22,18 @@ typedef enum {
     RATE_800_HERTZ
 } Valid_AccelMagRates;
 
-typedef struct XYZPoint_t {
-    uint16_t X;
-    uint16_t Y;
-    uint16_t Z;
+typedef union XYZPoint_t {
+
+    struct {
+        uint16_t X;
+        uint16_t Y;
+        uint16_t Z;
+    };
+    uint16_t TripletAccess[3];
 } XYZPoint_t;
 
 typedef union MagAccelSet_t {
+
     struct {
         uint16_t PacketId;
         XYZPoint_t AccelData[10];
@@ -66,15 +71,14 @@ typedef union GPSSet_t {
             float Alt;
             uint8_t Fix;
             uint8_t NumOfSats;
-            uint8_t HDOP;
-            uint8_t VDOP;
+            uint16_t HDOP;
         } Location;
     } DataAccess;
     uint8_t BulkAccess[24];
 } GPSSet_t;
 
-
 typedef union TempSet_t {
+
     struct {
         uint16_t PacketId;
         uint16_t Temp;

@@ -4,6 +4,12 @@
 #include "Sampler.h"
 #include "timers.h"
 #include "DataEncoding.h"
+#ifndef USE_FAKE_DATA
+#include "freescale_accel.h"
+#include "freescale_mag.h"
+#include "gps.h"
+#include <AD.h>
+#endif
 #include <peripheral/timer.h>
 #include <inttypes.h>
 
@@ -111,23 +117,22 @@ unsigned char Sampler_Init(void) {
 
     CurMagAccelData.DataAccess.PacketId = 34;
     CurGPSData.DataAccess.PacketID = 42;
-    CurTempData.DataAccess.PacketId=62;
+    CurTempData.DataAccess.PacketId = 62;
 
 
     //temp code to intialize the gps struct to something useful, will be moved to sample when real data is used
-    CurGPSData.DataAccess.Location.Lat = 37.000370;
-    CurGPSData.DataAccess.Location.Lon = -122.063309;
-    CurGPSData.DataAccess.Location.Alt = 433.36;
-    CurGPSData.DataAccess.Location.Fix = 3;
-    CurGPSData.DataAccess.Location.NumOfSats = 7;
-    CurGPSData.DataAccess.Location.HDOP = 3.41;
-    CurGPSData.DataAccess.Location.VDOP = .7;
-    CurGPSData.DataAccess.Time.Year = 14;
-    CurGPSData.DataAccess.Time.Month = 8;
-    CurGPSData.DataAccess.Time.Day = 20;
-    CurGPSData.DataAccess.Time.Hour = 12;
-    CurGPSData.DataAccess.Time.Min = 12;
-    CurGPSData.DataAccess.Time.Sec = 32;
+    //    CurGPSData.DataAccess.Location.Lat = 37.000370;
+    //    CurGPSData.DataAccess.Location.Lon = -122.063309;
+    //    CurGPSData.DataAccess.Location.Alt = 433.36;
+    //    CurGPSData.DataAccess.Location.Fix = 3;
+    //    CurGPSData.DataAccess.Location.NumOfSats = 7;
+    //    CurGPSData.DataAccess.Location.HDOP = 3;
+    //    CurGPSData.DataAccess.Time.Year = 14;
+    //    CurGPSData.DataAccess.Time.Month = 8;
+    //    CurGPSData.DataAccess.Time.Day = 20;
+    //    CurGPSData.DataAccess.Time.Hour = 12;
+    //    CurGPSData.DataAccess.Time.Min = 12;
+    //    CurGPSData.DataAccess.Time.Sec = 32;
 
 
 
@@ -176,20 +181,35 @@ unsigned char Sampler_Sample(void) {
 
     //sample the accel
     if (CurrentTickCount >= SensorRates.Accel.NextSampleTime) {
+#ifndef USE_FAKE_DATA
+        //        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].X = free_GetXData();
+        //        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Y = free_GetYData();
+        //        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Z = free_GetZData();
+        free_GetTriplet(CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].TripletAccess);
+        //                printf("%d\t%d\t%d\r\n",CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].X,CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Y,CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Z);
+#else
         //we sample the data here, loading with timestamp instead for now
         CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].X = CurrentTickCount;
         CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Y = CurrentTickCount + 1;
         CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Z = CurrentTickCount*-1;
+#endif
         //printf("ACCEL Sample Taken at %d of sample number %d\r\n", CurrentTickCount, AccelSampleCounter);
         SensorRates.Accel.NextSampleTime = CurrentTickCount + SensorRates.Accel.TicksBetweenSamples;
         AccelSampleCounter++;
     }
     //sample the mag
     if (CurrentTickCount >= SensorRates.Mag.NextSampleTime) {
+#ifndef USE_FAKE_DATA
+        //        CurMagAccelData.DataAccess.MagData.X = free_GetXData();
+        //        CurMagAccelData.DataAccess.MagData.Y = free_GetYData();
+        //        CurMagAccelData.DataAccess.MagData.Z = free_GetZData();
+        free_mag_GetTriplet(CurMagAccelData.DataAccess.MagData.TripletAccess);
+#else
         //we sample the data here, loading with timestamp instead for now
         CurMagAccelData.DataAccess.MagData.X = CurrentTickCount;
         CurMagAccelData.DataAccess.MagData.Y = CurrentTickCount;
         CurMagAccelData.DataAccess.MagData.Z = CurrentTickCount;
+#endif
         printf("MAG Sample Taken at %d\r\n", CurrentTickCount);
         SensorRates.Mag.NextSampleTime = CurrentTickCount + SensorRates.Mag.TicksBetweenSamples;
 
@@ -212,7 +232,21 @@ unsigned char Sampler_Sample(void) {
 
     //sample the GPS
     if (CurrentTickCount >= SensorRates.GPS.NextSampleTime) {
-        //we sample the data here, loading with timestamp instead for now
+#ifndef USE_FAKE_DATA
+        CurGPSData.DataAccess.Location.Lat = gpsControlData.lat;
+        CurGPSData.DataAccess.Location.Lon = gpsControlData.lon;
+        CurGPSData.DataAccess.Location.Alt = gpsControlData.altitude;
+        CurGPSData.DataAccess.Location.Fix = gpsControlData.fix;
+        CurGPSData.DataAccess.Location.NumOfSats = gpsControlData.sats;
+        CurGPSData.DataAccess.Location.HDOP = gpsControlData.hdop.usData;
+        CurGPSData.DataAccess.Time.Year = gpsControlData.year;
+        CurGPSData.DataAccess.Time.Month = gpsControlData.month;
+        CurGPSData.DataAccess.Time.Day = gpsControlData.day;
+        CurGPSData.DataAccess.Time.Hour = gpsControlData.hour;
+        CurGPSData.DataAccess.Time.Min = gpsControlData.min;
+        CurGPSData.DataAccess.Time.Sec = gpsControlData.sec;
+#else
+#endif
         printf("%f\t%f\t%f\r\n", CurGPSData.DataAccess.Location.Lat, CurGPSData.DataAccess.Location.Lon, CurGPSData.DataAccess.Location.Alt);
         DataEncoding_SubmitData(CurGPSData.BulkAccess);
         printf("GPS Sample Taken at %d\r\n", CurrentTickCount);
@@ -222,8 +256,11 @@ unsigned char Sampler_Sample(void) {
     //sample the Temp
     if (CurrentTickCount >= SensorRates.Temp.NextSampleTime) {
         //we sample the data here, loading with timestamp instead for now
-
+#ifndef USE_FAKE_DATA
+        CurTempData.DataAccess.Temp=AD_TempRead();
+#else
         CurTempData.DataAccess.Temp++;
+#endif
         DataEncoding_SubmitData(CurTempData.BulkAccess);
         printf("TEMP Sample Taken at %d\r\n", CurrentTickCount);
         SensorRates.Temp.NextSampleTime = CurrentTickCount + SensorRates.Temp.TicksBetweenSamples;

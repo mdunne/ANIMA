@@ -17,6 +17,12 @@
       <itemPath>../Data_Logging.X/HardwareProfile.h</itemPath>
       <itemPath>../Data_Logging.X/GenericTypeDefs.h</itemPath>
       <itemPath>../Data_Logging.X/SD-SPI.h</itemPath>
+      <itemPath>../I2C_Driver.X/I2C_Driver.h</itemPath>
+      <itemPath>../Freescale_Accel.X/freescale_accel.h</itemPath>
+      <itemPath>../LED.X/LED.h</itemPath>
+      <itemPath>../freescale_Mag.X/freescale_mag.h</itemPath>
+      <itemPath>../118_Libraries/include/AD.h</itemPath>
+      <itemPath>../GPS.X/gps.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -34,6 +40,12 @@
       <itemPath>../Data_Logging.X/Data_Logging.c</itemPath>
       <itemPath>../Data_Logging.X/FSIO.c</itemPath>
       <itemPath>../Data_Logging.X/SD-SPI.c</itemPath>
+      <itemPath>../Freescale_Accel.X/freescale_accel.c</itemPath>
+      <itemPath>../I2C_Driver.X/I2C_Driver.c</itemPath>
+      <itemPath>../LED.X/LED.c</itemPath>
+      <itemPath>../freescale_Mag.X/freescale_mag.c</itemPath>
+      <itemPath>../118_Libraries/src/AD.c</itemPath>
+      <itemPath>../GPS.X/gps.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -46,6 +58,11 @@
     <Elem>../118_Libraries/include</Elem>
     <Elem>../Data_Encoding.X</Elem>
     <Elem>../Data_Logging.X</Elem>
+    <Elem>../Freescale_Accel.X</Elem>
+    <Elem>../I2C_Driver.X</Elem>
+    <Elem>../LED.X</Elem>
+    <Elem>../freescale_Mag.X</Elem>
+    <Elem>../GPS.X</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -87,7 +104,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="..\118_Libraries\include;..\Data_Encoding.X;..\Data_Logging.X"/>
+                  value="..\118_Libraries\include;..\Data_Encoding.X;..\Data_Logging.X;..\I2C_Driver.X;..\Freescale_Accel.X;..\LED.X;..\freescale_Mag.X;..\GPS.X"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="false"/>
         <property key="isolate-each-function" value="false"/>

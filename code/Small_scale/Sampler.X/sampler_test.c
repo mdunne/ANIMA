@@ -16,6 +16,12 @@
 #include "Data_Logging.h"
 #include "DataEncoding.h"
 
+#ifndef USE_FAKE_DATA
+#include "freescale_accel.h"
+#include "freescale_mag.h"
+#include "gps.h"
+#include "AD.h"
+#endif
 
 #pragma config FNOSC = FRCPLL
 #pragma config FPLLIDIV = DIV_1
@@ -53,10 +59,17 @@ void main(void) {
     TIMERS_Init();
     SetTimer(0,1000);
     while(IsTimerActive(0));
+    printf("Waiting on Card\r\n");
     DataLogging_Init();
     DataEncoding_Init();
+
+#ifndef USE_FAKE_DATA
+    free_accel_init();
+    free_mag_init();
+    GPS_Init();
+    AD_ANIMA_Init();
+#endif
     Sampler_Init();
-    
 
 
 
