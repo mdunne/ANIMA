@@ -8,6 +8,7 @@
 #include "freescale_accel.h"
 #include "freescale_mag.h"
 #include "gps.h"
+#include "LED.h"
 #include <AD.h>
 #endif
 #include <peripheral/timer.h>
@@ -18,7 +19,8 @@
  ******************************************************************************/
 typedef struct SensorSampleSettings_t {
     uint16_t TicksBetweenSamples;
-    uint16_t NextSampleTime;
+    uint16_t CurrentSampleTime;
+    uint8_t SampleNeeded;
 } SensorSampleSettings_t;
 
 
@@ -38,6 +40,8 @@ typedef struct SensorSampleSettings_t {
 #define DEFAULT_ACCEL_TICK_COUNT 1 
 #define DEFAULT_MAG_TICK_COUNT 10
 
+
+#define TimeDiff(A,B) ((uint16_t)(A-B))
 
 /*******************************************************************************
  * PRIVATE VARIABLES                                                           *
@@ -63,6 +67,7 @@ struct SensorRates {
     SensorSampleSettings_t GPS;
     SensorSampleSettings_t Temp;
 } SensorRates;
+
 
 /*******************************************************************************
  * PRIVATE FUNCTIONS PROTOTYPES                                                *
@@ -138,20 +143,28 @@ unsigned char Sampler_Init(void) {
 
 
     //set up both timers
-    AccelFrequency = 12.5;
+    //AccelFrequency = 100;
     SensorRates.Accel.TicksBetweenSamples = DEFAULT_ACCEL_TICK_COUNT;
-    SensorRates.Accel.NextSampleTime = Sampler_GetAccelCount() + SensorRates.Accel.TicksBetweenSamples;
+
+    SensorRates.Accel.CurrentSampleTime = Sampler_GetAccelCount();
+    SensorRates.Accel.SampleNeeded = FALSE;
     SensorRates.Mag.TicksBetweenSamples = DEFAULT_MAG_TICK_COUNT;
-    SensorRates.Mag.NextSampleTime = Sampler_GetAccelCount() + SensorRates.Mag.TicksBetweenSamples;
+    SensorRates.Mag.CurrentSampleTime = Sampler_GetAccelCount();
+    SensorRates.Mag.SampleNeeded = FALSE;
 
 
     //these will slow down tremendously in short order but want a base point to start with
     SensorRates.GPS.TicksBetweenSamples = 60;
-    SensorRates.GPS.NextSampleTime = Sampler_GetSecondCount() + SensorRates.GPS.TicksBetweenSamples;
-    SensorRates.Temp.TicksBetweenSamples = 30;
-    SensorRates.Temp.NextSampleTime = Sampler_GetSecondCount() + SensorRates.Temp.TicksBetweenSamples;
 
-    Timer_Setup(ACCELMAG_TIMER, AccelFrequency);
+    SensorRates.GPS.CurrentSampleTime = Sampler_GetSecondCount();
+    SensorRates.GPS.SampleNeeded = FALSE;
+    SensorRates.Temp.TicksBetweenSamples = 30;
+    SensorRates.Temp.CurrentSampleTime = Sampler_GetSecondCount();
+    SensorRates.Temp.SampleNeeded = FALSE;
+
+
+    Sampler_SetAccelMagSampleRate(RATE_100_HERTZ);
+//    Timer_Setup(ACCELMAG_TIMER, AccelFrequency);
     //Timer_Setup(SECOND_TIMER, 1);
 }
 
@@ -168,6 +181,58 @@ float Sampler_GetAccelFrequency(void) {
 }
 
 /**
+ * @Function Sampler_SetAccelMagSampleRate
+ * @param NewSampleRate, a valid sensor rate
+ * @return SUCCESS or ERROR
+ * @brief  sets the sample rate of the accelerometer with which the magnetometer will be slaved to be 10x slower
+ * @note  If sample rate needed is slower that one of the given rates it should not be handled by this system
+ * @author Max Dunne */
+unsigned char Sampler_SetAccelMagSampleRate(uint8_t NewSampleRate) {
+    //    AccelFrequency = NewSampleRate;
+    //    Timer_Setup(ACCELMAG_TIMER, AccelFrequency);
+    switch (NewSampleRate) {
+        case RATE_12P5_HERTZ:
+            Timer_Setup(ACCELMAG_TIMER, AccelFrequency);
+            free_SetRate(FREE_12P5HERTZ);
+            free_SetRate(FREE_MAG_1P25HERTZ_16_OVERRATIO);
+            break;
+        case RATE_50_HERTZ:
+            Timer_Setup(ACCELMAG_TIMER, 50);
+            free_SetRate(FREE_50HERTZ);
+            free_SetRate(FREE_MAG_5HERTZ_16_OVERRATIO);
+            break;
+        case RATE_100_HERTZ:
+            Timer_Setup(ACCELMAG_TIMER, 100);
+            free_SetRate(FREE_100HERTZ);
+            free_SetRate(FREE_MAG_10HERTZ_16_OVERRATIO);
+            break;
+        case RATE_200_HERTZ:
+            Timer_Setup(ACCELMAG_TIMER, 200);
+            free_SetRate(FREE_200HERTZ);
+            free_SetRate(FREE_MAG_20HERTZ_16_OVERRATIO);
+            break;
+        case RATE_400_HERTZ:
+            Timer_Setup(ACCELMAG_TIMER, 400);
+            free_SetRate(FREE_400HERTZ);
+            free_SetRate(FREE_MAG_40HERTZ_16_OVERRATIO);
+            break;
+        case RATE_800_HERTZ:
+            Timer_Setup(ACCELMAG_TIMER, 800);
+            free_SetRate(FREE_800HERTZ);
+            free_SetRate(FREE_MAG_80HERTZ_16_OVERRATIO);
+            break;
+        default:
+            return ERROR;
+            //                    RATE_100_HERTZ,
+            //                    RATE_200_HERTZ,
+            //                    RATE_400_HERTZ,
+            //                    RATE_800_HERTZ
+    }
+    AccelFrequency=NewSampleRate;
+    return SUCCESS;
+}
+
+/**
  * @Function Sampler_Sample
  * @param None
  * @return SUCCESS or ERROR
@@ -178,9 +243,9 @@ unsigned char Sampler_Sample(void) {
     static uint16_t CurrentTickCount = 0; //local variable to ensure that the calls occur on the same interrupt, only static to save heap thrashing
     static uint8_t AccelSampleCounter = 0; //local variable to keep track of the sample count for accel to enforce 10:1
     CurrentTickCount = Sampler_GetAccelCount();
-
+    static int TickCount = 0;
     //sample the accel
-    if (CurrentTickCount >= SensorRates.Accel.NextSampleTime) {
+    if (TimeDiff(CurrentTickCount, SensorRates.Accel.CurrentSampleTime) >= SensorRates.Accel.TicksBetweenSamples) {
 #ifndef USE_FAKE_DATA
         //        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].X = free_GetXData();
         //        CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Y = free_GetYData();
@@ -194,11 +259,18 @@ unsigned char Sampler_Sample(void) {
         CurMagAccelData.DataAccess.AccelData[AccelSampleCounter].Z = CurrentTickCount*-1;
 #endif
         //printf("ACCEL Sample Taken at %d of sample number %d\r\n", CurrentTickCount, AccelSampleCounter);
-        SensorRates.Accel.NextSampleTime = CurrentTickCount + SensorRates.Accel.TicksBetweenSamples;
+
+        SensorRates.Accel.CurrentSampleTime = CurrentTickCount;
         AccelSampleCounter++;
+        SensorRates.Accel.SampleNeeded = FALSE;
+        //        PutChar('*');
     }
     //sample the mag
-    if (CurrentTickCount >= SensorRates.Mag.NextSampleTime) {
+    //    if ((CurrentTickCount >= 65450 || CurrentTickCount <= 50) && (CurrentTickCount != TickCount)) {
+    //        printf("\r\n%d\r\n", TimeDiff(CurrentTickCount, SensorRates.Mag.CurrentSampleTime));
+    //        TickCount = CurrentTickCount;
+    //    }
+    if (TimeDiff(CurrentTickCount, SensorRates.Mag.CurrentSampleTime) >= SensorRates.Mag.TicksBetweenSamples) {
 #ifndef USE_FAKE_DATA
         //        CurMagAccelData.DataAccess.MagData.X = free_GetXData();
         //        CurMagAccelData.DataAccess.MagData.Y = free_GetYData();
@@ -210,28 +282,31 @@ unsigned char Sampler_Sample(void) {
         CurMagAccelData.DataAccess.MagData.Y = CurrentTickCount;
         CurMagAccelData.DataAccess.MagData.Z = CurrentTickCount;
 #endif
-        printf("MAG Sample Taken at %d\r\n", CurrentTickCount);
-        SensorRates.Mag.NextSampleTime = CurrentTickCount + SensorRates.Mag.TicksBetweenSamples;
+        //        printf("MAG Sample Taken at %d %d %d\r\n", CurrentTickCount, TimeDiff(CurrentTickCount, SensorRates.Mag.CurrentSampleTime), CurrentTickCount + SensorRates.Mag.TicksBetweenSamples);
+        PutChar('.');
 
+        SensorRates.Mag.CurrentSampleTime = CurrentTickCount;
+        SensorRates.Mag.SampleNeeded = FALSE;
+        LED_InvertBank(LED_BANK1, 0xff);
 
         //as this is the mag datapoint we also submit data at this point for the mag/accel
         //as the encoder is not set up we will print the data for testing purposes
         DataEncoding_SubmitData(CurMagAccelData.BulkAccess);
         AccelSampleCounter = 0;
         uint8_t incrementor = 0;
-        printf("ACCEL Data: ");
+        //        printf("ACCEL Data: ");
         for (incrementor = 0; incrementor < 66; incrementor++) {
             //            printf("%d   ", CurMagAccelData.DataAccess.AccelData[incrementor].X);
             //            printf("%d\t",CurMagAccelData.BulkAccess[incrementor]);
         }
-        printf("   MAG: %d %d\r\n", CurMagAccelData.DataAccess.MagData.X, Sampler_GetSecondCount());
+        //        printf("   MAG: %d %d\r\n", CurMagAccelData.DataAccess.MagData.X, Sampler_GetSecondCount());
 
     }
     //with slow scale sensors we now record the tick count for the slow timer
     CurrentTickCount = Sampler_GetSecondCount();
 
     //sample the GPS
-    if (CurrentTickCount >= SensorRates.GPS.NextSampleTime) {
+    if (TimeDiff(CurrentTickCount, SensorRates.GPS.CurrentSampleTime) >= SensorRates.GPS.TicksBetweenSamples) {
 #ifndef USE_FAKE_DATA
         CurGPSData.DataAccess.Location.Lat = gpsControlData.lat;
         CurGPSData.DataAccess.Location.Lon = gpsControlData.lon;
@@ -247,23 +322,28 @@ unsigned char Sampler_Sample(void) {
         CurGPSData.DataAccess.Time.Sec = gpsControlData.sec;
 #else
 #endif
-        printf("%f\t%f\t%f\r\n", CurGPSData.DataAccess.Location.Lat, CurGPSData.DataAccess.Location.Lon, CurGPSData.DataAccess.Location.Alt);
+        //printf("%f\t%f\t%f\r\n", CurGPSData.DataAccess.Location.Lat, CurGPSData.DataAccess.Location.Lon, CurGPSData.DataAccess.Location.Alt);
         DataEncoding_SubmitData(CurGPSData.BulkAccess);
-        printf("GPS Sample Taken at %d\r\n", CurrentTickCount);
-        SensorRates.GPS.NextSampleTime = CurrentTickCount + SensorRates.GPS.TicksBetweenSamples;
+        //        printf("GPS Sample Taken at %d\r\n", CurrentTickCount);
+        PutChar('+');
+
+        SensorRates.GPS.CurrentSampleTime = CurrentTickCount;
+        //        Sampler_SetAccelMagSampleRate(Sampler_GetAccelFrequency()*2);
+        //        printf("New Accel Frequency: %f\r\n",Sampler_GetAccelFrequency());
     }
 
     //sample the Temp
-    if (CurrentTickCount >= SensorRates.Temp.NextSampleTime) {
+    if (TimeDiff(CurrentTickCount, SensorRates.Temp.CurrentSampleTime) >= SensorRates.Temp.TicksBetweenSamples) {
         //we sample the data here, loading with timestamp instead for now
 #ifndef USE_FAKE_DATA
-        CurTempData.DataAccess.Temp=AD_TempRead();
+        CurTempData.DataAccess.Temp = AD_TempRead();
 #else
         CurTempData.DataAccess.Temp++;
 #endif
         DataEncoding_SubmitData(CurTempData.BulkAccess);
-        printf("TEMP Sample Taken at %d\r\n", CurrentTickCount);
-        SensorRates.Temp.NextSampleTime = CurrentTickCount + SensorRates.Temp.TicksBetweenSamples;
+        //        printf("TEMP Sample Taken at %d\r\n", CurrentTickCount);
+        PutChar('-');
+        SensorRates.Temp.CurrentSampleTime = CurrentTickCount;
     }
 
 }
@@ -312,7 +392,12 @@ unsigned char Timer_SetSampleRate(unsigned char Timer, float TimerRate) {
             PreScalerIndex = Timer_DeterminePrescaler(ScaledTimerRate);
             TimerPeriod = (float) ((float) F_PB / (float) PossiblePreScalers[PreScalerIndex] / ScaledTimerRate);
             SecondTickSoftwareScaler = (int) ScaledTimerRate;
-            //printf("Timer Period: %f  Prescale: %d  Index: %d\r\n", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex);
+//            printf("Timer Period: %f  Prescale: %d  Index: %d TimerRate: %f", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex, TimerRate);
+            if (TimerPeriod > (1 << 16)) {
+//                printf(" Not Possible");
+                return ERROR;
+            }
+//            printf("\r\n");
             OpenTimer4(T4_ON | T4_SOURCE_INT | ScalerValues[PreScalerIndex], (unsigned int) TimerPeriod);
             return SUCCESS;
         default:
@@ -352,6 +437,12 @@ void __ISR(_TIMER_4_VECTOR, ipl3) Timer4IntHandler(void) {
     INTClearFlag(INT_T4);
     if (Toggler % 2 == 0) {
         AccelTickCount++;
+        //        if (AccelTickCount == SensorRates.Accel.NextSampleTime) {
+        //            SensorRates.Accel.SampleNeeded = TRUE;
+        //        }
+        //        if (AccelTickCount == SensorRates.Mag.NextSampleTime) {
+        //            SensorRates.Mag.SampleNeeded = TRUE;
+        //        }
     }
     Toggler++;
     if (SecondTickSoftwareScalerCounter < SecondTickSoftwareScaler) {

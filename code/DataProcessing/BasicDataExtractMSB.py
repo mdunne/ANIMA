@@ -4,6 +4,7 @@ import binascii
 import time
 import ConfigParser
 import os
+import inspect
 
 from operator import xor
 from struct import unpack
@@ -113,11 +114,12 @@ def BuildPacketDictionary(ConfigFileName):
 	
 #constants along with the commonly used Structs
 #while duplication of structs these could change
-HeaderValue=0xFB3B
-FooterValue=0x5F86
+HeaderValue=0xFB3B+1+1
+FooterValue=0x5F86+1+1
 HeaderFooterStruct=struct.Struct('<H')
 CheckSumStruct=struct.Struct('<H')
 TimeStampStruct=struct.Struct('<H')
+IDStruct=struct.Struct('H')
 ConfigFileName='PacketIDs.cfg'
 CRCPolynomial=0x8005
 CRCWidth=2  #in bytes
@@ -125,10 +127,18 @@ CRCSeed=0xffff
 CommentMarker='%'
 
 
-testfilename="009.bin"
+testfilename="004_1.bin"
 #uncomment for normal usage and comment testline
-InFileName=testfilename
-# InFileName=sys.argv[2]
+# numArguments
+if(len(sys.argv)>1):
+	InFileName=sys.argv[1]
+else:
+	InFileName=testfilename
+print(len(sys.argv))
+
+print(InFileName)
+# exit()
+# 
 
 #need to generate table for quick CRC calculation, should probably store in file if table grows much larger
 CRCTable=GenerateCRCTable(1,CRCPolynomial,CRCWidth)
@@ -141,7 +151,8 @@ inFileHandler=open(InFileName,"rb")
 
 TrimmedFileName,FileExt=os.path.splitext(InFileName)
 print(TrimmedFileName,FileExt)
-#exit()
+# print(inspect.stack(ConfigParser))
+# exit()
 OutFileName=TrimmedFileName+'_parsed.txt'
 OutFileHandler=open(OutFileName,"w")
 # OutFileHandler.seek(0)
@@ -186,13 +197,16 @@ for key in PacketDict:
 		print(curEntryKey,key,CurEntry[key])
 # print(PacketConfigs.get('34','stringname'))
 ValidPacketsFound=0
+ValidChecksumedSectors=0
+TotalBytesRemoved=0
+TotalSectors=0
 # exit()
 while curSector!='':
-
+	TotalSectors=TotalSectors+1
 	#check first for header and footer for verification of valid sector
-	inHeaderValue=HeaderFooterStruct.unpack(curSector[:2])
-	inFooterValue=HeaderFooterStruct.unpack(curSector[-2:])
-	if inHeaderValue[0]==HeaderValue and inFooterValue[0]==FooterValue:
+	inHeaderValue=HeaderFooterStruct.unpack(curSector[:2])[0]
+	inFooterValue=HeaderFooterStruct.unpack(curSector[-2:])[0]
+	if inHeaderValue==HeaderValue and inFooterValue==FooterValue:
 		# print("Valid Sector Found")
 		ValidSectorCount=ValidSectorCount+1
 		#extract checksum and calculate new checksum
@@ -212,10 +226,10 @@ while curSector!='':
 		# print(ComputedChecksum, inCheckSum)
 		#if(Compute
 		if(ComputedChecksum==inCheckSum):
-		
+			print('+'),
 			# we need to find the new time stamp but not update the value
 			PossTimeStamp=TimeStampStruct.unpack(curSector[2:4])[0]
-			
+			ValidChecksumedSectors=ValidChecksumedSectors+1
 			#the first timestamp needs to be set regardless of packet state
 			if(CurTimeStamp==-1):
 				CurTimeStamp=PossTimeStamp
@@ -231,7 +245,7 @@ while curSector!='':
 				if(len(FullDataPacket)>=2):
 					FirstByte=ord(FullDataPacket[0])
 					# pic can't pack 8 bits in, need to upshift to 16 bits for id for now fudged as they are the wrong endedness
-					FirstByte=struct.Struct('H').unpack(FullDataPacket[0:2])[0]
+					FirstByte=IDStruct.unpack(FullDataPacket[0:2])[0]
 
 					# print(ValidSectorCount,len(FullDataPacket))
 					
@@ -277,9 +291,32 @@ while curSector!='':
 							# print(ValidSectorCount,ValidPacketsFound)
 						else:
 							break
-						# BytesToProcess=BytesToProcess-68
 					else:
-						print("found something invalid")
+						#at this point we do not have valid packet and assume the data stream is corrupted, we need to find the valid start
+						BytesToRemove=0
+						# print([ord(byte for byte in FullDataPacket])
+						for IDIndex in range(0,len(FullDataPacket),2):
+							DeadByte=IDStruct.unpack(FullDataPacket[IDIndex:IDIndex+2])[0]
+							#print(DeadByte)
+							if(DeadByte not in PacketDict):
+								BytesToRemove=IDIndex+2
+								# print(BytesToRemove)
+							else:
+								PacketLength=PacketDict[DeadByte]['structlength']
+								NextIDByte=IDStruct.unpack(FullDataPacket[IDIndex+PacketLength:PacketLength+IDIndex+2])[0]
+								# print(BytesToRemove,PacketLength,NextIDByte),
+								if(NextIDByte in PacketDict):
+									break
+								
+								
+						# print([ord(byte) for byte in FullDataPacket])
+						TotalBytesRemoved=TotalBytesRemoved+BytesToRemove
+						FullDataPacket=FullDataPacket[BytesToRemove:]
+						# print(FullDataPacket)
+						# print([ord(byte) for byte in FullDataPacket])
+						# exit()
+						# print()
+						# print("found something invalid",OutString)
 						break
 						
 				else:
@@ -287,21 +324,23 @@ while curSector!='':
 				#break
 			
 		else:
-			print("ERROR==================================================================================================")
+			print('-'),
+			# print("ERROR=================================================================================================="+str(ComputedChecksum)+" "+str(inCheckSum))
 		# BitAr=BitArray(int=ord(curSector[0]),length=8)
 		
 		# print(FullDataPacket[-2])
 		#print(inCheckSum[0])
 		
-		
+	else:
+		print('.'),
 	curSector=inFileHandler.read(512)
-	if(ValidSectorCount>4000):
+	if(ValidSectorCount>90000000):
 		break
 # print([ord(byte) for byte in FullDataPacket])
 FullStopTime=time.time()
 FullElapsedTime=FullStopTime-FullStartTime
 print("Full time to verify was %f" % FullElapsedTime)
-print(ValidSectorCount*512,ValidPacketsFound)
+print(TotalSectors,ValidSectorCount,ValidSectorCount*512,ValidPacketsFound,ValidChecksumedSectors,(ValidChecksumedSectors+0.0)/ValidSectorCount*100,TotalBytesRemoved)
 inFileHandler.close()
 
 

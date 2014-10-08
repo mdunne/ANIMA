@@ -17,7 +17,7 @@ MEDIA_INFORMATION *mediaInformation;
 
 
 #define DEBUG_MESSAGE
-//#define DEBUG_VERBOSE
+#define DEBUG_VERBOSE
 
 #define SECTORS_USED_FOR_DIRECTORY 5
 
@@ -213,6 +213,10 @@ char DataLogging_LoadSector(unsigned char *AddresstoWrite) {
     //        ChunkCount = 0;
     //    }
 
+    if(IsWriteActive)
+    {
+        printf("Error: Next sector Write occured before last one was complete\r\n");
+    }
     //set up the write
     SPI_Status = MDD_SDSPI_SectorSetupWrite(CurSectorCount, AddresstoWrite, TRUE);
     IsWriteActive = TRUE;
@@ -256,12 +260,12 @@ char DataLogging_Log() {
 
             if (ChunkCount >= CHUNK_IN_SECTORS) {
 #ifdef DEBUG_VERBOSE
-                printf("Card allocated more sectors\r\n");
+                printf("Card allocated more sectors,card is currently at %d sectors and according to file system %d\r\n",CurSectorCount,FilePointer->size);
 #endif
                 int curtime = GetTime();
                 FILEallocate_multiple_clusters(FilePointer, CHUNK_IN_SECTORS);
 #ifdef DEBUG_VERBOSE
-                printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
+               // printf("Time to allocate %d was %d milliseconds\r\n", CHUNK_IN_SECTORS, GetTime() - curtime);
 #endif
                 //            printf("%d\t%d\r\n",ChunkCount,CurSectorCount);
                 //        InitTimer(0,1000);

@@ -23,7 +23,6 @@ typedef enum {
 } Valid_AccelMagRates;
 
 typedef union XYZPoint_t {
-
     struct {
         uint16_t X;
         uint16_t Y;
@@ -142,7 +141,7 @@ unsigned char Sampler_SubmitData(unsigned char DataID, void *DataPointer);
  * @brief  sets the sample rate of the accelerometer with which the magnetometer will be slaved to be 10x slower
  * @note  If sample rate needed is slower that one of the given rates it should not be handled by this system
  * @author Max Dunne */
-unsigned char Sampler_SetAccelMagSampleRate(unsigned char NewSampleRate);
+unsigned char Sampler_SetAccelMagSampleRate(uint8_t NewSampleRate);
 
 
 /**

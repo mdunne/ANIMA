@@ -15,12 +15,14 @@
 #include "serial.h"
 #include "Data_Logging.h"
 #include "DataEncoding.h"
+//#include <plib.h>
 
 #ifndef USE_FAKE_DATA
 #include "freescale_accel.h"
 #include "freescale_mag.h"
 #include "gps.h"
 #include "AD.h"
+#include "LED.h"
 #endif
 
 #pragma config FNOSC = FRCPLL
@@ -32,11 +34,11 @@
 #pragma config FSOSCEN = OFF
 #pragma config OSCIOFNC = OFF
 
-union
-{
+union {
     float testFloat;
     char testChar[4];
 } testUnion;
+
 void main(void) {
     BOARD_Init();
     printf("Welcome to the Sampler Test\r\n");
@@ -44,25 +46,26 @@ void main(void) {
     printf("Size of MagAccelSet: %d %d\r\n", sizeof (MagAccelSet_t), sizeof (Bob));
     GPSSet_t is;
     printf("Size of GPSSet: %d %d\r\n", sizeof (GPSSet_t), sizeof (is));
-        TempSet_t not;
+    TempSet_t not;
     printf("Size of GPSSet: %d %d\r\n", sizeof (TempSet_t), sizeof (not));
-//    while(1);
-//    testUnion.testFloat=37.000370;
-//    printf("The Float is %f\r\n",testUnion.testFloat);
-//    printf("The Hex of it is ");
-//    int i;
-//    for(i=0;i<4;i++)
-//    {
-//        printf("%02X\t",testUnion.testChar[i]);
-//    }
-//    while (1);
+    //    while(1);
+    //    testUnion.testFloat=37.000370;
+    //    printf("The Float is %f\r\n",testUnion.testFloat);
+    //    printf("The Hex of it is ");
+    //    int i;
+    //    for(i=0;i<4;i++)
+    //    {
+    //        printf("%02X\t",testUnion.testChar[i]);
+    //    }
+    //    while (1);
     TIMERS_Init();
-    SetTimer(0,1000);
-    while(IsTimerActive(0));
+    InitTimer(0, 5000);
+    printf("Waiting to Ensure Stabilization\r\n");
+    while (IsTimerActive(0));
     printf("Waiting on Card\r\n");
     DataLogging_Init();
     DataEncoding_Init();
-
+    LED_Init(LED_BANK1);
 #ifndef USE_FAKE_DATA
     free_accel_init();
     free_mag_init();
@@ -70,13 +73,19 @@ void main(void) {
     AD_ANIMA_Init();
 #endif
     Sampler_Init();
-
-
-
-
+//    uint8_t SampleIterator;
+//    for (SampleIterator = 0; SampleIterator < 20; SampleIterator++) {
+//        Sampler_SetAccelMagSampleRate(Sampler_GetAccelFrequency()/2);
+//        while(!IsTransmitEmpty());
+//    }
+//    while (1);
+    Sampler_SetAccelMagSampleRate(RATE_800_HERTZ);
     while (1) {
         Sampler_Sample();
         DataLogging_Log();
+        if (gpsControlData.newDatatoParse == 1) {
+            processNewGpsData();
+        }
     }
     //------------------------------------------------------------------
     printf("Starting the timing test\r\n");
