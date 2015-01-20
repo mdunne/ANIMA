@@ -7,6 +7,7 @@
  */
 
 #include <xc.h>
+#include <stdint.h>
 #include "gps.h"
 #include <peripheral/uart.h>
 #include <serial.h>
@@ -61,7 +62,7 @@ struct CircBuffer GoutgoingUart;
 CBRef GtransmitBuffer;
 struct CircBuffer GincomingUart;
 CBRef GreceiveBuffer;
-
+uint8_t IsGPSAwake;
 
 
 #define GPSPOWER_TRIS TRISAbits.TRISA7
@@ -130,7 +131,9 @@ void GPS_Init(void) {
     GPSEN_TRIS = 0;
     PORTSetPinsDigitalOut(GPSEN_PORT);
     GPSPOWER_LAT = 0;
-    GPSEN_LAT = 1;
+
+    GPS_Wake();
+
     printf("Pin States: %d\t%d\t%d\t%d\r\n", GPSPOWER_LAT, GPSPOWER_TRIS, GPSEN_LAT, GPSEN_TRIS);
     //mU2TXIntEnable(1);
     GPS_Configure();
@@ -138,7 +141,7 @@ void GPS_Init(void) {
 
 void GPS_Configure(void) {
     //send the string to always change the baud
-    
+
     printf("about to change the baud");
     //char *NMEA_String="$PMTK251,115200*1F\r\n\0";
     //GPS_PutString(MEDIATEK_CHANGE_BAUD);
@@ -162,6 +165,36 @@ void GPS_Configure(void) {
     GPS_PutString(MEDIATEK_REFRESH_RATE);
     printf("GPS Should be at 115200");
 
+}
+//set the pin of the enable low setting into sleep
+
+uint8_t GPS_Sleep(void) {
+    GPSEN_LAT = 0;
+    IsGPSAwake=FALSE;
+    return TRUE;
+}
+
+uint8_t GPS_Wake(void) {
+   // printf("GPS Struct Size: %d\r\n", sizeof (gpsControlData));
+    memset(&gpsControlData, 0, sizeof (gpsControlData));
+    GPS_FlushBuffer();
+    GPSEN_LAT = 1;
+    IsGPSAwake=TRUE;
+    return TRUE;
+}
+
+uint8_t GPS_FlushBuffer(void) {
+    while (!GPS_IsReceiveEmpty()) {
+        GPS_GetChar();
+    }
+    return TRUE;
+}
+
+uint8_t GPS_HandleGps(void) {
+    if ((gpsControlData.newDatatoParse == 1)&&(IsGPSAwake)) {
+        //printf("New Data to parse\r\n");
+        processNewGpsData();
+    }
 }
 
 /****************************************************************************
@@ -231,7 +264,7 @@ char GPS_GetChar(void) {
     } else {
         ch = GPSreadFront(GreceiveBuffer);
     }
-    
+
     return ch;
 }
 
@@ -331,8 +364,8 @@ void __ISR(_UART2_VECTOR, ipl4) IntUart2Handler(void) {
     static int stallcount = 0;
     unsigned char curChar;
     if (INTGetFlag(INT_U2RX)) {
-        
-        curChar=U2RXREG;
+
+        curChar = U2RXREG;
         GPSwriteBack(GreceiveBuffer, (unsigned char) curChar);
 
         gpsControlData.newDatatoParse = 1;

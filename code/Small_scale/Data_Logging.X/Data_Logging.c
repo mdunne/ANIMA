@@ -17,7 +17,7 @@ MEDIA_INFORMATION *mediaInformation;
 
 
 #define DEBUG_MESSAGE
-#define DEBUG_VERBOSE
+//#define DEBUG_VERBOSE
 
 #define SECTORS_USED_FOR_DIRECTORY 5
 
@@ -130,15 +130,19 @@ char DataLogging_Init() {
     //    while (1);
     MDD_SDSPI_InitIO();
     int count = 0;
+    int startTime=GetTime();
     mediaInformation = MDD_MediaInitialize();
+    printf("media initialization time is %d\r\n",GetTime()-startTime);
     if (mediaInformation->errorCode != 0) {
         printf("Media not initialized with error code: %d\r\n", mediaInformation->errorCode);
         while (1);
     }
+
     if (!FSInit()) {
         printf("File System Initializaion Failed");
         while (1);
     }
+    //printf("media and file initialization time is %d\r\n",GetTime()-startTime);
     //We now need to find the new file name
     char Searchresult;
     //search for the first file matching filepattern

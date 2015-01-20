@@ -22,6 +22,9 @@ typedef enum {
     RATE_800_HERTZ
 } Valid_AccelMagRates;
 
+
+
+
 typedef union XYZPoint_t {
     struct {
         uint16_t X;
@@ -177,5 +180,9 @@ uint16_t Sampler_GetAccelCount(void);
  * @author Max Dunne */
 float Sampler_GetAccelFrequency(void);
 
+void Sampler_HandleGPS(uint8_t Event);
+void Sampler_TestGPSStateMachine(void);
+void Sampler_StartContinousSamplingNow();
+void Sampler_StopContinousSampling();
 #endif	/* SAMPLER_H */
 

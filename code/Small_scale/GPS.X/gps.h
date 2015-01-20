@@ -9,6 +9,7 @@
 #define GPS_H
 
 
+#include <stdint.h>
 /*******************************************************************************
  * PUBLIC #DEFINES                                                             *
  ******************************************************************************/
@@ -17,6 +18,9 @@
 #define ERROR -1
 #endif
 
+#define GPS_NO_FIX 0
+#define GPS_2D_FIX 1
+#define GPS_3D_FIX 2
 
 /*******************************************************************************
  * PUBLIC FUNCTION PROTOTYPES                                                  *
@@ -91,6 +95,10 @@ char GPS_IsReceiveEmpty(void);
 unsigned char GPS_GetLength(void);
 
 void GPS_Configure(void);
+uint8_t GPS_Sleep(void);
+uint8_t GPS_Wake(void);
+uint8_t GPS_FlushBuffer(void);
+uint8_t GPS_HandleGps(void);
 void GPS_PutString(char *MEDIATEK_CHANGE_BAUD);
 ;
 

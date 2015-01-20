@@ -315,7 +315,7 @@ char IsTransmitEmpty(void) {
  Author
  Max Dunne, 2011.11.10
  ****************************************************************************/
-void __ISR(_UART1_VECTOR, ipl4) IntUart1Handler(void) {
+void __ISR(_UART1_VECTOR, IPL4AUTO) IntUart1Handler(void) {
     static int transmitcount = 0;
     static int clearcount = 0;
     static int stallcount = 0;

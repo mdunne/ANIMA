@@ -28,17 +28,54 @@ typedef struct SensorSampleSettings_t {
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
 
+#define SAMPLER_DEBUG_VERBOSE
+
+#ifdef SAMPLER_DEBUG_VERBOSE
+#define dbprintf(...) printf(__VA_ARGS__)
+#endif
+
+
+#ifdef TEST_GPS_STATE_MACHINE
+#ifndef dbprintf
+#define dbprintf(...) printf(__VA_ARGS__)
+#endif
+#else
+#ifndef dbprintf
+#define dbprintf(...)
+#endif
+#endif
+
+
 //timer defines--------------------------------------
 #define ACCELMAG_TIMER 0
 #define SECOND_TIMER 1
 #define POSSIBLE_PRESCALERS 8
 #define MAX_TIMER_VALUE 1<<16
 
+
+#define GPS_CONTINUOUS_SAMPLE_TIME 1
+#define GPS_AVERAGING_SAMPLE_TIME 2
+#define GPS_AVERAGE_SAMPLES_TO_TAKE 3
+#define GPS_BAILOUT_COUNTS 100
+
 #define F_PB (BOARD_GetPBClock()>>1)
 
 //use of these defines or same multiplier will result in desired 10:1 sample ratio
 #define DEFAULT_ACCEL_TICK_COUNT 1 
 #define DEFAULT_MAG_TICK_COUNT 10
+
+typedef enum {
+    CONTINOUS_SAMPLE,
+    WAITING,
+    AVERAGING
+} GPS_States;
+
+typedef enum {
+    TIMEOUT_OCCURED,
+    STATE_ENTRY,
+    START_CONTINUOUS,
+    STOP_CONTINUOUS
+} GPS_Events;
 
 
 #define TimeDiff(A,B) ((uint16_t)(A-B))
@@ -103,6 +140,11 @@ unsigned char Timer_SetSampleRate(unsigned char Timer, float TimerRate);
  * @author Max Dunne */
 unsigned int Timer_DeterminePrescaler(float TimerRate);
 
+
+//helper function to submit gps datapoints for code deduplication
+//this directly submits a point without any checking of validity
+void Sampler_SubmitGPSPoint(void);
+
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                           *
  ******************************************************************************/
@@ -162,9 +204,9 @@ unsigned char Sampler_Init(void) {
     SensorRates.Temp.CurrentSampleTime = Sampler_GetSecondCount();
     SensorRates.Temp.SampleNeeded = FALSE;
 
-
+    Sampler_HandleGPS(STATE_ENTRY);
     Sampler_SetAccelMagSampleRate(RATE_100_HERTZ);
-//    Timer_Setup(ACCELMAG_TIMER, AccelFrequency);
+    //    Timer_Setup(ACCELMAG_TIMER, AccelFrequency);
     //Timer_Setup(SECOND_TIMER, 1);
 }
 
@@ -228,7 +270,7 @@ unsigned char Sampler_SetAccelMagSampleRate(uint8_t NewSampleRate) {
             //                    RATE_400_HERTZ,
             //                    RATE_800_HERTZ
     }
-    AccelFrequency=NewSampleRate;
+    AccelFrequency = NewSampleRate;
     return SUCCESS;
 }
 
@@ -307,29 +349,9 @@ unsigned char Sampler_Sample(void) {
 
     //sample the GPS
     if (TimeDiff(CurrentTickCount, SensorRates.GPS.CurrentSampleTime) >= SensorRates.GPS.TicksBetweenSamples) {
-#ifndef USE_FAKE_DATA
-        CurGPSData.DataAccess.Location.Lat = gpsControlData.lat;
-        CurGPSData.DataAccess.Location.Lon = gpsControlData.lon;
-        CurGPSData.DataAccess.Location.Alt = gpsControlData.altitude;
-        CurGPSData.DataAccess.Location.Fix = gpsControlData.fix;
-        CurGPSData.DataAccess.Location.NumOfSats = gpsControlData.sats;
-        CurGPSData.DataAccess.Location.HDOP = gpsControlData.hdop.usData;
-        CurGPSData.DataAccess.Time.Year = gpsControlData.year;
-        CurGPSData.DataAccess.Time.Month = gpsControlData.month;
-        CurGPSData.DataAccess.Time.Day = gpsControlData.day;
-        CurGPSData.DataAccess.Time.Hour = gpsControlData.hour;
-        CurGPSData.DataAccess.Time.Min = gpsControlData.min;
-        CurGPSData.DataAccess.Time.Sec = gpsControlData.sec;
-#else
-#endif
-        //printf("%f\t%f\t%f\r\n", CurGPSData.DataAccess.Location.Lat, CurGPSData.DataAccess.Location.Lon, CurGPSData.DataAccess.Location.Alt);
-        DataEncoding_SubmitData(CurGPSData.BulkAccess);
-        //        printf("GPS Sample Taken at %d\r\n", CurrentTickCount);
-        PutChar('+');
-
         SensorRates.GPS.CurrentSampleTime = CurrentTickCount;
-        //        Sampler_SetAccelMagSampleRate(Sampler_GetAccelFrequency()*2);
-        //        printf("New Accel Frequency: %f\r\n",Sampler_GetAccelFrequency());
+        Sampler_HandleGPS(TIMEOUT_OCCURED);
+
     }
 
     //sample the Temp
@@ -348,10 +370,160 @@ unsigned char Sampler_Sample(void) {
 
 }
 
+void Sampler_HandleGPS(uint8_t Event) {
+    static uint8_t CurrentState = AVERAGING;
+    static uint16_t SlowSampleRate;
+    static uint8_t SamplesTaken;
+    static uint8_t BailoutCount;
+    uint8_t NextState = CurrentState;
+    dbprintf("Entered State Machine in State %d and with Event %d\r\n", CurrentState, Event);
+    switch (CurrentState) {
+        case CONTINOUS_SAMPLE:
+            switch (Event) {
+                case STATE_ENTRY:
+                    dbprintf("\tState Entry Handled inside Continous Sampling by waking up gps and upping sample rate\r\n");
+                    GPS_Wake();
+                    SensorRates.GPS.TicksBetweenSamples = GPS_CONTINUOUS_SAMPLE_TIME;
+                    break;
+                case TIMEOUT_OCCURED:
+
+                    dbprintf("\tTimeout Event Handled inside Continous Sampling by taking GPS point\r\n");
+
+                    Sampler_SubmitGPSPoint();
+                    //SensorRates.GPS.CurrentSampleTime = Payload;
+                    //        Sampler_SetAccelMagSampleRate(Sampler_GetAccelFrequency()*2);
+                    //        printf("New Accel Frequency: %f\r\n",Sampler_GetAccelFrequency());
+                    break;
+                case STOP_CONTINUOUS:
+                    dbprintf("\tStop Continous Event Handled inside Continous Sampling by changing state\r\n");
+                    NextState = WAITING;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case WAITING:
+            switch (Event) {
+                case STATE_ENTRY:
+                    dbprintf("\tState Entry handled inside WAITING by sleeping GPS and setting new timeout\r\n");
+                    GPS_Sleep();
+                    SensorRates.GPS.TicksBetweenSamples = 300; //need to set this to a variable instead
+                    break;
+                case START_CONTINUOUS:
+                    dbprintf("\tStart Continous handled inside WAITING by changing state and forcing a timeout\r\n");
+                    NextState = CONTINOUS_SAMPLE;
+                    SensorRates.GPS.TicksBetweenSamples = 0;
+                    break;
+                case TIMEOUT_OCCURED:
+                    dbprintf("\tTimeOut handled inside WAITING by changing state\r\n");
+                    NextState = AVERAGING;
+                default:
+                    break;
+            }
+            break;
+        case AVERAGING:
+            switch (Event) {
+                case STATE_ENTRY:
+                    dbprintf("\tState Entry Handled inside AVERAGING by settting SampleRate and turning on GPS\r\n");
+                    SensorRates.GPS.TicksBetweenSamples = GPS_AVERAGING_SAMPLE_TIME;
+                    GPS_Wake();
+                    SamplesTaken = 0;
+                    BailoutCount = 0;
+                    break;
+                case TIMEOUT_OCCURED:
+                    dbprintf("\tTimeOut handled inside AVERAGING by Checking GPS Data and Taking Appropriate Measures: %d %d\r\n",SamplesTaken,BailoutCount);
+                    if (gpsControlData.fix > GPS_NO_FIX) {
+                        Sampler_SubmitGPSPoint();
+                        SamplesTaken++;
+                        gpsControlData.fix = 0;
+                    } else {
+                        BailoutCount++;
+                    }
+                    if ((SamplesTaken >= GPS_AVERAGE_SAMPLES_TO_TAKE) || (BailoutCount >= GPS_BAILOUT_COUNTS)) {
+                        dbprintf("\t\tSamples Taken: %d\tBailoutCounts: %d\r\n", SamplesTaken, BailoutCount);
+                        NextState = WAITING;
+                    }
+                    break;
+                case START_CONTINUOUS:
+                    dbprintf("\tStart Continous handled inside AVERAGING by changing state and forcing a timeout\r\n");
+                    NextState = CONTINOUS_SAMPLE;
+                    SensorRates.GPS.TicksBetweenSamples = 0;
+                    break;
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
+    if (NextState != CurrentState) {
+        CurrentState = NextState;
+        Sampler_HandleGPS(STATE_ENTRY);
+    }
+
+}
+//tests the gps state machine, does not return
+
+void Sampler_TestGPSStateMachine(void) {
+    uint16_t Counter = 0;
+    printf("\r\nStarting GPS State Machine Testing\r\n");
+    //testing averaging with sample success
+    for (Counter = 0; Counter < GPS_AVERAGE_SAMPLES_TO_TAKE; Counter++) {
+        gpsControlData.fix = GPS_2D_FIX;
+        Sampler_HandleGPS(TIMEOUT_OCCURED);
+        while (!IsTransmitEmpty());
+    }
+    Sampler_HandleGPS(START_CONTINUOUS); //testing transition from waiting to continous
+    while (!IsTransmitEmpty());
+    Sampler_HandleGPS(TIMEOUT_OCCURED); //testing continous mode
+    while (!IsTransmitEmpty());
+    Sampler_HandleGPS(TIMEOUT_OCCURED); //testing continous mode
+    while (!IsTransmitEmpty());
+    Sampler_HandleGPS(STOP_CONTINUOUS); //switching to waiting
+    while (!IsTransmitEmpty());
+    Sampler_HandleGPS(TIMEOUT_OCCURED); //switching to averaging
+    while (!IsTransmitEmpty());
+    Sampler_HandleGPS(TIMEOUT_OCCURED); //taking one sample
+    while (!IsTransmitEmpty());
+    Sampler_HandleGPS(START_CONTINUOUS); //testing transition from averaging to continous
+    while (!IsTransmitEmpty());
+    Sampler_HandleGPS(STOP_CONTINUOUS); //switching to waiting
+    Sampler_HandleGPS(TIMEOUT_OCCURED); //switching to averaging
+    while (!IsTransmitEmpty());
+    //testing averaging with bailout count
+    for (Counter = 0; Counter < GPS_BAILOUT_COUNTS; Counter++) {
+        Sampler_HandleGPS(TIMEOUT_OCCURED);
+        while (!IsTransmitEmpty());
+    }
+    while (!IsTransmitEmpty());
+    while (1);
+}
+
 /*******************************************************************************
  * PRIVATE FUNCTIONS                                                           *
  ******************************************************************************/
 
+void Sampler_SubmitGPSPoint(void) {
+#ifndef USE_FAKE_DATA
+    CurGPSData.DataAccess.Location.Lat = gpsControlData.lat;
+    CurGPSData.DataAccess.Location.Lon = gpsControlData.lon;
+    CurGPSData.DataAccess.Location.Alt = gpsControlData.altitude;
+    CurGPSData.DataAccess.Location.Fix = gpsControlData.fix;
+    CurGPSData.DataAccess.Location.NumOfSats = gpsControlData.sats;
+    CurGPSData.DataAccess.Location.HDOP = gpsControlData.hdop.usData;
+    CurGPSData.DataAccess.Time.Year = gpsControlData.year;
+    CurGPSData.DataAccess.Time.Month = gpsControlData.month;
+    CurGPSData.DataAccess.Time.Day = gpsControlData.day;
+    CurGPSData.DataAccess.Time.Hour = gpsControlData.hour;
+    CurGPSData.DataAccess.Time.Min = gpsControlData.min;
+    CurGPSData.DataAccess.Time.Sec = gpsControlData.sec;
+#else
+#endif
+    //printf("%f\t%f\t%f\r\n", CurGPSData.DataAccess.Location.Lat, CurGPSData.DataAccess.Location.Lon, CurGPSData.DataAccess.Location.Alt);
+    DataEncoding_SubmitData(CurGPSData.BulkAccess);
+    //        printf("GPS Sample Taken at %d\r\n", CurrentTickCount);
+    // PutChar('+');
+}
 
 unsigned char Timer_Setup(unsigned char Timer, float TimerRate) {
     switch (Timer) {
@@ -392,12 +564,12 @@ unsigned char Timer_SetSampleRate(unsigned char Timer, float TimerRate) {
             PreScalerIndex = Timer_DeterminePrescaler(ScaledTimerRate);
             TimerPeriod = (float) ((float) F_PB / (float) PossiblePreScalers[PreScalerIndex] / ScaledTimerRate);
             SecondTickSoftwareScaler = (int) ScaledTimerRate;
-//            printf("Timer Period: %f  Prescale: %d  Index: %d TimerRate: %f", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex, TimerRate);
+            //            printf("Timer Period: %f  Prescale: %d  Index: %d TimerRate: %f", TimerPeriod, PossiblePreScalers[PreScalerIndex], PreScalerIndex, TimerRate);
             if (TimerPeriod > (1 << 16)) {
-//                printf(" Not Possible");
+                //                printf(" Not Possible");
                 return ERROR;
             }
-//            printf("\r\n");
+            //            printf("\r\n");
             OpenTimer4(T4_ON | T4_SOURCE_INT | ScalerValues[PreScalerIndex], (unsigned int) TimerPeriod);
             return SUCCESS;
         default:

@@ -61,10 +61,13 @@ int main(void) {
     TIMERS_Init();
     LED_Init(LED_BANK1);
     //LED_SetBank(LED_BANK1,0);
+#ifdef HIGH_SPEED_TIMING
+    while(GetTime()<2631578);
+#else
     InitTimer(0, 2000);
 
     while (IsTimerActive(0));
-
+#endif
     //while(1);
 
 
@@ -107,6 +110,8 @@ int main(void) {
     //printf("Size of entry %d is: %d\r\n",DataLogging_NumEntries()/2,DataLogging_GetEntrySize(DataLogging_NumEntries()/2));
 
     //while(1);
+    unsigned int SectorsToWrite=2048;
+    unsigned int Average=0;
     unsigned char test_array[512];
     unsigned char test_char;
     for (count = 0; count < 512; count++) {
@@ -115,12 +120,17 @@ int main(void) {
     }
     test_array[0] = 30;
     printf("Starting to write a lot of data\r\n");
-    for (count = 0; count < 2048; count++) {
-        printf(".");
+    unsigned int Duration;
+    for (count = 0; count < SectorsToWrite; count++) {
+        //printf(".");
+        Duration=GetTime();
         DataLogging_LoadSector(test_array);
         while(!DataLogging_Log());
+        Average+=(GetTime()-Duration);
+        //printf("%d\r\n",Average/count);
     }
-    printf("Test Complete\r\n");
+    
+    printf("Test Complete: %d\r\n",Average/count);
     while (1);
     //DataLogging_PrintDirectory();
 

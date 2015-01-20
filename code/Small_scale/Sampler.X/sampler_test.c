@@ -15,7 +15,7 @@
 #include "serial.h"
 #include "Data_Logging.h"
 #include "DataEncoding.h"
-//#include <plib.h>
+#include <plib.h>
 
 #ifndef USE_FAKE_DATA
 #include "freescale_accel.h"
@@ -62,7 +62,7 @@ void main(void) {
     InitTimer(0, 5000);
     printf("Waiting to Ensure Stabilization\r\n");
     while (IsTimerActive(0));
-    printf("Waiting on Card\r\n");
+    printf("Waiting on Card\a\r\n");
     DataLogging_Init();
     DataEncoding_Init();
     LED_Init(LED_BANK1);
@@ -73,19 +73,22 @@ void main(void) {
     AD_ANIMA_Init();
 #endif
     Sampler_Init();
-//    uint8_t SampleIterator;
-//    for (SampleIterator = 0; SampleIterator < 20; SampleIterator++) {
-//        Sampler_SetAccelMagSampleRate(Sampler_GetAccelFrequency()/2);
-//        while(!IsTransmitEmpty());
-//    }
-//    while (1);
-    Sampler_SetAccelMagSampleRate(RATE_800_HERTZ);
+    //    uint8_t SampleIterator;
+    //    for (SampleIterator = 0; SampleIterator < 20; SampleIterator++) {
+    //        Sampler_SetAccelMagSampleRate(Sampler_GetAccelFrequency()/2);
+    //        while(!IsTransmitEmpty());
+    //    }
+    //    while (1);
+//    Sampler_SetAccelMagSampleRate(RATE_800_HERTZ);
+    Sampler_SetAccelMagSampleRate(RATE_12P5_HERTZ);
+#ifdef TEST_GPS_STATE_MACHINE
+    Sampler_TestGPSStateMachine();
+    //end of testing
+#endif
     while (1) {
         Sampler_Sample();
         DataLogging_Log();
-        if (gpsControlData.newDatatoParse == 1) {
-            processNewGpsData();
-        }
+        GPS_HandleGps();
     }
     //------------------------------------------------------------------
     printf("Starting the timing test\r\n");
