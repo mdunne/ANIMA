@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.05" unitdist="inch" unit="mil" style="lines" multiple="1" display="yes" altdistance="0.025" altunitdist="inch" altunit="mil"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -9411,6 +9411,88 @@ package type P</description>
 <pin name="ADJ" x="20.32" y="-2.54" length="middle" direction="in" rot="R180"/>
 <pin name="V_OUT" x="20.32" y="5.08" length="middle" direction="out" rot="R180"/>
 </symbol>
+<symbol name="PIC24FJXXXGA204-RESET">
+<wire x1="-5.08" y1="-2.54" x2="-5.08" y2="2.54" width="0.254" layer="94"/>
+<wire x1="-5.08" y1="2.54" x2="5.08" y2="2.54" width="0.254" layer="94"/>
+<wire x1="5.08" y1="2.54" x2="5.08" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="5.08" y1="-2.54" x2="-5.08" y2="-2.54" width="0.254" layer="94"/>
+<text x="-5.08" y="5.08" size="2.54" layer="95">&gt;NAME</text>
+<text x="0" y="-7.62" size="2.54" layer="95">&gt;VALUE</text>
+<pin name="MCLR" x="-10.16" y="0" length="middle" function="dot"/>
+</symbol>
+<symbol name="PIC24FJXXXGA204-44PIN-PORTA">
+<wire x1="15.24" y1="15.24" x2="15.24" y2="-10.16" width="0.254" layer="94"/>
+<wire x1="15.24" y1="-10.16" x2="-15.24" y2="-10.16" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="-10.16" x2="-15.24" y2="15.24" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="15.24" x2="15.24" y2="15.24" width="0.254" layer="94"/>
+<text x="-15.24" y="17.78" size="2.54" layer="95">&gt;NAME</text>
+<text x="2.54" y="-15.24" size="2.54" layer="95">&gt;VALUE</text>
+<pin name="RA0/AN0/VREF+/CN2" x="20.32" y="12.7" length="middle" rot="R180"/>
+<pin name="RA1/AN1/VREF-/CN3" x="20.32" y="10.16" length="middle" rot="R180"/>
+<pin name="RA2/OSCI/CLKI/CN30" x="20.32" y="7.62" length="middle" rot="R180"/>
+<pin name="RA3/OSCO/CLKO/CN29" x="20.32" y="5.08" length="middle" rot="R180"/>
+<pin name="RA4/SOSCO/CN0" x="20.32" y="2.54" length="middle" rot="R180"/>
+<pin name="RA7/TCK/CN33" x="20.32" y="0" length="middle" rot="R180"/>
+<pin name="RA8/TDI/CN34" x="20.32" y="-2.54" length="middle" rot="R180"/>
+<pin name="RA9/TDI/CN35" x="20.32" y="-5.08" length="middle" rot="R180"/>
+<pin name="RA10/TMS/CN36" x="20.32" y="-7.62" length="middle" rot="R180"/>
+</symbol>
+<symbol name="PIC24FJXXXGA204-44PIN-PORTB">
+<wire x1="-17.78" y1="-22.86" x2="-17.78" y2="20.32" width="0.254" layer="94"/>
+<wire x1="-17.78" y1="20.32" x2="20.32" y2="20.32" width="0.254" layer="94"/>
+<wire x1="20.32" y1="20.32" x2="20.32" y2="-22.86" width="0.254" layer="94"/>
+<wire x1="20.32" y1="-22.86" x2="-17.78" y2="-22.86" width="0.254" layer="94"/>
+<text x="-17.78" y="22.86" size="2.54" layer="95">&gt;NAME</text>
+<text x="5.08" y="-27.94" size="2.54" layer="96">&gt;VALUE</text>
+<pin name="RB0/PGED1/AN2/RP0/CN4" x="25.4" y="17.78" length="middle" rot="R180"/>
+<pin name="RB1/PGEC1/AN3/RP1/CN5" x="25.4" y="15.24" length="middle" rot="R180"/>
+<pin name="RB2/AN4/RP2/SDA2/CN6" x="25.4" y="12.7" length="middle" rot="R180"/>
+<pin name="RB3/AN5/RP3/SCL2/CN7" x="25.4" y="10.16" length="middle" rot="R180"/>
+<pin name="RB4/SOSCI/RPI4/CN1" x="25.4" y="7.62" length="middle" rot="R180"/>
+<pin name="RB5/PGED3/ASDA1/RP5/CN27" x="25.4" y="5.08" length="middle" rot="R180"/>
+<pin name="RB7/RP7/INT0/CN23" x="25.4" y="0" length="middle" rot="R180"/>
+<pin name="RB8/RP8/SCL1/CN22" x="25.4" y="-2.54" length="middle" rot="R180"/>
+<pin name="RB9/RP9/SDA1/CN21" x="25.4" y="-5.08" length="middle" rot="R180"/>
+<pin name="RB10/PGED2/RP10/CN16" x="25.4" y="-7.62" length="middle" rot="R180"/>
+<pin name="RB11/PGEC2/RP11/CN15" x="25.4" y="-10.16" length="middle" rot="R180"/>
+<pin name="RB14/AN06/RP14/RTCC/CN12" x="25.4" y="-17.78" length="middle" rot="R180"/>
+<pin name="RB15/AN9/RP15/CN11" x="25.4" y="-20.32" length="middle" rot="R180"/>
+<pin name="RB13/AN07/RP13/CN13" x="25.4" y="-15.24" length="middle" rot="R180"/>
+<pin name="RB6/PGEC3/ASCL1/RP6/CN24" x="25.4" y="2.54" length="middle" rot="R180"/>
+<pin name="RB12/AN08/CN14" x="25.4" y="-12.7" length="middle" rot="R180"/>
+</symbol>
+<symbol name="PIC24FJXXXGA204-44PIN-PORTC">
+<wire x1="15.24" y1="12.7" x2="15.24" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="15.24" y1="-15.24" x2="-15.24" y2="-15.24" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="-15.24" x2="-15.24" y2="12.7" width="0.254" layer="94"/>
+<wire x1="-15.24" y1="12.7" x2="15.24" y2="12.7" width="0.254" layer="94"/>
+<text x="-15.24" y="15.24" size="2.54" layer="95">&gt;NAME</text>
+<text x="2.54" y="-20.32" size="2.54" layer="95">&gt;VALUE</text>
+<pin name="RC4/RP20/CN25" x="20.32" y="0" length="middle" rot="R180"/>
+<pin name="RC5/RP21/CN28" x="20.32" y="-2.54" length="middle" rot="R180"/>
+<pin name="RC6/RP22/CN18" x="20.32" y="-5.08" length="middle" rot="R180"/>
+<pin name="RC7/RP23/CN17" x="20.32" y="-7.62" length="middle" rot="R180"/>
+<pin name="RC8/RP24/CN29" x="20.32" y="-10.16" length="middle" rot="R180"/>
+<pin name="RC9/RP26/CN19" x="20.32" y="-12.7" length="middle" rot="R180"/>
+<pin name="RC3/RP319/CN28" x="20.32" y="2.54" length="middle" rot="R180"/>
+<pin name="RC2/AN12/RP18/CN10" x="20.32" y="5.08" length="middle" rot="R180"/>
+<pin name="RC1/AN11/RP17/CN9" x="20.32" y="7.62" length="middle" rot="R180"/>
+<pin name="RC0/AN10/RP16/CN8" x="20.32" y="10.16" length="middle" rot="R180"/>
+</symbol>
+<symbol name="PIC24FJXXXGA204-44PIN-POWER">
+<wire x1="-7.62" y1="-10.16" x2="-7.62" y2="12.7" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="12.7" x2="10.16" y2="12.7" width="0.254" layer="94"/>
+<wire x1="10.16" y1="12.7" x2="10.16" y2="-10.16" width="0.254" layer="94"/>
+<wire x1="10.16" y1="-10.16" x2="-7.62" y2="-10.16" width="0.254" layer="94"/>
+<text x="10.16" y="10.16" size="2.54" layer="95">&gt;NAME</text>
+<text x="10.16" y="-17.78" size="2.54" layer="95">&gt;VALUE</text>
+<pin name="VDD" x="2.54" y="17.78" length="middle" rot="R270"/>
+<pin name="VCAP" x="15.24" y="0" length="middle" rot="R180"/>
+<pin name="VSS" x="2.54" y="-15.24" length="middle" rot="R90"/>
+<pin name="AVDD" x="0" y="17.78" length="middle" rot="R270"/>
+<pin name="AVSS" x="0" y="-15.24" length="middle" rot="R90"/>
+<pin name="VBAT" x="-12.7" y="0" length="middle"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="FRAME-LETTER" prefix="FRAME">
@@ -12961,6 +13043,66 @@ Various common sizes : AA, AAA, 20mm coin cell and 12mm coin cell.&lt;br&gt;
 <connect gate="G$1" pin="INHIBIT" pad="P$3"/>
 <connect gate="G$1" pin="V_IN" pad="P$2"/>
 <connect gate="G$1" pin="V_OUT" pad="P$5"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="PIC24FJXXXGA204-44PIN" prefix="U">
+<gates>
+<gate name="RESET" symbol="PIC24FJXXXGA204-RESET" x="-35.56" y="30.48"/>
+<gate name="PORTA" symbol="PIC24FJXXXGA204-44PIN-PORTA" x="25.4" y="22.86"/>
+<gate name="PORTB" symbol="PIC24FJXXXGA204-44PIN-PORTB" x="22.86" y="-20.32"/>
+<gate name="PORTC" symbol="PIC24FJXXXGA204-44PIN-PORTC" x="-22.86" y="58.42"/>
+<gate name="POWER" symbol="PIC24FJXXXGA204-44PIN-POWER" x="-48.26" y="-10.16"/>
+</gates>
+<devices>
+<device name="" package="TQFP44">
+<connects>
+<connect gate="PORTA" pin="RA0/AN0/VREF+/CN2" pad="19"/>
+<connect gate="PORTA" pin="RA1/AN1/VREF-/CN3" pad="20"/>
+<connect gate="PORTA" pin="RA10/TMS/CN36" pad="12"/>
+<connect gate="PORTA" pin="RA2/OSCI/CLKI/CN30" pad="30"/>
+<connect gate="PORTA" pin="RA3/OSCO/CLKO/CN29" pad="31"/>
+<connect gate="PORTA" pin="RA4/SOSCO/CN0" pad="34"/>
+<connect gate="PORTA" pin="RA7/TCK/CN33" pad="13"/>
+<connect gate="PORTA" pin="RA8/TDI/CN34" pad="32"/>
+<connect gate="PORTA" pin="RA9/TDI/CN35" pad="35"/>
+<connect gate="PORTB" pin="RB0/PGED1/AN2/RP0/CN4" pad="21"/>
+<connect gate="PORTB" pin="RB1/PGEC1/AN3/RP1/CN5" pad="22"/>
+<connect gate="PORTB" pin="RB10/PGED2/RP10/CN16" pad="8"/>
+<connect gate="PORTB" pin="RB11/PGEC2/RP11/CN15" pad="9"/>
+<connect gate="PORTB" pin="RB12/AN08/CN14" pad="10"/>
+<connect gate="PORTB" pin="RB13/AN07/RP13/CN13" pad="11"/>
+<connect gate="PORTB" pin="RB14/AN06/RP14/RTCC/CN12" pad="14"/>
+<connect gate="PORTB" pin="RB15/AN9/RP15/CN11" pad="15"/>
+<connect gate="PORTB" pin="RB2/AN4/RP2/SDA2/CN6" pad="23"/>
+<connect gate="PORTB" pin="RB3/AN5/RP3/SCL2/CN7" pad="24"/>
+<connect gate="PORTB" pin="RB4/SOSCI/RPI4/CN1" pad="33"/>
+<connect gate="PORTB" pin="RB5/PGED3/ASDA1/RP5/CN27" pad="41"/>
+<connect gate="PORTB" pin="RB6/PGEC3/ASCL1/RP6/CN24" pad="42"/>
+<connect gate="PORTB" pin="RB7/RP7/INT0/CN23" pad="43"/>
+<connect gate="PORTB" pin="RB8/RP8/SCL1/CN22" pad="44"/>
+<connect gate="PORTB" pin="RB9/RP9/SDA1/CN21" pad="1"/>
+<connect gate="PORTC" pin="RC0/AN10/RP16/CN8" pad="25"/>
+<connect gate="PORTC" pin="RC1/AN11/RP17/CN9" pad="26"/>
+<connect gate="PORTC" pin="RC2/AN12/RP18/CN10" pad="27"/>
+<connect gate="PORTC" pin="RC3/RP319/CN28" pad="36"/>
+<connect gate="PORTC" pin="RC4/RP20/CN25" pad="37"/>
+<connect gate="PORTC" pin="RC5/RP21/CN28" pad="38"/>
+<connect gate="PORTC" pin="RC6/RP22/CN18" pad="2"/>
+<connect gate="PORTC" pin="RC7/RP23/CN17" pad="3"/>
+<connect gate="PORTC" pin="RC8/RP24/CN29" pad="4"/>
+<connect gate="PORTC" pin="RC9/RP26/CN19" pad="5"/>
+<connect gate="POWER" pin="AVDD" pad="17"/>
+<connect gate="POWER" pin="AVSS" pad="16"/>
+<connect gate="POWER" pin="VBAT" pad="6"/>
+<connect gate="POWER" pin="VCAP" pad="7"/>
+<connect gate="POWER" pin="VDD" pad="28 40"/>
+<connect gate="POWER" pin="VSS" pad="29 39"/>
+<connect gate="RESET" pin="MCLR" pad="18"/>
 </connects>
 <technologies>
 <technology name=""/>
